@@ -3,6 +3,7 @@ elm-doc-test
 
 > Create doc test and run them with elm-test
 
+![](./elm-doc-test.gif)
 
 Install
 -------
