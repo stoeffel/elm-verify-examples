@@ -8,33 +8,57 @@ import Regex exposing (HowMany(..), regex)
 compile : String -> TestSuite -> String
 compile moduleName suite =
     String.join "\n" <|
-        [ "module Doc." ++ moduleName ++ " exposing (spec)"
-        , ""
-        , "import Test"
-        , "import Expect"
-        , "import " ++ moduleName ++ " exposing(..)"
-        ]
-            ++ suite.imports
-            ++ [ ""
-               , "spec : Test.Test"
-               , "spec ="
-               , "    Test.describe \"" ++ moduleName ++ "\""
-               ]
-            ++ [ suite.tests
-                    |> List.map toTest
-                    |> String.join "\n    ,\n"
-                    |> (\tests -> "        [\n" ++ tests ++ "\n        ]")
-               ]
+        List.concatMap identity
+            [ moduleHeader moduleName suite.imports
+            , testDescribe moduleName
+            , testBodies suite.tests
+            ]
+
+
+moduleHeader : String -> List String -> List String
+moduleHeader moduleName imports =
+    [ "module Doc." ++ moduleName ++ " exposing (spec)"
+    , ""
+    , "import Test"
+    , "import Expect"
+    , "import " ++ moduleName ++ " exposing(..)"
+    ]
+        ++ imports
+
+
+testDescribe : String -> List String
+testDescribe moduleName =
+    [ ""
+    , "spec : Test.Test"
+    , "spec ="
+    , indent 1 "Test.describe \"" ++ moduleName ++ "\""
+    ]
+
+
+testBodies : List Test -> List String
+testBodies tests =
+    [ tests
+        |> List.map toTest
+        |> String.join ",\n"
+        |> (\tests -> indent 2 "[\n" ++ tests ++ "\n        ]")
+    ]
 
 
 toTest : Test -> String
 toTest test =
     String.join "\n"
-        [ "        Test.test \">>> " ++ escape test.assertion ++ "\" <|"
-        , "            \\() ->"
-        , "                (" ++ test.assertion ++ ")"
-        , "                   |> Expect.equal (" ++ test.expectation ++ ")"
+        [ indent 2 "Test.test \">>> " ++ escape test.assertion ++ "\" <|"
+        , indent 3 "\\() ->"
+        , indent 4 "(" ++ test.assertion ++ ")"
+        , indent 4 "|> Expect.equal (" ++ test.expectation ++ ")"
         ]
+
+
+indent : Int -> String -> String
+indent count str =
+    List.repeat (count * 4) " "
+        ++ [ str ]
+        |> String.join ""
 
 
 escape : String -> String
