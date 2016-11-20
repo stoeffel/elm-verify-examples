@@ -26,8 +26,8 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "fs-extra": "^1.0.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "yargs": "^6.4.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
