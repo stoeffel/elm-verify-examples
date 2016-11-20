@@ -7,20 +7,22 @@ var helpers = require('./cli-helpers.js');
 
 
 
+/* Running modes currently supported are either
+   - generate, to generate tests as part of your suite
+   - run, to run a single file, provide the file name
+*/
 var RUNNING_MODE = {
   GENERATE: 0,
   RUN: 1
 };
 
+// runners are called via `.run` on a model
 var running_mode_runners = {};
 running_mode_runners[RUNNING_MODE.GENERATE] = generate;
-running_mode_runners[RUNNING_MODE.RUN] = function() { console.log("dey see me running"); };
+running_mode_runners[RUNNING_MODE.RUN] = run;
 
 
-/* Running modes currently supported are either
-   - generate, to generate tests as part of your suite
-   - run, to run a single file, provide the file name
-*/
+// loaders are called by init
 var running_mode_loaders = {};
 
 running_mode_loaders[RUNNING_MODE.GENERATE] = function(){
@@ -63,6 +65,15 @@ function init(argv){
   return model;
 }
 
+function run(config){
+  var files = config.files.split(' ');
+  files = files.filter(
+    function(v){ return v.endsWith('.elm'); }
+  ).map(elmPathToModule);
+
+
+  console.log(files);
+}
 
 function generate(config) {
   var testsPath = path.join(
@@ -76,8 +87,8 @@ function generate(config) {
 
   if (config.tests.length === 0){
     console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
+    return;
   }
-
 
   helpers.createDocTest(testsDocPath, config.tests, function() {
     var app = Elm.DocTest.worker(config);
@@ -86,7 +97,7 @@ function generate(config) {
       var pathToModule = path.join(
         testsPath,
         config.root,
-        test.replace(/\./g, "/") + ".elm"
+        elmModuleToPath(test)
       );
       fs.readFile(
           pathToModule,
@@ -97,7 +108,7 @@ function generate(config) {
           process.exit(-1);
           return;
         }
-        app.ports.fileRead.send([test, data]);
+        app.ports.generateModuleDoctest.send([test, data]);
       });
     });
 
@@ -141,6 +152,13 @@ function generate(config) {
   });
 }
 
+function elmPathToModule(pathName){
+  return pathName.substr(0, pathName.length - 4).replace("/", ".");
+}
+
+function elmModuleToPath(moduleName){
+  return moduleName.replace(/\./g, "/") + ".elm";
+}
 
 module.exports = {
   RUNNING_MODE: RUNNING_MODE,
