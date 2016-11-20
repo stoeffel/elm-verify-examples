@@ -6,44 +6,45 @@ var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
 
 
+
 var RUNNING_MODE = {
   GENERATE: 0,
   RUN: 1
 };
 
-var running_mode_runners = {
-  RUNNING_MODE.GENERATE: generate,
-  RUNNING_MODE.RUN: function() { console.log("dey see me running"); }
-};
+var running_mode_runners = {};
+running_mode_runners[RUNNING_MODE.GENERATE] = generate;
+running_mode_runners[RUNNING_MODE.RUN] = function() { console.log("dey see me running"); };
 
 
 /* Running modes currently supported are either
    - generate, to generate tests as part of your suite
    - run, to run a single file, provide the file name
 */
-var running_mode_loaders = {
-  RUNNING_MODE.GENERATE: function(){
-    var docTestConfig = helpers.loadDocTestConfig();
+var running_mode_loaders = {};
 
-    return {
-      runningMode: RUNNING_MODE.GENERATE,
-      config: docTestConfig,
-      run: running_mode_runners[RUNNING_MODE.RUN]
-    };
-  },
-  RUNNING_MODE.RUN: function(argv){
-    var files = argv.run;
+running_mode_loaders[RUNNING_MODE.GENERATE] = function(){
+  var docTestConfig = helpers.loadDocTestConfig();
 
-    var config = {
-      files: files
-    };
+  return {
+    runningMode: RUNNING_MODE.GENERATE,
+    config: docTestConfig,
+    run: running_mode_runners[RUNNING_MODE.GENERATE]
+  };
+};
 
-    return {
-      runningMode: RUNNING_MODE.RUN,
-      config: config,
-      run: running_mode_runners[RUNNING_MODE.RUN]
-    };
-  }
+running_mode_loaders[RUNNING_MODE.RUN] = function(argv){
+  var files = argv.run;
+
+  var config = {
+    files: files
+  };
+
+  return {
+    runningMode: RUNNING_MODE.RUN,
+    config: config,
+    run: running_mode_runners[RUNNING_MODE.RUN]
+  };
 };
 
 
@@ -73,14 +74,18 @@ function generate(config) {
     "Doc"
   );
 
+  if (config.tests.length === 0){
+    console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
+  }
 
-  helpers.createDocTest(testsDocPath, config.docTests.tests, function() {
-    var app = Elm.DocTest.worker(config.docTests);
+
+  helpers.createDocTest(testsDocPath, config.tests, function() {
+    var app = Elm.DocTest.worker(config);
 
     app.ports.readFile.subscribe(function(test) {
       var pathToModule = path.join(
         testsPath,
-        config.docTests.root,
+        config.root,
         test.replace(/\./g, "/") + ".elm"
       );
       fs.readFile(
