@@ -49,7 +49,7 @@ decoder =
 
 type Msg
     = ReadTest String
-    | FileRead ( String, String )
+    | CompileModule ( String, String )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,13 +58,13 @@ update msg model =
         ReadTest test ->
             model ! [ readFile test ]
 
-        FileRead ( moduleName, test ) ->
+        CompileModule ( moduleName, fileText ) ->
             let
-                compiled =
-                    Parser.parse test
+                generatedTestFileText =
+                    Parser.parse fileText
                         |> Compiler.compile moduleName
             in
-                model ! [ writeFile ( moduleName, compiled ) ]
+                model ! [ writeFile ( moduleName, generatedTestFileText ) ]
 
 
 
@@ -77,7 +77,7 @@ port readFile : String -> Cmd msg
 port writeFile : ( String, String ) -> Cmd msg
 
 
-port fileRead : (( String, String ) -> msg) -> Sub msg
+port generateModuleDoctest : (( String, String ) -> msg) -> Sub msg
 
 
 
@@ -86,7 +86,7 @@ port fileRead : (( String, String ) -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    fileRead FileRead
+    generateModuleDoctest CompileModule
 
 
 
