@@ -38,7 +38,7 @@ It's recommended to add `./tests/Doc` to your `.gitignore`.
 Writing DocTests
 ----------------
 
-Tests start with for spaces!
+Tests start with four spaces!
 
 ```elm
 {-| returns the sum of two int.
