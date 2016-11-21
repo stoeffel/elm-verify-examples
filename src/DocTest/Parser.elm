@@ -85,26 +85,56 @@ parseComments_ notInComment acc str =
 
 commentBegin : String -> Bool
 commentBegin str =
-    contains (regex "^{-") str
+    contains commentBeginToken str
+
+
+commentBeginToken : Regex
+commentBeginToken =
+    regex "^{-"
 
 
 commentEnd : String -> Bool
 commentEnd str =
-    contains (regex "^-}") str
+    contains commentEndToken str
+
+
+commentEndToken : Regex
+commentEndToken =
+    regex "^-}"
 
 
 replacePrefix : String -> String
 replacePrefix str =
     str
-        |> replace (AtMost 1) (regex "^\\s{4}") (\_ -> "")
-        |> replace (AtMost 1) (regex "^[>|\\.]{3}\\s") (\_ -> "")
+        |> replace (AtMost 1) fourSpaces (\_ -> "")
+        |> replace (AtMost 1) docTestPrefixes (\_ -> "")
+
+
+fourSpaces : Regex
+fourSpaces =
+    regex "^\\s{4}"
+
+
+docTestPrefixes : Regex
+docTestPrefixes =
+    regex "^[>|\\.]{3}\\s"
 
 
 continuationPrefix : String -> Bool
-continuationPrefix str =
-    contains (regex "^\\s{4}\\.\\.\\.\\s.*") str
+continuationPrefix =
+    contains continuationToken
+
+
+continuationToken : Regex
+continuationToken =
+    regex "^\\s{4}\\.\\.\\.\\s.*"
 
 
 assertionPrefix : String -> Bool
-assertionPrefix str =
-    contains (regex "^\\s{4}>>>\\s.*") str
+assertionPrefix =
+    contains assertionToken
+
+
+assertionToken : Regex
+assertionToken =
+    regex "^\\s{4}>>>\\s.*"
