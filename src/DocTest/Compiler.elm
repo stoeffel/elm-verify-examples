@@ -17,7 +17,7 @@ compile moduleName suite =
 
 moduleHeader : String -> List String -> List String
 moduleHeader moduleName imports =
-    [ "module Doc." ++ moduleName ++ " exposing (spec)"
+    [ "module Doc." ++ moduleName ++ "Spec exposing (spec)"
     , ""
     , "import Test"
     , "import Expect"

@@ -137,7 +137,7 @@ function generate(config) {
           return;
         }
         fs.writeFile(
-          path.join(testsDocModulePath, moduleName + ".elm"),
+          path.join(testsDocModulePath, moduleName + "Spec.elm"),
           test,
           "utf8",
           function(err) {

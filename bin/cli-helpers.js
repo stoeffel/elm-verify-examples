@@ -32,10 +32,10 @@ function createDocTest(testsDocPath, tests, cb) {
 
 function testsFile(tests) {
   var testsString = tests.map(function(test) {
-    return "        Doc." + test + ".spec";
+    return "        Doc." + test + "Spec.spec";
   });
   var imports = tests.map(function(test) {
-    return "import Doc." + test;
+    return "import Doc." + test + "Spec";
   });
   return [
     "module Doc.Tests exposing (..)",
