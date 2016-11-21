@@ -5,10 +5,10 @@ import String
 
 {-| returns the sum of two int.
 
-    >>> add 41 1
+    > add 41 1
     42
 
-    >>> add 3 3
+    > add 3 3
     6
 
 -}
@@ -19,10 +19,10 @@ add =
 
 {-| returns the sum of a list of int
 
-    >>> sum
-    ...     [ 41
-    ...     , 1
-    ...     ]
+    > sum
+    |     [ 41
+    |     , 1
+    |     ]
     42
 -}
 sum : List Int -> Int
@@ -32,17 +32,17 @@ sum =
 
 {-| reverses the list
 
-    >>> rev
-    ...     [ 41
-    ...     , 1
-    ...     ]
+    > rev
+    |     [ 41
+    |     , 1
+    |     ]
     [ 1
     , 41
     ]
 
-    >>> rev [1, 2, 3]
-    ... |> List.map toString
-    ... |> String.join ""
+    > rev [1, 2, 3]
+    | |> List.map toString
+    | |> String.join ""
     "321"
 -}
 rev : List a -> List a

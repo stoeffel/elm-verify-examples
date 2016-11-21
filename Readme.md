@@ -43,10 +43,10 @@ Tests start with four spaces!
 ```elm
 {-| returns the sum of two int.
 
-    >>> add 41 1
+    > add 41 1
     42
 
-    >>> add 3 3
+    > add 3 3
     6
 -}
 add : Int -> Int -> Int
@@ -56,17 +56,17 @@ add =
 
 {-| reverses the list
 
-    >>> rev
-    ...     [ 41
-    ...     , 1
-    ...     ]
+    > rev
+    |     [ 41
+    |     , 1
+    |     ]
     [ 1
     , 41
     ]
 
-    >>> rev [1, 2, 3]
-    ... |> List.map toString
-    ... |> String.join ""
+    > rev [1, 2, 3]
+    |     |> List.map toString
+    |     |> String.join ""
     "321"
 -}
 rev : List a -> List a
