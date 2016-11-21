@@ -28,10 +28,8 @@ toTest ( assertion, expectation ) last str =
         h :: rest ->
             if assertionPrefix h then
                 toTest ( h :: assertion, expectation ) h rest
-            else if expectationPrefix h then
-                toTest ( assertion, h :: expectation ) h rest
-            else if assertionPrefix last then
-                toTest ( h :: assertion, expectation ) last rest
+            else if continuationPrefix h then
+                toTest ( h :: assertion, expectation ) h rest
             else
                 toTest ( assertion, h :: expectation ) last rest
 
@@ -66,6 +64,7 @@ parseComments str =
     str
         |> String.lines
         |> parseComments_ True []
+        |> List.filter (not << String.isEmpty)
         |> List.reverse
 
 
@@ -74,11 +73,11 @@ parseComments_ notInComment acc str =
     case str of
         h :: t ->
             if notInComment then
-                parseComments_ (commentBegin h) acc t
-            else if isDocTestPrefix h then
-                parseComments_ (commentEnd h) (h :: acc) t
+                parseComments_ (not <| commentBegin h) acc t
+            else if commentEnd h then
+                parseComments_ True acc t
             else
-                parseComments_ (commentEnd h) acc t
+                parseComments_ notInComment (h :: acc) t
 
         _ ->
             acc
@@ -96,26 +95,16 @@ commentEnd str =
 
 replacePrefix : String -> String
 replacePrefix str =
-    replace (AtMost 1) (regex "\\s{4}[>|=|\\.]{3}\\s") (\_ -> "") str
-
-
-isDocTestPrefix : String -> Bool
-isDocTestPrefix str =
-    expectationPrefix str
-        || assertionPrefix str
-        || continuationPrefix str
-
-
-expectationPrefix : String -> Bool
-expectationPrefix str =
-    contains (regex "\\s{4}===\\s.*") str
+    str
+        |> replace (AtMost 1) (regex "^\\s{4}") (\_ -> "")
+        |> replace (AtMost 1) (regex "^[>|\\.]{3}\\s") (\_ -> "")
 
 
 continuationPrefix : String -> Bool
 continuationPrefix str =
-    contains (regex "\\s{4}\\.\\.\\.\\s.*") str
+    contains (regex "^\\s{4}\\.\\.\\.\\s.*") str
 
 
 assertionPrefix : String -> Bool
 assertionPrefix str =
-    contains (regex "\\s{4}>>>\\s.*") str
+    contains (regex "^\\s{4}>>>\\s.*") str

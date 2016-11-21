@@ -38,14 +38,16 @@ It's recommended to add `./tests/Doc` to your `.gitignore`.
 Writing DocTests
 ----------------
 
+Tests start with for spaces!
+
 ```elm
 {-| returns the sum of two int.
 
     >>> add 41 1
-    === 42
+    42
 
     >>> add 3 3
-    === 6
+    6
 -}
 add : Int -> Int -> Int
 add =
@@ -58,14 +60,14 @@ add =
     ...     [ 41
     ...     , 1
     ...     ]
-    === [ 1
-    ... , 41
-    ... ]
+    [ 1
+    , 41
+    ]
 
     >>> rev [1, 2, 3]
     ... |> List.map toString
     ... |> String.join ""
-    === "321"
+    "321"
 -}
 rev : List a -> List a
 rev =

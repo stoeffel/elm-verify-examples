@@ -42,10 +42,10 @@ import Dict
 {-| Sum
 
     >>> add 3 4
-    === 7
+    7
 
     >>> add 42 42
-    === 84
+    84
 -}
 add : Int -> Int -> Int
 add =
@@ -64,9 +64,9 @@ imports =
 comments : List String
 comments =
     [ "    >>> add 3 4"
-    , "    === 7"
+    , "    7"
     , "    >>> add 42 42"
-    , "    === 84"
+    , "    84"
     ]
 
 
