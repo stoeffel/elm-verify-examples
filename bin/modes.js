@@ -58,7 +58,7 @@ function init(argv){
     console.log('Running in generate mode..');
     model = running_mode_loaders[RUNNING_MODE.GENERATE]();
   } else {
-    console.log('Running in run mode..')
+    console.log('Running in run mode..');
     model = running_mode_loaders[RUNNING_MODE.RUN](argv);
   }
 
@@ -163,4 +163,4 @@ function elmModuleToPath(moduleName){
 module.exports = {
   RUNNING_MODE: RUNNING_MODE,
   init: init
-}
+};
