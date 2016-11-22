@@ -3,7 +3,7 @@ module Mock.Foo.Bar.Moo exposing (..)
 {-| does stuff
 
     >>> foo "a" "b" "c"
-    === "bca"
+    "bca"
 -}
 
 
@@ -15,7 +15,7 @@ foo a b c =
 {-| does stuff
 
     >>> bar "a" "b" "c"
-    === [ "b", "c", "a" ]
+    [ "b", "c", "a" ]
 -}
 bar : String -> String -> String -> List String
 bar a b c =
