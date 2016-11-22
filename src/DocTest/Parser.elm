@@ -117,7 +117,7 @@ fourSpaces =
 
 docTestPrefixes : Regex
 docTestPrefixes =
-    regex "^[>|\\.]{3}\\s"
+    regex "^[>|\\|]\\s"
 
 
 continuationPrefix : String -> Bool
@@ -127,7 +127,7 @@ continuationPrefix =
 
 continuationToken : Regex
 continuationToken =
-    regex "^\\s{4}\\.\\.\\.\\s.*"
+    regex "^\\s{4}\\|\\s.*"
 
 
 assertionPrefix : String -> Bool
@@ -137,4 +137,4 @@ assertionPrefix =
 
 assertionToken : Regex
 assertionToken =
-    regex "^\\s{4}>>>\\s.*"
+    regex "^\\s{4}>\\s.*"
