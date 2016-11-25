@@ -1,33 +1,43 @@
-module DocTest.Parser
-    exposing
-        ( parse
-        , parseImports
-        , parseComments
-        )
+module DocTest.Parser exposing (parse)
 
 import Combine exposing (..)
 import Combine.Char exposing (..)
 import DocTest.Types exposing (..)
 import List.Extra
-import Regex exposing (..)
 import String
 
 
-type alias Comment =
-    String
+import_ : Parser s String
+import_ =
+    String.join "" <$> sequence [ string "import ", Combine.regex ".*" ]
 
 
-comment : Parser s Comment
+imports : Parser s (List (Maybe String))
+imports =
+    many (choice [ Just <$> import_, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
+
+
+parseImports : String -> List String
+parseImports input =
+    case Combine.parse imports input of
+        Ok ( _, stream, imports ) ->
+            List.filterMap identity imports
+
+        Err ( _, stream, errors ) ->
+            []
+
+
+comment : Parser s String
 comment =
     String.fromList <$> (string "{-" *> manyTill anyChar (string "-}"))
 
 
-allComments : Parser s (List (Maybe Comment))
+allComments : Parser s (List (Maybe String))
 allComments =
     many (choice [ Just <$> comment, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
 
 
-parseComments : String -> List Comment
+parseComments : String -> List String
 parseComments input =
     case Combine.parse allComments input of
         Ok ( _, stream, comments ) ->
@@ -129,24 +139,3 @@ isAssertion e =
 
         _ ->
             False
-
-
-parseImports : String -> List String
-parseImports str =
-    str
-        |> String.lines
-        |> List.foldl parseImport []
-        |> List.reverse
-
-
-parseImport : String -> List String -> List String
-parseImport str acc =
-    if contains (Regex.regex "^import\\s.*") str then
-        str :: acc
-    else
-        acc
-
-
-fourSpaces : Regex
-fourSpaces =
-    Regex.regex "^\\s{4}"
