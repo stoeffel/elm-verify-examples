@@ -5,10 +5,62 @@ module DocTest.Parser
         , parseComments
         )
 
-import String
-import Regex exposing (..)
-import List.Extra
+import Combine exposing (..)
+import Combine.Char exposing (..)
 import DocTest.Types exposing (..)
+import List.Extra
+import Regex exposing (..)
+import String
+
+
+type alias Comment =
+    String
+
+
+comment : Parser s Comment
+comment =
+    String.fromList <$> (string "{-" *> manyTill anyChar (string "-}"))
+
+
+allComments : Parser s (List (Maybe Comment))
+allComments =
+    many (choice [ Just <$> comment, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
+
+
+parseComments : String -> List Comment
+parseComments input =
+    case Combine.parse allComments input of
+        Ok ( _, stream, comments ) ->
+            List.filterMap identity comments
+
+        Err ( _, stream, errors ) ->
+            []
+
+
+type E
+    = Assertion String
+    | Continuation String
+    | Expectation String
+
+
+docTest : Parser s (Maybe E)
+docTest =
+    choice
+        [ Just << Assertion <$> (space *> space *> space *> space *> string ">>> " *> Combine.regex ".*")
+        , Just << Continuation <$> (space *> space *> space *> space *> string "... " *> Combine.regex ".*")
+        , Just << Expectation <$> (space *> space *> space *> space *> Combine.regex ".*")
+        , Nothing <$ Combine.regex ".*"
+        ]
+
+
+parseDocTest : String -> Maybe E
+parseDocTest input =
+    case Combine.parse docTest input of
+        Ok ( _, stream, comments ) ->
+            comments
+
+        Err ( _, stream, errors ) ->
+            Nothing
 
 
 parse : String -> TestSuite
@@ -17,32 +69,68 @@ parse str =
     , tests =
         str
             |> parseComments
-            |> List.Extra.groupWhile (\x y -> not <| assertionPrefix y)
-            |> List.map (toTest ( [], [] ) "")
+            |> List.map (String.lines >> List.filter (contains fourSpaces))
+            |> List.filter (not << List.isEmpty)
+            |> List.concatMap (filterNotDocTest << List.filterMap parseDocTest)
+            |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
+            |> List.filterMap toTest
     }
 
 
-toTest : ( List String, List String ) -> String -> List String -> Test
-toTest ( assertion, expectation ) last str =
-    case str of
-        h :: rest ->
-            if assertionPrefix h then
-                toTest ( h :: assertion, expectation ) h rest
-            else if continuationPrefix h then
-                toTest ( h :: assertion, expectation ) last rest
-            else if assertionPrefix last then
-                toTest ( assertion, h :: expectation ) last rest
-            else
-                toTest ( assertion, expectation ) "" rest
+filterNotDocTest : List E -> List E
+filterNotDocTest xs =
+    if List.isEmpty <| List.filter isAssertion xs then
+        []
+    else
+        xs
+
+
+toTest : List E -> Maybe Test
+toTest e =
+    let
+        assertion =
+            List.filterMap isAssertionOrContinue e
+
+        expectation =
+            List.filterMap isExpectiation e
+    in
+        if List.isEmpty assertion || List.isEmpty expectation then
+            Nothing
+        else
+            Just <| Test (String.join " " assertion) (String.join " " expectation)
+
+
+isExpectiation : E -> Maybe String
+isExpectiation e =
+    case e of
+        Expectation str ->
+            Just str
 
         _ ->
-            let
-                clean x =
-                    List.map replacePrefix x
-                        |> List.reverse
-                        |> String.join " "
-            in
-                Test (clean assertion) (clean expectation)
+            Nothing
+
+
+isAssertionOrContinue : E -> Maybe String
+isAssertionOrContinue e =
+    case e of
+        Assertion str ->
+            Just str
+
+        Continuation str ->
+            Just str
+
+        _ ->
+            Nothing
+
+
+isAssertion : E -> Bool
+isAssertion e =
+    case e of
+        Assertion str ->
+            True
+
+        _ ->
+            False
 
 
 parseImports : String -> List String
@@ -55,90 +143,12 @@ parseImports str =
 
 parseImport : String -> List String -> List String
 parseImport str acc =
-    if contains (regex "^import\\s.*") str then
+    if contains (Regex.regex "^import\\s.*") str then
         str :: acc
     else
         acc
 
 
-parseComments : String -> List String
-parseComments str =
-    str
-        |> String.lines
-        |> parseComments_ True True []
-        |> List.filter (not << String.isEmpty)
-        |> List.reverse
-
-
-parseComments_ : Bool -> Bool -> List String -> List String -> List String
-parseComments_ notInComment notInTest acc str =
-    case str of
-        h :: t ->
-            if notInComment then
-                parseComments_ (not <| commentBegin h) True acc t
-            else if commentEnd h then
-                parseComments_ True True acc t
-            else if assertionPrefix h then
-                parseComments_ notInComment False (h :: acc) t
-            else if not notInTest && contains fourSpaces h then
-                parseComments_ notInComment False (h :: acc) t
-            else
-                parseComments_ notInComment True acc t
-
-        _ ->
-            acc
-
-
-commentBegin : String -> Bool
-commentBegin str =
-    contains commentBeginToken str
-
-
-commentBeginToken : Regex
-commentBeginToken =
-    regex "^{-"
-
-
-commentEnd : String -> Bool
-commentEnd str =
-    contains commentEndToken str
-
-
-commentEndToken : Regex
-commentEndToken =
-    regex "^-}"
-
-
-replacePrefix : String -> String
-replacePrefix =
-    replace (AtMost 1) docTestPrefixes (\_ -> "")
-
-
-docTestPrefixes : Regex
-docTestPrefixes =
-    regex "^\\s{4}[>|\\.]{3}\\s"
-
-
 fourSpaces : Regex
 fourSpaces =
-    regex "^\\s{4}"
-
-
-continuationPrefix : String -> Bool
-continuationPrefix =
-    contains continuationToken
-
-
-continuationToken : Regex
-continuationToken =
-    regex "^\\s{4}\\.\\.\\.\\s.*"
-
-
-assertionPrefix : String -> Bool
-assertionPrefix =
-    contains assertionToken
-
-
-assertionToken : Regex
-assertionToken =
-    regex "^\\s{4}>>>\\s.*"
+    Regex.regex "^\\s{4}"
