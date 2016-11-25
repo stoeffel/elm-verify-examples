@@ -9,19 +9,19 @@ import String
 
 import_ : Parser s String
 import_ =
-    String.join "" <$> sequence [ string "import ", Combine.regex ".*" ]
+    Combine.regex "import .*"
 
 
-imports : Parser s (List String)
+imports : Parser s (List (Maybe String))
 imports =
-    many (import_) <* end
+    many (choice [ Just <$> import_, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
 
 
 parseImports : String -> List String
 parseImports input =
     case Combine.parse imports input of
         Ok ( _, stream, imports ) ->
-            imports
+            List.filterMap identity imports
 
         Err ( _, stream, errors ) ->
             []
