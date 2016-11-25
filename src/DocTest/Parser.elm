@@ -96,11 +96,10 @@ filterNotDocTest xs =
 toTest : List E -> Maybe Test
 toTest e =
     let
-        assertion =
-            List.filterMap isAssertionOrContinue e
-
-        expectation =
-            List.filterMap isExpectiation e
+        ( assertion, expectation ) =
+            List.partition (not << isExpectiation) e
+                |> Tuple.mapFirst (List.map toStr)
+                |> Tuple.mapSecond (List.map toStr)
     in
         if List.isEmpty assertion || List.isEmpty expectation then
             Nothing
@@ -108,27 +107,27 @@ toTest e =
             Just <| Test (String.join " " assertion) (String.join " " expectation)
 
 
-isExpectiation : E -> Maybe String
+isExpectiation : E -> Bool
 isExpectiation e =
     case e of
         Expectation str ->
-            Just str
+            True
 
         _ ->
-            Nothing
+            False
 
 
-isAssertionOrContinue : E -> Maybe String
-isAssertionOrContinue e =
+toStr : E -> String
+toStr e =
     case e of
         Assertion str ->
-            Just str
+            str
 
         Continuation str ->
-            Just str
+            str
 
-        _ ->
-            Nothing
+        Expectation str ->
+            str
 
 
 isAssertion : E -> Bool
