@@ -17,7 +17,6 @@ parse str =
     , tests =
         str
             |> parseComments
-            |> List.filter (contains fourSpaces)
             |> List.Extra.groupWhile (\x y -> not <| assertionPrefix y)
             |> List.map (toTest ( [], [] ) "")
     }
@@ -66,21 +65,25 @@ parseComments : String -> List String
 parseComments str =
     str
         |> String.lines
-        |> parseComments_ True []
+        |> parseComments_ True True []
         |> List.filter (not << String.isEmpty)
         |> List.reverse
 
 
-parseComments_ : Bool -> List String -> List String -> List String
-parseComments_ notInComment acc str =
+parseComments_ : Bool -> Bool -> List String -> List String -> List String
+parseComments_ notInComment notInTest acc str =
     case str of
         h :: t ->
             if notInComment then
-                parseComments_ (not <| commentBegin h) acc t
+                parseComments_ (not <| commentBegin h) True acc t
             else if commentEnd h then
-                parseComments_ True acc t
+                parseComments_ True True acc t
+            else if assertionPrefix h then
+                parseComments_ notInComment False (h :: acc) t
+            else if not notInTest && contains fourSpaces h then
+                parseComments_ notInComment False (h :: acc) t
             else
-                parseComments_ notInComment (h :: acc) t
+                parseComments_ notInComment True acc t
 
         _ ->
             acc
@@ -107,20 +110,18 @@ commentEndToken =
 
 
 replacePrefix : String -> String
-replacePrefix str =
-    str
-        |> replace (AtMost 1) fourSpaces (\_ -> "")
-        |> replace (AtMost 1) docTestPrefixes (\_ -> "")
+replacePrefix =
+    replace (AtMost 1) docTestPrefixes (\_ -> "")
+
+
+docTestPrefixes : Regex
+docTestPrefixes =
+    regex "^\\s{4}[>|\\.]{3}\\s"
 
 
 fourSpaces : Regex
 fourSpaces =
     regex "^\\s{4}"
-
-
-docTestPrefixes : Regex
-docTestPrefixes =
-    regex "^[>|\\.]{3}\\s"
 
 
 continuationPrefix : String -> Bool
