@@ -69,9 +69,7 @@ parse str =
     , tests =
         str
             |> parseComments
-            |> List.map (String.lines >> List.filter (contains fourSpaces))
-            |> List.filter (not << List.isEmpty)
-            |> List.concatMap (filterNotDocTest << List.filterMap parseDocTest)
+            |> List.concatMap (filterNotDocTest << List.filterMap parseDocTest << String.lines)
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
             |> List.filterMap toTest
     }
