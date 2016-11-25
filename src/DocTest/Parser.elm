@@ -17,6 +17,7 @@ parse str =
     , tests =
         str
             |> parseComments
+            |> List.filter (not << contains fourSpaces)
             |> List.Extra.groupWhile (\x y -> not <| assertionPrefix y)
             |> List.map (toTest ( [], [] ) "")
     }
@@ -33,7 +34,7 @@ toTest ( assertion, expectation ) last str =
             else if assertionPrefix last then
                 toTest ( assertion, h :: expectation ) last rest
             else
-                toTest ( assertion, expectation ) last rest
+                toTest ( assertion, expectation ) "" rest
 
         _ ->
             let
