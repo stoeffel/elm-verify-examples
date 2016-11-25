@@ -29,9 +29,11 @@ toTest ( assertion, expectation ) last str =
             if assertionPrefix h then
                 toTest ( h :: assertion, expectation ) h rest
             else if continuationPrefix h then
-                toTest ( h :: assertion, expectation ) h rest
-            else
+                toTest ( h :: assertion, expectation ) last rest
+            else if assertionPrefix last then
                 toTest ( assertion, h :: expectation ) last rest
+            else
+                toTest ( assertion, expectation ) last rest
 
         _ ->
             let

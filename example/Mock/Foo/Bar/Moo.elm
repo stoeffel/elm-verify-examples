@@ -1,12 +1,15 @@
 module Mock.Foo.Bar.Moo exposing (..)
 
+{-|
+## Foo bar
+-}
+
+
 {-| does stuff
 
     >>> foo "a" "b" "c"
     "bca"
 -}
-
-
 foo : String -> String -> String -> String
 foo a b c =
     b ++ c ++ a
