@@ -17,7 +17,7 @@ parse str =
     , tests =
         str
             |> parseComments
-            |> List.filter (not << contains fourSpaces)
+            |> List.filter (contains fourSpaces)
             |> List.Extra.groupWhile (\x y -> not <| assertionPrefix y)
             |> List.map (toTest ( [], [] ) "")
     }
