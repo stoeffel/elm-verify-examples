@@ -4,53 +4,36 @@ import Combine exposing (..)
 import Combine.Char exposing (..)
 import DocTest.Types exposing (..)
 import List.Extra
+import Regex exposing (Regex, HowMany(..))
 import String
-
-
-import_ : Parser s String
-import_ =
-    Combine.regex "import .*"
-
-
-imports : Parser s (List (Maybe String))
-imports =
-    many (choice [ Just <$> import_, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
-
-
-parseImports : String -> List String
-parseImports input =
-    case Combine.parse imports input of
-        Ok ( _, stream, imports ) ->
-            List.filterMap identity imports
-
-        Err ( _, stream, errors ) ->
-            []
-
-
-comment : Parser s String
-comment =
-    string "{-" *> Combine.regex "[^-\\}]*" <* string "-}"
-
-
-allComments : Parser s (List (Maybe String))
-allComments =
-    many (choice [ Just <$> comment, Nothing <$ Combine.regex ".*" ] <* whitespace) <* end
-
-
-parseComments : String -> List String
-parseComments input =
-    case Combine.parse allComments input of
-        Ok ( _, stream, comments ) ->
-            List.filterMap identity comments
-
-        Err ( _, stream, errors ) ->
-            []
 
 
 type E
     = Assertion String
     | Continuation String
     | Expectation String
+
+
+parseImports : String -> List String
+parseImports str =
+    Regex.find All importRegex str
+        |> List.map .match
+
+
+importRegex : Regex
+importRegex =
+    Regex.regex "import\\s.*"
+
+
+parseComments : String -> List String
+parseComments str =
+    Regex.find All commentRegex str
+        |> List.map .match
+
+
+commentRegex : Regex
+commentRegex =
+    Regex.regex "{-[^-}]*-}"
 
 
 docTest : Parser s (Maybe E)
@@ -77,8 +60,7 @@ parse : String -> TestSuite
 parse str =
     { imports = parseImports str
     , tests =
-        str
-            |> parseComments
+        parseComments str
             |> List.concatMap (filterNotDocTest << List.filterMap parseDocTest << String.lines)
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
             |> List.filterMap toTest
