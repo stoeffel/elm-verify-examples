@@ -1,59 +1,9 @@
 module DocTest.Parser exposing (parse)
 
-import Combine exposing (..)
-import Combine.Char exposing (..)
 import DocTest.Types exposing (..)
 import List.Extra
 import Regex exposing (Regex, HowMany(..))
 import String
-
-
-type E
-    = Assertion String
-    | Continuation String
-    | Expectation String
-
-
-parseImports : String -> List String
-parseImports str =
-    Regex.find All importRegex str
-        |> List.map .match
-
-
-importRegex : Regex
-importRegex =
-    Regex.regex "import\\s.*"
-
-
-parseComments : String -> List String
-parseComments str =
-    Regex.find All commentRegex str
-        |> List.map .match
-
-
-commentRegex : Regex
-commentRegex =
-    Regex.regex "{-[^-}]*-}"
-
-
-docTest : Parser s (Maybe E)
-docTest =
-    choice
-        [ Just << Assertion <$> (space *> space *> space *> space *> string ">>> " *> Combine.regex ".*")
-        , Just << Continuation <$> (space *> space *> space *> space *> string "... " *> Combine.regex ".*")
-        , Just << Expectation <$> (space *> space *> space *> space *> Combine.regex ".*")
-        , Nothing <$ Combine.regex ".*"
-        ]
-
-
-parseDocTest : String -> Maybe E
-parseDocTest input =
-    case Combine.parse docTest input of
-        Ok ( _, stream, comments ) ->
-            comments
-
-        Err ( _, stream, errors ) ->
-            Nothing
 
 
 parse : String -> TestSuite
@@ -67,7 +17,78 @@ parse str =
     }
 
 
-filterNotDocTest : List E -> List E
+parseImports : String -> List String
+parseImports str =
+    Regex.find All importRegex str
+        |> List.map .match
+
+
+parseComments : String -> List String
+parseComments str =
+    Regex.find All commentRegex str
+        |> List.map .match
+
+
+parseDocTest : String -> Maybe Syntax
+parseDocTest =
+    oneOf
+        [ choice assertionRegex Assertion
+        , choice continuationRegex Continuation
+        , choice expectationRegex Expectation
+        ]
+
+
+importRegex : Regex
+importRegex =
+    Regex.regex "import\\s.*"
+
+
+commentRegex : Regex
+commentRegex =
+    Regex.regex "{-[^-}]*-}"
+
+
+assertionRegex : Regex
+assertionRegex =
+    Regex.regex "^\\s{4}>>>\\s(.*)"
+
+
+continuationRegex : Regex
+continuationRegex =
+    Regex.regex "^\\s{4}\\.\\.\\.\\s(.*)"
+
+
+expectationRegex : Regex
+expectationRegex =
+    Regex.regex "^\\s{4}(.*)"
+
+
+oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
+oneOf fs str =
+    case fs of
+        [] ->
+            Nothing
+
+        f :: rest ->
+            case f str of
+                Just result ->
+                    Just result
+
+                Nothing ->
+                    oneOf rest str
+
+
+choice : Regex -> (String -> Syntax) -> (String -> Maybe Syntax)
+choice regex e str =
+    Regex.find (AtMost 1) regex str
+        |> List.map .submatches
+        |> List.concat
+        |> List.filterMap identity
+        |> List.head
+        |> Maybe.map e
+
+
+filterNotDocTest : List Syntax -> List Syntax
 filterNotDocTest xs =
     if List.isEmpty <| List.filter isAssertion xs then
         []
@@ -75,7 +96,7 @@ filterNotDocTest xs =
         xs
 
 
-toTest : List E -> Maybe Test
+toTest : List Syntax -> Maybe Test
 toTest e =
     let
         ( assertion, expectation ) =
@@ -89,7 +110,7 @@ toTest e =
             Just <| Test (String.join " " assertion) (String.join " " expectation)
 
 
-isExpectiation : E -> Bool
+isExpectiation : Syntax -> Bool
 isExpectiation e =
     case e of
         Expectation str ->
@@ -99,7 +120,7 @@ isExpectiation e =
             False
 
 
-toStr : E -> String
+toStr : Syntax -> String
 toStr e =
     case e of
         Assertion str ->
@@ -112,7 +133,7 @@ toStr e =
             str
 
 
-isAssertion : E -> Bool
+isAssertion : Syntax -> Bool
 isAssertion e =
     case e of
         Assertion str ->
