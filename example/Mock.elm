@@ -1,9 +1,16 @@
 module Mock exposing (..)
 
-import String
+import String as S exposing (join)
+import Dict
+    exposing
+        ( Dict
+        , fromList
+        )
 
 
 {-| returns the sum of two int.
+    >>> 3 - 1
+    2
 
     >>> add 41 1
     42
@@ -30,6 +37,15 @@ sum =
     List.foldl (+) 0
 
 
+{-|
+    >>> bar 1 "foo"
+    fromList [(1, "foo")]
+-}
+bar : Int -> String -> Dict Int String
+bar a b =
+    fromList [ ( a, b ) ]
+
+
 {-| reverses the list
 
     >>> rev
@@ -42,7 +58,7 @@ sum =
 
     >>> rev [1, 2, 3]
     ... |> List.map toString
-    ... |> String.join ""
+    ... |> join ""
     "321"
 -}
 rev : List a -> List a

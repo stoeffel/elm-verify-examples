@@ -11,3 +11,9 @@ type alias Test =
     { assertion : String
     , expectation : String
     }
+
+
+type Syntax
+    = Assertion String
+    | Continuation String
+    | Expectation String
