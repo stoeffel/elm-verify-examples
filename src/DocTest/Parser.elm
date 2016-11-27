@@ -37,9 +37,9 @@ parseComments str =
 parseDocTest : String -> Maybe Syntax
 parseDocTest =
     oneOf
-        [ choice assertionRegex Assertion
-        , choice continuationRegex Continuation
-        , choice expectationRegex Expectation
+        [ makeSyntaxRegex assertionRegex Assertion
+        , makeSyntaxRegex continuationRegex Continuation
+        , makeSyntaxRegex expectationRegex Expectation
         ]
 
 
@@ -83,8 +83,8 @@ oneOf fs str =
                     oneOf rest str
 
 
-choice : Regex -> (String -> Syntax) -> (String -> Maybe Syntax)
-choice regex e str =
+makeSyntaxRegex : Regex -> (String -> Syntax) -> (String -> Maybe Syntax)
+makeSyntaxRegex regex e str =
     Regex.find (AtMost 1) regex str
         |> List.map .submatches
         |> List.concat
