@@ -5,6 +5,8 @@ import Dict exposing (Dict, fromList)
 
 
 {-| returns the sum of two int.
+    >>> 3 - 1
+    2
 
     >>> add 41 1
     42
