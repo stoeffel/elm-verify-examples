@@ -90,10 +90,12 @@ choice regex e str =
 
 filterNotDocTest : List Syntax -> List Syntax
 filterNotDocTest xs =
-    if List.isEmpty <| List.filter isAssertion xs then
-        []
-    else
-        xs
+    case List.filter isAssertion xs of
+        [] ->
+            []
+
+        _ ->
+            xs
 
 
 toTest : List Syntax -> Maybe Test
