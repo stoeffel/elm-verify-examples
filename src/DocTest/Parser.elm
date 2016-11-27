@@ -45,7 +45,7 @@ importRegex =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "{-[^-}]*-}"
+    Regex.regex "{-[^]*?-}"
 
 
 assertionRegex : Regex
