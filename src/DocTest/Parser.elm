@@ -21,6 +21,11 @@ parseImports : String -> List String
 parseImports str =
     Regex.find All importRegex str
         |> List.map .match
+        |> List.head
+        |> Maybe.map (String.split "import")
+        |> Maybe.withDefault []
+        |> List.filter ((/=) 0 << String.length)
+        |> List.map ((++) "import")
 
 
 parseComments : String -> List String
@@ -40,7 +45,7 @@ parseDocTest =
 
 importRegex : Regex
 importRegex =
-    Regex.regex "import\\s.*"
+    Regex.regex "import\\s[^]*?\\n\\n"
 
 
 commentRegex : Regex
