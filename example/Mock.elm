@@ -1,11 +1,11 @@
 module Mock exposing (..)
 
-import String as S exposing (join)
-import Dict
-    exposing
-        ( Dict
-        , fromList
-        )
+{-| imports for examples
+    >>> import Dict exposing (Dict, fromList)
+    >>> import String exposing (join)
+-}
+
+import Dict exposing (Dict, fromList)
 
 
 {-| returns the sum of two int.

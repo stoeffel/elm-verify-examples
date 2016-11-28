@@ -8,44 +8,39 @@ import String
 
 parse : String -> TestSuite
 parse str =
-    { imports = parseImports str
-    , tests =
-        parseComments str
-            |> List.concatMap (filterNotDocTest << List.filterMap parseDocTest << String.lines)
-            |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
-            |> List.filterMap toTest
-    }
+    let
+        ( imports, tests ) =
+            parseComments str
+                |> List.concatMap (filterNotDocTest << parseDocTests << String.lines << .match)
+                |> List.partition isImport
+    in
+        { imports = List.map toStr imports
+        , tests =
+            tests
+                |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
+                |> List.filterMap toTest
+        }
 
 
-parseImports : String -> List String
-parseImports str =
-    Regex.find All importRegex str
-        |> List.map .match
-        |> List.head
-        |> Maybe.map (String.split "import")
-        |> Maybe.withDefault []
-        |> List.filter ((/=) 0 << String.length)
-        |> List.map ((++) "import")
-
-
-parseComments : String -> List String
+parseComments : String -> List Regex.Match
 parseComments str =
     Regex.find All commentRegex str
-        |> List.map .match
 
 
-parseDocTest : String -> Maybe Syntax
-parseDocTest =
-    oneOf
-        [ makeSyntaxRegex assertionRegex Assertion
-        , makeSyntaxRegex continuationRegex Continuation
-        , makeSyntaxRegex expectationRegex Expectation
-        ]
+parseDocTests : List String -> List Syntax
+parseDocTests =
+    List.filterMap <|
+        oneOf
+            [ makeSyntaxRegex importRegex Import
+            , makeSyntaxRegex assertionRegex Assertion
+            , makeSyntaxRegex continuationRegex Continuation
+            , makeSyntaxRegex expectationRegex Expectation
+            ]
 
 
 importRegex : Regex
 importRegex =
-    Regex.regex "import\\s[^]*?\\n\\n"
+    Regex.regex "^\\s{4}>>>\\s(import\\s.*)"
 
 
 commentRegex : Regex
@@ -95,7 +90,7 @@ makeSyntaxRegex regex e str =
 
 filterNotDocTest : List Syntax -> List Syntax
 filterNotDocTest xs =
-    case List.filter isAssertion xs of
+    case List.filter (\x -> isImport x || isAssertion x) xs of
         [] ->
             []
 
@@ -139,11 +134,24 @@ toStr e =
         Expectation str ->
             str
 
+        Import str ->
+            str
+
 
 isAssertion : Syntax -> Bool
 isAssertion e =
     case e of
         Assertion str ->
+            True
+
+        _ ->
+            False
+
+
+isImport : Syntax -> Bool
+isImport e =
+    case e of
+        Import str ->
             True
 
         _ ->
