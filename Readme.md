@@ -1,4 +1,4 @@
-elm-doc-test
+elm-doc-test [![Build Status](https://travis-ci.org/stoeffel/elm-doc-test.svg?branch=master)](https://travis-ci.org/stoeffel/elm-doc-test)
 ============
 
 > Create doc test and run them with elm-test
