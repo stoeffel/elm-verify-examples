@@ -1,0 +1,13 @@
+before_install:
+  git config user.name "Travis CI"
+
+language:
+  node_js
+
+node_js:
+  - stable
+
+script:
+  - npm test
+
+sudo: false

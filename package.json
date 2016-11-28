@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prepublish": "npm run-script elm-make",
-    "test": "npm start",
+    "test": "./run-tests.sh",
     "elm-make": "elm-make src/DocTest.elm --output bin/elm.js",
     "start": "npm run-script elm-make && cd example && ../bin/cli.js && elm-test tests/Doc/Main.elm",
     "release-major": "xyz --repo git@github.com:stoeffel/elm-doc-test.git --increment major",
