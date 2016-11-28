@@ -1,17 +1,37 @@
-before_install:
-  git config user.name "Travis CI"
+sudo: false
 
-language:
-  node_js
+cache:
+  directories:
+    - elm-stuff/build-artifacts
+    - example/elm-stuff/build-artifacts
+    - example/tests/elm-stuff/build-artifacts
+    - sysconfcpus
+    - node_modules
 
+language: node_js
 node_js:
-  - stable
+  - "node"
+
+before_install:
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - |
+    if [ ! -d sysconfcpus/bin ];
+    then
+      git clone https://github.com/obmarg/libsysconfcpus.git;
+      cd libsysconfcpus;
+      ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
+      make && make install;
+      cd ..;
+    fi
+  - npm install -g elm
+  - git clone https://github.com/NoRedInk/elm-ops-tooling
+  - elm-ops-tooling/with_retry.rb elm-package install --yes
 
 install:
   - npm install
-  - npm install -g elm
 
 script:
   - npm test
 
-sudo: false
+notifications:
+  email: false

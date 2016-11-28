@@ -7,6 +7,7 @@ cd example &&
   elm-test tests/Doc/Main.elm | grep 'Passed:   9' &&
   echo "👍"
 } || {
-  echo "expected 9 passing specs. run 'npm start'"
+  echo "Expected 9 passing specs!"
+  npm start
   exit -1
 }
