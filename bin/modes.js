@@ -75,7 +75,7 @@ function run(config){
   console.log(files);
 }
 
-function generate(config) {
+function generate(config, allTestsGenerated) {
   var testsPath = path.join(
     process.cwd(),
     "tests"
@@ -112,6 +112,7 @@ function generate(config) {
       });
     });
 
+    var writtenTests = 0;
     app.ports.writeFile.subscribe(function(data) {
       var test = data[1];
       var parts = data[0].split(".");
@@ -145,6 +146,11 @@ function generate(config) {
               console.error(err);
               process.exit(-1);
               return;
+            }
+
+            writtenTests = writtenTests + 1;
+            if (writtenTests === config.tests.length && allTestsGenerated) {
+              allTestsGenerated();
             }
         });
       });
