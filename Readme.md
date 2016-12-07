@@ -74,6 +74,20 @@ rev =
     List.reverse
 ```
 
+You can specify imports for doc-test, if you want to use a module or a special test util.
+
+```elm
+{-| returns some html
+
+    HtmlToString is only used for doc tests.
+    >>> import HtmlToString exposing (htmlToString, nodeTypeToString)
+
+    >>> header "World"
+    ... |> htmlToString
+    "<h1>Hello, World!</h1>"
+-}
+```
+
 Running DocTests
 ----------------
 

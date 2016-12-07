@@ -17,3 +17,4 @@ type Syntax
     = Assertion String
     | Continuation String
     | Expectation String
+    | Import String
