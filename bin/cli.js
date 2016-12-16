@@ -11,4 +11,4 @@ var init = require('./modes').init;
 // stateful things
 var cliModel = init(argv);
 
-cliModel.run(cliModel.config);
+cliModel.run(cliModel);

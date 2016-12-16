@@ -25,17 +25,18 @@ running_mode_runners[RUNNING_MODE.RUN] = run;
 // loaders are called by init
 var running_mode_loaders = {};
 
-running_mode_loaders[RUNNING_MODE.GENERATE] = function(){
+running_mode_loaders[RUNNING_MODE.GENERATE] = function(showWarnings){
   var docTestConfig = helpers.loadDocTestConfig();
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
     config: docTestConfig,
-    run: running_mode_runners[RUNNING_MODE.GENERATE]
+    run: running_mode_runners[RUNNING_MODE.GENERATE],
+    showWarnings: showWarnings
   };
 };
 
-running_mode_loaders[RUNNING_MODE.RUN] = function(argv){
+running_mode_loaders[RUNNING_MODE.RUN] = function(argv, showWarnings){
   var files = argv.run;
 
   var config = {
@@ -45,7 +46,8 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv){
   return {
     runningMode: RUNNING_MODE.RUN,
     config: config,
-    run: running_mode_runners[RUNNING_MODE.RUN]
+    run: running_mode_runners[RUNNING_MODE.RUN],
+    showWarnings: showWarnings
   };
 };
 
@@ -54,18 +56,24 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv){
 function init(argv){
   var model = null;
 
+  var showWarnings = true;
+  if (typeof argv.warn !== "undefined") {
+    showWarnings = argv.warn;
+  }
+
   if (typeof argv.run === "undefined") {
-    console.log('Running in generate mode..');
-    model = running_mode_loaders[RUNNING_MODE.GENERATE]();
+    if (showWarnings) console.log('Running in generate mode..');
+    model = running_mode_loaders[RUNNING_MODE.GENERATE](showWarnings);
   } else {
-    console.log('Running in run mode..');
-    model = running_mode_loaders[RUNNING_MODE.RUN](argv);
+    if (showWarnings) console.log('Running in run mode..');
+    model = running_mode_loaders[RUNNING_MODE.RUN](argv, showWarnings);
   }
 
   return model;
 }
 
-function run(config){
+function run(model){
+  var config = model.config;
   var files = config.files.split(' ');
   files = files.filter(
     function(v){ return v.endsWith('.elm'); }
@@ -75,7 +83,8 @@ function run(config){
   console.log(files);
 }
 
-function generate(config, allTestsGenerated) {
+function generate(model, allTestsGenerated) {
+  var config = model.config;
   var testsPath = path.join(
     process.cwd(),
     "tests"
@@ -86,7 +95,9 @@ function generate(config, allTestsGenerated) {
   );
 
   if (config.tests.length === 0){
-    console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
+    if (model.showWarnings) {
+      console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
+    }
     return;
   }
 
