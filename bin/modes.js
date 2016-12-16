@@ -25,18 +25,19 @@ running_mode_runners[RUNNING_MODE.RUN] = run;
 // loaders are called by init
 var running_mode_loaders = {};
 
-running_mode_loaders[RUNNING_MODE.GENERATE] = function(showWarnings){
+running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
   var docTestConfig = helpers.loadDocTestConfig();
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
     config: docTestConfig,
     run: running_mode_runners[RUNNING_MODE.GENERATE],
-    showWarnings: showWarnings
+    showWarnings: options.showWarnings,
+    output: options.output
   };
 };
 
-running_mode_loaders[RUNNING_MODE.RUN] = function(argv, showWarnings){
+running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
   var files = argv.run;
 
   var config = {
@@ -47,7 +48,8 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, showWarnings){
     runningMode: RUNNING_MODE.RUN,
     config: config,
     run: running_mode_runners[RUNNING_MODE.RUN],
-    showWarnings: showWarnings
+    showWarnings: options.showWarnings,
+    output: options.output
   };
 };
 
@@ -56,17 +58,25 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, showWarnings){
 function init(argv){
   var model = null;
 
-  var showWarnings = true;
+  var options = {
+    showWarnings: true,
+    output: "tests"
+  };
+
   if (typeof argv.warn !== "undefined") {
-    showWarnings = argv.warn;
+    options.showWarnings = argv.warn;
+  }
+
+  if (typeof argv.output !== "undefined") {
+    options.output = argv.output;
   }
 
   if (typeof argv.run === "undefined") {
-    if (showWarnings) console.log('Running in generate mode..');
-    model = running_mode_loaders[RUNNING_MODE.GENERATE](showWarnings);
+    if (options.showWarnings) console.log('Running in generate mode..');
+    model = running_mode_loaders[RUNNING_MODE.GENERATE](options);
   } else {
-    if (showWarnings) console.log('Running in run mode..');
-    model = running_mode_loaders[RUNNING_MODE.RUN](argv, showWarnings);
+    if (options.showWarnings) console.log('Running in run mode..');
+    model = running_mode_loaders[RUNNING_MODE.RUN](argv, options);
   }
 
   return model;
@@ -89,10 +99,7 @@ function generate(model, allTestsGenerated) {
     process.cwd(),
     "tests"
   );
-  var testsDocPath = path.join(
-    testsPath,
-    "Doc"
-  );
+  var testsDocPath = path.join(model.output, "Doc");
 
   if (config.tests.length === 0){
     if (model.showWarnings) {
