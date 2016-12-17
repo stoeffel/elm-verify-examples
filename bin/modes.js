@@ -26,11 +26,10 @@ running_mode_runners[RUNNING_MODE.RUN] = run;
 var running_mode_loaders = {};
 
 running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
-  var docTestConfig = helpers.loadDocTestConfig();
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
-    config: docTestConfig,
+    getConfig: helpers.loadDocTestConfig,
     run: running_mode_runners[RUNNING_MODE.GENERATE],
     showWarnings: options.showWarnings,
     output: options.output
@@ -40,13 +39,13 @@ running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
 running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
   var files = argv.run;
 
-  var config = {
-    files: files
+  var getConfig = function (cb) {
+    cb({ files: files });
   };
 
   return {
     runningMode: RUNNING_MODE.RUN,
-    config: config,
+    getConfig: getConfig,
     run: running_mode_runners[RUNNING_MODE.RUN],
     showWarnings: options.showWarnings,
     output: options.output
@@ -83,93 +82,78 @@ function init(argv){
 }
 
 function run(model){
-  var config = model.config;
-  var files = config.files.split(' ');
-  files = files.filter(
-    function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule);
+  model.getConfig(function(config) {
+    var files = config.files.split(' ');
+    files = files.filter(
+      function(v){ return v.endsWith('.elm'); }
+    ).map(elmPathToModule);
 
-
-  console.log(files);
+    console.log(files);
+  });
 }
 
 function generate(model, allTestsGenerated) {
-  var config = model.config;
-  var testsPath = path.join(
-    process.cwd(),
-    "tests"
-  );
-  var testsDocPath = path.join(model.output, "Doc");
+  model.getConfig(function(config) {
+    var testsDocPath = path.join(model.output, "Doc");
 
-  if (config.tests.length === 0){
-    if (model.showWarnings) {
-      console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
-    }
-    return;
-  }
+    helpers.createDocTest(testsDocPath, config, function() {
+      var app = Elm.DocTest.worker(config);
 
-  helpers.createDocTest(testsDocPath, config.tests, function() {
-    var app = Elm.DocTest.worker(config);
-
-    app.ports.readFile.subscribe(function(test) {
-      var pathToModule = path.join(
-        testsPath,
-        config.root,
-        elmModuleToPath(test)
-      );
-      fs.readFile(
-          pathToModule,
-          "utf8",
-          function(err, data) {
-        if (err) {
-          console.error(err);
-          process.exit(-1);
-          return;
-        }
-        app.ports.generateModuleDoctest.send([test, data]);
+      app.ports.readFile.subscribe(function(test) {
+        fs.readFile(
+            test[1],
+            "utf8",
+            function(err, data) {
+          if (err) {
+            console.error(err);
+            process.exit(-1);
+            return;
+          }
+          app.ports.generateModuleDoctest.send([test[0], data]);
+        });
       });
-    });
 
-    var writtenTests = 0;
-    app.ports.writeFile.subscribe(function(data) {
-      var test = data[1];
-      var parts = data[0].split(".");
-      var modulePath = [];
-      var moduleName = ".";
+      var writtenTests = 0;
+      app.ports.writeFile.subscribe(function(data) {
+        var test = data[1];
+        var parts = data[0].split(".");
+        var modulePath = [];
+        var moduleName = ".";
 
-      if (parts.length > 1) {
-        modulePath = parts.slice(0, -1);
-        moduleName = parts.slice(-1)[0];
-      } else {
-        moduleName = parts[0];
-      }
-
-      var testsDocModulePath = path.join(
-        testsDocPath,
-        modulePath.join("/")
-      );
-
-      mkdirp(testsDocModulePath, function(err) {
-        if (err) {
-          console.error(err);
-          process.exit(-1);
-          return;
+        if (parts.length > 1) {
+          modulePath = parts.slice(0, -1);
+          moduleName = parts.slice(-1)[0];
+        } else {
+          moduleName = parts[0];
         }
-        fs.writeFile(
-          path.join(testsDocModulePath, moduleName + "Spec.elm"),
-          test,
-          "utf8",
-          function(err) {
-            if (err) {
-              console.error(err);
-              process.exit(-1);
-              return;
-            }
 
-            writtenTests = writtenTests + 1;
-            if (writtenTests === config.tests.length && allTestsGenerated) {
-              allTestsGenerated();
-            }
+        var testsDocModulePath = path.join(
+          testsDocPath,
+          modulePath.join("/")
+        );
+
+        mkdirp(testsDocModulePath, function(err) {
+          if (err) {
+            console.error(err);
+            process.exit(-1);
+            return;
+          }
+          fs.writeFile(
+            path.join(testsDocModulePath, moduleName + "Spec.elm"),
+            test,
+            "utf8",
+            function(err) {
+              if (err) {
+                console.error(err);
+                process.exit(-1);
+                return;
+              }
+
+              writtenTests = writtenTests + 1;
+              if (writtenTests === config.length && allTestsGenerated) {
+                allTestsGenerated();
+              }
+          });
         });
       });
     });

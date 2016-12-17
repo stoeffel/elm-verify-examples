@@ -1,7 +1,0 @@
-{
-  "root": "../",
-  "tests": [
-    "Mock",
-    "Mock.Foo.Bar.Moo"
-  ]
-}

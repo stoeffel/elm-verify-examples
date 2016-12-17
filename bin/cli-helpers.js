@@ -2,6 +2,7 @@ var path = require("path");
 var fs = require('fs');
 var fsExtra = require("fs-extra");
 var mkdirp = require("mkdirp");
+var shell = require('shelljs');
 
 function createDocTest(testsDocPath, tests, cb) {
   mkdirp(testsDocPath, function(err) {
@@ -32,10 +33,10 @@ function createDocTest(testsDocPath, tests, cb) {
 
 function testsFile(tests) {
   var testsString = tests.map(function(test) {
-    return "        Doc." + test + "Spec.spec";
+    return "        Doc." + test.name + "Spec.spec";
   });
   var imports = tests.map(function(test) {
-    return "import Doc." + test + "Spec";
+    return "import Doc." + test.name + "Spec";
   });
   return [
     "module Doc.Tests exposing (..)",
@@ -52,29 +53,25 @@ function testsFile(tests) {
   ].join("\n");
 }
 
-function loadDocTestConfig() {
-  /* load the doc test config if we can find it
-     otherwise, copy the template one and load that
-  */
-
-  var configPath = path.join(process.cwd(), 'tests/elm-doc-test.json');
-  var docTests = null;
-  try {
-    docTests = require(configPath);
-  } catch (e) {
-    console.log(`Copying initial elm-doc-test.json to ${configPath}`);
-    fsExtra.copySync(
-      path.resolve(__dirname, './templates/elm-doc-test.json'),
-      configPath
-    );
-
-    docTests = require(path.resolve(__dirname, 'templates/elm-doc-test.json'));
-  }
-
-  return docTests;
+function loadDocTestConfig(cb) {
+  var root = process.cwd();
+  shell.exec('elm-reflection --path ' + root + ' --filter DocTest', { silent: true }, function(code, out, err) {
+    if (code === 0) {
+      cb(JSON.parse(out));
+    } else {
+      console.error(err);
+      process.exit(-1);
+    }
+  });
+  // shell.exec('echo "[]" > ' + root + '/elm-doc-test_____.json');
+  // console.log('elm-reflection --path ' + root + ' --filter DocTest > ' + root + '/elm-doc-test_____.json');
+  // shell.exec('elm-reflection --path ' + root + ' --filter DocTest > ' + root + '/elm-doc-test_____.json');
+  // var tests = require(path.join(root, 'elm-doc-test_____.json'));
+  // shell.rm(root + '/elm-doc-test_____.json');
+  // return tests;
 }
 
 module.exports =  {
     loadDocTestConfig: loadDocTestConfig,
     createDocTest: createDocTest
-}
+};
