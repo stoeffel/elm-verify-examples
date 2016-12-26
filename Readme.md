@@ -3,8 +3,6 @@ elm-doc-test [![Build Status](https://travis-ci.org/stoeffel/elm-doc-test.svg?br
 
 > Create doc test and run them with elm-test
 
-
-
 Install
 -------
 
@@ -97,6 +95,8 @@ You have to use elm-test in order to run them.
 ```bash
 $ elm-doc-test && elm-test tests/Doc/Main.elm
 ```
+
+By default the first command creates the tests at `tests/Doc/`. If you want to have them at a custom location use the `--output` argument (e.g. `elm-doc-test --output my/custom/path/` will create the tests at `my/custom/path/Doc/`).
 
 Examples
 --------
