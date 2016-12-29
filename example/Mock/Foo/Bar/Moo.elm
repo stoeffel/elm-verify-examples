@@ -26,3 +26,13 @@ bar a b c =
     , c
     , a
     ]
+
+
+{-| anon function
+
+    >>> moo (\x y -> x + y) 3
+    6
+-}
+moo : (a -> a -> a) -> a -> a
+moo fn x =
+    fn x x

@@ -63,5 +63,6 @@ indent count str =
 
 escape : String -> String
 escape =
-    Regex.replace All (regex "\\\"") (\_ -> "\\\"")
+    Regex.replace All (regex "\\\\") (\_ -> "\\\\")
+        >> Regex.replace All (regex "\\\"") (\_ -> "\\\"")
         >> Regex.replace All (regex "\\s\\s+") (\_ -> " ")
