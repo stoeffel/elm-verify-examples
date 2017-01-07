@@ -59,11 +59,12 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
 // parse args
 function init(argv){
   var model = null;
+  var defaultConfigPath = path.join(process.cwd(), 'tests/elm-doc-test.json');
 
   var options = {
     showWarnings: true,
     output: "tests",
-    configPath: false
+    configPath: defaultConfigPath
   };
 
   if (typeof argv.warn !== "undefined") {
