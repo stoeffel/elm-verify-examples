@@ -28,8 +28,10 @@
   "author": "schtoeffel",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "elm-reflection": "^0.2.0",
     "fs-extra": "^1.0.0",
     "mkdirp": "^0.5.1",
+    "shelljs": "^0.7.5",
     "yargs": "^6.4.0"
   },
   "devDependencies": {

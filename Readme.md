@@ -12,25 +12,6 @@ $ npm i elm-doc-test -g
 $ elm-test init
 ```
 
-Setup
------
-
-```bash
-$ touch tests/elm-doc-test.json
-```
-
-`elm-doc-test.json` contains information on which files contain doc tests and where to find them.
-
-```json
-{
-  "root": "../src",
-  "tests": [
-    "Mock",
-    "Mock.Foo.Bar.Moo"
-  ]
-}
-```
-
 It's recommended to add `./tests/Doc` to your `.gitignore`.
 
 Writing DocTests

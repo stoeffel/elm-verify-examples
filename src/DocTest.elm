@@ -21,16 +21,18 @@ main =
 
 
 type alias Model =
-    { root : String
-    , tests : List String
-    }
+    List Test
+
+
+type alias Test =
+    { name : String, path : String }
 
 
 init : Value -> ( Model, Cmd Msg )
 init flags =
     case decodeValue decoder flags of
         Ok model ->
-            model ! List.map (message << ReadTest) model.tests
+            model ! List.map (message << ReadTest) model
 
         Err err ->
             Debug.crash err
@@ -38,9 +40,14 @@ init flags =
 
 decoder : Decode.Decoder Model
 decoder =
-    Decode.map2 Model
-        (field "root" string)
-        (field "tests" (list string))
+    list decodeTest
+
+
+decodeTest : Decode.Decoder Test
+decodeTest =
+    Decode.map2 Test
+        (field "name" string)
+        (field "path" string)
 
 
 
@@ -48,7 +55,7 @@ decoder =
 
 
 type Msg
-    = ReadTest String
+    = ReadTest Test
     | CompileModule ( String, String )
 
 
@@ -56,7 +63,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ReadTest test ->
-            model ! [ readFile test ]
+            model ! [ readFile ( test.name, test.path ) ]
 
         CompileModule ( moduleName, fileText ) ->
             let
@@ -71,7 +78,7 @@ update msg model =
 -- PORTS
 
 
-port readFile : String -> Cmd msg
+port readFile : ( String, String ) -> Cmd msg
 
 
 port writeFile : ( String, String ) -> Cmd msg
