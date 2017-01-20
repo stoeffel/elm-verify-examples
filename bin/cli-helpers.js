@@ -63,12 +63,6 @@ function loadDocTestConfig(cb) {
       process.exit(-1);
     }
   });
-  // shell.exec('echo "[]" > ' + root + '/elm-doc-test_____.json');
-  // console.log('elm-reflection --path ' + root + ' --filter DocTest > ' + root + '/elm-doc-test_____.json');
-  // shell.exec('elm-reflection --path ' + root + ' --filter DocTest > ' + root + '/elm-doc-test_____.json');
-  // var tests = require(path.join(root, 'elm-doc-test_____.json'));
-  // shell.rm(root + '/elm-doc-test_____.json');
-  // return tests;
 }
 
 module.exports =  {
