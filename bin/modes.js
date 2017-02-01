@@ -26,14 +26,15 @@ running_mode_runners[RUNNING_MODE.RUN] = run;
 var running_mode_loaders = {};
 
 running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
-  var docTestConfig = helpers.loadDocTestConfig();
+  var docTestConfig = helpers.loadDocTestConfig(options.configPath);
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
     config: docTestConfig,
     run: running_mode_runners[RUNNING_MODE.GENERATE],
     showWarnings: options.showWarnings,
-    output: options.output
+    output: options.output,
+    configPath: options.configPath
   };
 };
 
@@ -49,7 +50,8 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
     config: config,
     run: running_mode_runners[RUNNING_MODE.RUN],
     showWarnings: options.showWarnings,
-    output: options.output
+    output: options.output,
+    configPath: options.configPath
   };
 };
 
@@ -57,10 +59,12 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
 // parse args
 function init(argv){
   var model = null;
+  var defaultConfigPath = path.join(process.cwd(), 'tests/elm-doc-test.json');
 
   var options = {
     showWarnings: true,
-    output: "tests"
+    output: "tests",
+    configPath: defaultConfigPath
   };
 
   if (typeof argv.warn !== "undefined") {
@@ -69,6 +73,10 @@ function init(argv){
 
   if (typeof argv.output !== "undefined") {
     options.output = argv.output;
+  }
+
+  if (typeof argv.config !== "undefined") {
+    options.configPath = argv.config;
   }
 
   if (typeof argv.run === "undefined") {

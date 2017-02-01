@@ -1,5 +1,9 @@
+# elm-doc-test generated files
+bin/elm.js
+
 # elm-package generated files
 elm-stuff
+
 # elm-repl generated files
 repl-temp-*
 

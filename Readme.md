@@ -98,6 +98,8 @@ $ elm-doc-test && elm-test tests/Doc/Main.elm
 
 By default the first command creates the tests at `tests/Doc/`. If you want to have them at a custom location use the `--output` argument (e.g. `elm-doc-test --output my/custom/path/` will create the tests at `my/custom/path/Doc/`).
 
+Also by default the first command looks for the config file at `tests/elm-doc-test.json`. If you want it to load a specific config file use the `--config` argument (e.g. `elm-doc-test --config my/custom/path/elm-doc-test.json` will read the config from `my/custom/path/elm-doc-test.json`).
+
 Examples
 --------
 

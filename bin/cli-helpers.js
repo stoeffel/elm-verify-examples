@@ -52,13 +52,13 @@ function testsFile(tests) {
   ].join("\n");
 }
 
-function loadDocTestConfig() {
+function loadDocTestConfig(configPath) {
   /* load the doc test config if we can find it
      otherwise, copy the template one and load that
   */
 
-  var configPath = path.join(process.cwd(), 'tests/elm-doc-test.json');
   var docTests = null;
+
   try {
     docTests = require(configPath);
   } catch (e) {
