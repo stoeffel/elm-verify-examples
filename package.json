@@ -1,6 +1,6 @@
 {
   "name": "elm-doc-test",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "doc-test for elm",
   "main": "index.js",
   "directories": {
@@ -8,6 +8,14 @@
     "bin": "bin",
     "lib": "src"
   },
+  "files": [
+    "./bin/elm.js",
+    "./bin/cli-helpers.js",
+    "./bin/cli.js",
+    "./bin/modes.js",
+    "./bin/templates/elm-doc-test.json",
+    "./bin/templates/Main.elm"
+  ],
   "scripts": {
     "prepublish": "npm run-script elm-make",
     "test": "./run-tests.sh",
