@@ -4,7 +4,7 @@ elm-make src/DocTest.elm --output bin/elm.js &&
 cd example &&
 ../bin/cli.js &&
 {
-  elm-test tests/Doc/Main.elm | grep 'Passed:   10' &&
+  elm-test tests/Doc/Tests.elm | grep "Passed:   10" &&
   echo "👍"
 } || {
   echo "Expected 10 passing specs!"

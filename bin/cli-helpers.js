@@ -11,10 +11,6 @@ function createDocTest(testsDocPath, tests, cb) {
       return;
     }
 
-    fsExtra.copySync(
-      path.resolve(__dirname,'./templates/Main.elm'),
-      path.join(testsDocPath, 'Main.elm')
-    );
     fs.writeFile(
       path.join(testsDocPath, "Tests.elm"),
       testsFile(tests),

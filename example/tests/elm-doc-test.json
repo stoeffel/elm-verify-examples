@@ -1,5 +1,5 @@
 {
-  "root": "../",
+  "root": "../src",
   "tests": [
     "Mock",
     "Mock.Foo.Bar.Moo"
