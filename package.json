@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "elm": "^0.18.0",
-    "elm-test": "^0.18.2",
+    "elm-test": "^0.18.4",
     "xyz": "^1.1.0"
   }
 }
