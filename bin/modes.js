@@ -116,69 +116,67 @@ function generate(model, allTestsGenerated) {
     return;
   }
 
-  helpers.createDocTest(testsDocPath, config.tests, function() {
-    var app = Elm.DocTest.worker(config);
+  var app = Elm.DocTest.worker(config);
 
-    app.ports.readFile.subscribe(function(test) {
-      var pathToModule = path.join(
-        testsPath,
-        config.root,
-        elmModuleToPath(test)
-      );
-      fs.readFile(
-          pathToModule,
-          "utf8",
-          function(err, data) {
-        if (err) {
-          console.error(err);
-          process.exit(-1);
-          return;
-        }
-        app.ports.generateModuleDoctest.send([test, data]);
-      });
-    });
-
-    var writtenTests = 0;
-    app.ports.writeFile.subscribe(function(data) {
-      var test = data[1];
-      var parts = data[0].split(".");
-      var modulePath = [];
-      var moduleName = ".";
-
-      if (parts.length > 1) {
-        modulePath = parts.slice(0, -1);
-        moduleName = parts.slice(-1)[0];
-      } else {
-        moduleName = parts[0];
+  app.ports.readFile.subscribe(function(test) {
+    var pathToModule = path.join(
+      testsPath,
+      config.root,
+      elmModuleToPath(test)
+    );
+    fs.readFile(
+        pathToModule,
+        "utf8",
+        function(err, data) {
+      if (err) {
+        console.error(err);
+        process.exit(-1);
+        return;
       }
+      app.ports.generateModuleDoctest.send([test, data]);
+    });
+  });
 
-      var testsDocModulePath = path.join(
-        testsDocPath,
-        modulePath.join("/")
-      );
+  var writtenTests = 0;
+  app.ports.writeFile.subscribe(function(data) {
+    var test = data[1];
+    var parts = data[0].split(".");
+    var modulePath = [];
+    var moduleName = ".";
 
-      mkdirp(testsDocModulePath, function(err) {
-        if (err) {
-          console.error(err);
-          process.exit(-1);
-          return;
-        }
-        fs.writeFile(
-          path.join(testsDocModulePath, moduleName + "Spec.elm"),
-          test,
-          "utf8",
-          function(err) {
-            if (err) {
-              console.error(err);
-              process.exit(-1);
-              return;
-            }
+    if (parts.length > 1) {
+      modulePath = parts.slice(0, -1);
+      moduleName = parts.slice(-1)[0];
+    } else {
+      moduleName = parts[0];
+    }
 
-            writtenTests = writtenTests + 1;
-            if (writtenTests === config.tests.length && allTestsGenerated) {
-              allTestsGenerated();
-            }
-        });
+    var testsDocModulePath = path.join(
+      testsDocPath,
+      modulePath.join("/")
+    );
+
+    mkdirp(testsDocModulePath, function(err) {
+      if (err) {
+        console.error(err);
+        process.exit(-1);
+        return;
+      }
+      fs.writeFile(
+        path.join(testsDocModulePath, moduleName + "Spec.elm"),
+        test,
+        "utf8",
+        function(err) {
+          if (err) {
+            console.error(err);
+            process.exit(-1);
+            return;
+          }
+
+          writtenTests = writtenTests + 1;
+          if (writtenTests === config.tests.length && allTestsGenerated) {
+            allTestsGenerated();
+          }
       });
     });
   });

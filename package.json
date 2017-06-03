@@ -15,7 +15,7 @@
     "prepublish": "npm run-script elm-make",
     "test": "./run-tests.sh",
     "elm-make": "elm-make src/DocTest.elm --output bin/elm.js",
-    "start": "npm run-script elm-make && cd example && ../bin/cli.js && ../node_modules/.bin/elm-test tests/Doc/Main.elm",
+    "start": "npm run-script elm-make && cd example && ../bin/cli.js && ../node_modules/.bin/elm-test",
     "release-major": "xyz --repo git@github.com:stoeffel/elm-doc-test.git --increment major",
     "release-minor": "xyz --repo git@github.com:stoeffel/elm-doc-test.git --increment minor",
     "release-patch": "xyz --repo git@github.com:stoeffel/elm-doc-test.git --increment patch"
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "elm": "^0.18.0",
-    "elm-test": "^0.18.2",
+    "elm-test": "^0.18.4",
     "xyz": "^1.1.0"
   }
 }
