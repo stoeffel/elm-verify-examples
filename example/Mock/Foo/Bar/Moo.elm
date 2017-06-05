@@ -5,6 +5,8 @@ module Mock.Foo.Bar.Moo exposing (..)
 
 ## Foo bar
 
+@docs foo, bar, moo
+
 -}
 
 
