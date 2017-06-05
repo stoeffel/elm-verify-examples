@@ -11,7 +11,7 @@ parse str =
     let
         ( imports, tests ) =
             parseComments str
-                |> List.concatMap (filterNotDocTest << parseDocTests << String.lines << .match)
+                |> List.concatMap (parseDocTests << String.lines << .match)
                 |> List.partition isImport
     in
     { imports = List.map toStr imports
@@ -19,6 +19,8 @@ parse str =
         tests
             |> List.foldr collapseAssertions []
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
+            |> Debug.log ""
+            |> List.map filterNotDocTest
             |> List.filterMap toTest
     }
 
@@ -32,11 +34,17 @@ parseDocTests : List String -> List Syntax
 parseDocTests =
     List.filterMap <|
         oneOf
-            [ makeSyntaxRegex importRegex Import
+            [ makeSyntaxRegex newLineRegex (\_ -> NewLine)
+            , makeSyntaxRegex importRegex Import
             , makeSyntaxRegex expectationRegex Expectation
             , makeSyntaxRegex continuationRegex Continuation
             , makeSyntaxRegex assertionRegex Assertion
             ]
+
+
+newLineRegex : Regex
+newLineRegex =
+    Regex.regex "(^\\s*$)"
 
 
 importRegex : Regex
@@ -61,7 +69,7 @@ continuationRegex =
 
 expectationRegex : Regex
 expectationRegex =
-    Regex.regex "^\\s{4}\\-\\->\\s(.*)"
+    Regex.regex "\\s\\-\\->\\s(.*)"
 
 
 oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
@@ -91,7 +99,7 @@ makeSyntaxRegex regex e str =
 
 filterNotDocTest : List Syntax -> List Syntax
 filterNotDocTest xs =
-    case List.filter (\x -> isImport x || isAssertion x) xs of
+    case List.filter (\x -> isImport x || isExpectiation x) xs of
         [] ->
             []
 
@@ -138,6 +146,19 @@ toStr e =
 
         Import str ->
             str
+
+        NewLine ->
+            ""
+
+
+isNewLine : Syntax -> Bool
+isNewLine e =
+    case e of
+        NewLine ->
+            True
+
+        _ ->
+            False
 
 
 isAssertion : Syntax -> Bool
