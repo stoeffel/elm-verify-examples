@@ -15,6 +15,8 @@ module Mock.Foo.Bar.Moo exposing (..)
     foo "a" "b" "c"
     --> "bca"
 
+    foo "a" "b" "!" --> "b!a"
+
 -}
 foo : String -> String -> String -> String
 foo a b c =
@@ -37,8 +39,7 @@ bar a b c =
 
 {-| anon function
 
-    moo (\x y -> x + y) 3
-    --> 6
+    moo (\x y -> x + y) 3 --> 6
 
 -}
 moo : (a -> a -> a) -> a -> a
