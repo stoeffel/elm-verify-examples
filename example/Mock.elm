@@ -1,11 +1,12 @@
 module Mock exposing (..)
 
-{-| imports for examples
+{-|
 
 @docs add, sum, bar, rev
 
-    --> import Dict exposing (Dict, fromList)
-    --> import String exposing (join)
+    -- Imports for doc-tests
+    --| import Dict exposing (Dict, fromList)
+    --| import String exposing (join)
 
 -}
 
@@ -44,6 +45,8 @@ sum =
 
 
 {-|
+
+    --| import Dict exposing (Dict, fromList)
 
     bar 1 "foo"
     --> fromList [(1, "foo")]

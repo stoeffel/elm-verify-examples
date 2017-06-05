@@ -57,7 +57,7 @@ newLineRegex =
 
 importRegex : Regex
 importRegex =
-    Regex.regex "^\\s{4}\\-\\->\\s(import\\s.*)"
+    Regex.regex "^\\s{4}\\-\\-\\|\\s(import\\s.*)"
 
 
 commentRegex : Regex
