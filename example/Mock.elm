@@ -19,8 +19,7 @@ import Dict exposing (Dict, fromList)
     add 41 1
     --> 42
 
-    add 3 3
-    --> 6
+    add 3 3 --> 6
 
 -}
 add : Int -> Int -> Int

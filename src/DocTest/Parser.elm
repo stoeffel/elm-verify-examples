@@ -11,7 +11,7 @@ parse str =
     let
         ( imports, tests ) =
             parseComments str
-                |> List.concatMap (parseDocTests << String.lines << .match)
+                |> List.concatMap (parseDocTests << List.concatMap splitOneLiners << String.lines << .match)
                 |> List.partition isImport
     in
     { imports = List.map toStr imports
@@ -19,10 +19,18 @@ parse str =
         tests
             |> List.foldr collapseAssertions []
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
-            |> Debug.log ""
             |> List.map filterNotDocTest
             |> List.filterMap toTest
     }
+
+
+splitOneLiners : String -> List String
+splitOneLiners str =
+    str
+        |> Regex.replace Regex.All
+            (Regex.regex "\\s\\-\\->\\s")
+            (\_ -> "\n    --> ")
+        |> String.lines
 
 
 parseComments : String -> List Regex.Match
@@ -69,7 +77,7 @@ continuationRegex =
 
 expectationRegex : Regex
 expectationRegex =
-    Regex.regex "\\s\\-\\->\\s(.*)"
+    Regex.regex "^\\s{4}\\-\\->\\s(.*)"
 
 
 oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
