@@ -28,6 +28,8 @@ add =
 
 {-| returns the sum of a list of int
 
+    sum aList -- no expectation, this is not a test
+
     sum
         [ 41
         , 1
