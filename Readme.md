@@ -41,11 +41,10 @@ Tests start with four spaces!
 ```elm
 {-| returns the sum of two int.
 
-    >>> add 41 1
-    42
+    add 41 1
+    --> 42
 
-    >>> add 3 3
-    6
+    add 3 3 --> 6
 -}
 add : Int -> Int -> Int
 add =
@@ -54,18 +53,18 @@ add =
 
 {-| reverses the list
 
-    >>> rev
-    ...     [ 41
-    ...     , 1
-    ...     ]
-    [ 1
-    , 41
-    ]
+    rev
+        [ 41
+        , 1
+        ]
+    --> [ 1
+    --. , 41
+    --. ]
 
-    >>> rev [1, 2, 3]
-    ... |> List.map toString
-    ... |> String.join ""
-    "321"
+    rev [1, 2, 3]
+        |> List.map toString
+        |> String.join ""
+    --> "321"
 -}
 rev : List a -> List a
 rev =
@@ -78,11 +77,11 @@ You can specify imports for doc-test, if you want to use a module or a special t
 {-| returns some html
 
     HtmlToString is only used for doc tests.
-    >>> import HtmlToString exposing (htmlToString, nodeTypeToString)
+    --| import HtmlToString exposing (htmlToString, nodeTypeToString)
 
-    >>> header "World"
-    ... |> htmlToString
-    "<h1>Hello, World!</h1>"
+    header "World"
+        |> htmlToString
+    --> "<h1>Hello, World!</h1>"
 -}
 ```
 
