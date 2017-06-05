@@ -2,6 +2,8 @@ module Mock exposing (..)
 
 {-| imports for examples
 
+@docs add, sum, bar, rev
+
     --> import Dict exposing (Dict, fromList)
     --> import String exposing (join)
 
