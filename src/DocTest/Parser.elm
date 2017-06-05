@@ -2,7 +2,7 @@ module DocTest.Parser exposing (parse)
 
 import DocTest.Types exposing (..)
 import List.Extra
-import Regex exposing (Regex, HowMany(..))
+import Regex exposing (HowMany(..), Regex)
 import String
 
 
@@ -14,12 +14,13 @@ parse str =
                 |> List.concatMap (filterNotDocTest << parseDocTests << String.lines << .match)
                 |> List.partition isImport
     in
-        { imports = List.map toStr imports
-        , tests =
-            tests
-                |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
-                |> List.filterMap toTest
-        }
+    { imports = List.map toStr imports
+    , tests =
+        tests
+            |> List.foldr collapseAssertions []
+            |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
+            |> List.filterMap toTest
+    }
 
 
 parseComments : String -> List Regex.Match
@@ -32,15 +33,15 @@ parseDocTests =
     List.filterMap <|
         oneOf
             [ makeSyntaxRegex importRegex Import
-            , makeSyntaxRegex assertionRegex Assertion
-            , makeSyntaxRegex continuationRegex Continuation
             , makeSyntaxRegex expectationRegex Expectation
+            , makeSyntaxRegex continuationRegex Continuation
+            , makeSyntaxRegex assertionRegex Assertion
             ]
 
 
 importRegex : Regex
 importRegex =
-    Regex.regex "^\\s{4}>>>\\s(import\\s.*)"
+    Regex.regex "^\\s{4}\\-\\->\\s(import\\s.*)"
 
 
 commentRegex : Regex
@@ -50,17 +51,17 @@ commentRegex =
 
 assertionRegex : Regex
 assertionRegex =
-    Regex.regex "^\\s{4}>>>\\s(.*)"
+    Regex.regex "^\\s{4}(.*)"
 
 
 continuationRegex : Regex
 continuationRegex =
-    Regex.regex "^\\s{4}\\.\\.\\.\\s(.*)"
+    Regex.regex "^\\s{4}\\-\\-\\.\\s(.*)"
 
 
 expectationRegex : Regex
 expectationRegex =
-    Regex.regex "^\\s{4}(.*)"
+    Regex.regex "^\\s{4}\\-\\->\\s(.*)"
 
 
 oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
@@ -102,15 +103,15 @@ toTest : List Syntax -> Maybe Test
 toTest e =
     let
         ( assertion, expectation ) =
-            List.partition (not << isExpectiation) e
+            List.partition isAssertion e
                 |> Tuple.mapFirst (List.map toStr)
                 |> Tuple.mapSecond (List.map toStr)
     in
-        if List.isEmpty assertion || List.isEmpty expectation then
-            Nothing
-        else
-            Test (String.join " " assertion) (String.join " " expectation)
-                |> Just
+    if List.isEmpty assertion || List.isEmpty expectation then
+        Nothing
+    else
+        Test (String.join " " assertion) (String.join " " expectation)
+            |> Just
 
 
 isExpectiation : Syntax -> Bool
@@ -157,3 +158,16 @@ isImport e =
 
         _ ->
             False
+
+
+collapseAssertions : Syntax -> List Syntax -> List Syntax
+collapseAssertions x xs =
+    case xs of
+        [] ->
+            [ x ]
+
+        y :: rest ->
+            if isAssertion x && isAssertion y then
+                Assertion (toStr x ++ toStr y) :: rest
+            else
+                x :: xs
