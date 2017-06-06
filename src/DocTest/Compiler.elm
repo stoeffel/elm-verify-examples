@@ -1,8 +1,8 @@
 module DocTest.Compiler exposing (compile)
 
 import DocTest.Types exposing (..)
-import String
 import Regex exposing (HowMany(..), regex)
+import String
 
 
 compile : String -> TestSuite -> String
@@ -49,8 +49,11 @@ toTest test =
     String.join "\n"
         [ indent 2 "Test.test \">>> " ++ escape test.assertion ++ "\" <|"
         , indent 3 "\\() ->"
-        , indent 4 "(" ++ test.assertion ++ ")"
-        , indent 4 "|> Expect.equal (" ++ test.expectation ++ ")"
+        , indent 4 "("
+        , indent 5 test.assertion
+        , indent 4 ") |> Expect.equal ("
+        , indent 5 test.expectation
+        , indent 4 ")"
         ]
 
 
