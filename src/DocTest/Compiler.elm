@@ -47,7 +47,7 @@ testBodies tests =
 toTest : Test -> String
 toTest test =
     String.join "\n"
-        [ indent 2 "Test.test \">>> " ++ escape test.assertion ++ "\" <|"
+        [ indent 2 "Test.test \"" ++ escape test.assertion ++ " --> " ++ escape test.expectation ++ "\" <|"
         , indent 3 "\\() ->"
         , indent 4 "("
         , indent 5 test.assertion
