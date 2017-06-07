@@ -11,7 +11,12 @@ parse str =
     let
         ( imports, tests ) =
             parseComments str
-                |> List.concatMap (parseDocTests << List.concatMap splitOneLiners << String.lines << .match)
+                |> List.concatMap
+                    (.match
+                        >> String.lines
+                        >> List.concatMap splitOneLiners
+                        >> parseDocTests
+                    )
                 |> List.partition isImport
     in
     { imports = List.map toStr imports
