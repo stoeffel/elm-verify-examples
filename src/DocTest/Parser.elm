@@ -72,7 +72,7 @@ assertionRegex =
 
 continuationRegex : Regex
 continuationRegex =
-    Regex.regex "^\\s{4}\\-\\-\\.\\s(.*)"
+    Regex.regex "^\\s{4}\\-\\-\\-\\s(.*)"
 
 
 expectationRegex : Regex
