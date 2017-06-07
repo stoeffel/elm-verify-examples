@@ -2,11 +2,11 @@ module Mock exposing (..)
 
 {-|
 
-@docs add, sum, bar, rev
+@docs add, sum, bar, rev, IsItCool, coolFunc
 
     -- Imports for doc-tests
-    --| import Dict exposing (Dict, fromList)
-    --| import String exposing (join)
+    import Dict exposing (Dict, fromList)
+    import String exposing (join)
 
 -}
 
@@ -14,8 +14,6 @@ import Dict exposing (Dict, fromList)
 
 
 {-| returns the sum of two int.
-3 - 1
---> 2
 
     add 41 1
     --> 42
@@ -26,6 +24,46 @@ import Dict exposing (Dict, fromList)
 add : Int -> Int -> Int
 add =
     (+)
+
+
+{-| Cool or not
+-}
+type IsItCool
+    = Cool
+    | Uncool
+
+
+{-| This is my cool function.
+
+    -- basic usage in your view function
+    view : Html msg
+    view =
+        case coolFunc 42 of
+            Cool -> showSomeCoolStuff
+            NotCool -> text "uncool, man"
+
+    -- Cool values
+
+    coolFunc 42    --> Cool
+
+    coolFunc 10000 --> Cool
+
+    -- Uncool values
+
+    coolFunc 1 --> Uncool
+
+-}
+coolFunc : Int -> IsItCool
+coolFunc x =
+    case x of
+        42 ->
+            Cool
+
+        10000 ->
+            Cool
+
+        _ ->
+            Uncool
 
 
 {-| returns the sum of a list of int
@@ -46,7 +84,7 @@ sum =
 
 {-|
 
-    --| import Dict exposing (Dict, fromList)
+    import Dict exposing (Dict, fromList)
 
     bar 1 "foo"
     --> fromList [(1, "foo")]
