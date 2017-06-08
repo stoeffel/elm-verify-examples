@@ -64,3 +64,15 @@ bar a b =
 rev : List a -> List a
 rev =
     List.reverse
+
+
+{-| some inline comments
+
+    >>> -- comment
+    >>> quux 10 32 -- another
+    42 --result
+
+-}
+quux : Int -> Int -> Int
+quux n m =
+    n + m

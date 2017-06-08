@@ -109,7 +109,8 @@ toTest e =
         if List.isEmpty assertion || List.isEmpty expectation then
             Nothing
         else
-            Just <| Test (String.join " " assertion) (String.join " " expectation)
+            Test (String.join " " assertion) (String.join " " expectation)
+                |> Just
 
 
 isExpectiation : Syntax -> Bool
