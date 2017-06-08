@@ -1,6 +1,6 @@
 {
   "name": "elm-doc-test",
-  "version": "2.2.3",
+  "version": "3.0.0",
   "description": "doc-test for elm",
   "main": "index.js",
   "directories": {
