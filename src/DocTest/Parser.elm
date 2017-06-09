@@ -72,7 +72,7 @@ importRegex =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "{-[^]*?-}"
+    Regex.regex "({-[^]*?-})(\n[^\n]*)"
 
 
 assertionRegex : Regex
