@@ -31,6 +31,7 @@ toTestSuite ( imports, tests ) =
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
             |> List.map filterNotDocTest
             |> List.filterMap toTest
+    , functionName = Nothing
     }
 
 

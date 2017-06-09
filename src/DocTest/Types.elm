@@ -4,6 +4,7 @@ module DocTest.Types exposing (..)
 type alias TestSuite =
     { imports : List String
     , tests : List Test
+    , functionName : Maybe String
     }
 
 
