@@ -55,7 +55,11 @@ toDescribe index suite =
     in
     (startOfListOrNot index
         ++ "Test.describe \""
-        ++ escape ("Comment: " ++ toString (index + 1))
+        ++ (suite.functionName
+                |> Maybe.map ((++) "#")
+                |> Maybe.withDefault ("Comment: " ++ toString (index + 1))
+                |> escape
+           )
         ++ "\" <|"
     )
         :: List.map (indent 1) renderedTests

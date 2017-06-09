@@ -12,18 +12,31 @@ parse str =
         |> parseComments
         |> List.map
             (\parsedComment ->
+                let
+                    maybeFunctionName =
+                        case parsedComment.submatches of
+                            _ :: name :: _ ->
+                                name
+                                    |> Maybe.map (Regex.find (AtMost 1) functionNameRegex)
+                                    |> Maybe.andThen List.head
+                                    |> Maybe.andThen (.submatches >> List.head)
+                                    |> Maybe.andThen identity
+
+                            _ ->
+                                Nothing
+                in
                 parsedComment
                     |> .match
                     |> String.lines
                     |> List.concatMap splitOneLiners
                     |> parseDocTests
                     |> List.partition isImport
-                    |> toTestSuite
+                    |> toTestSuite maybeFunctionName
             )
 
 
-toTestSuite : ( List Syntax, List Syntax ) -> TestSuite
-toTestSuite ( imports, tests ) =
+toTestSuite : Maybe String -> ( List Syntax, List Syntax ) -> TestSuite
+toTestSuite maybeFunctionName ( imports, tests ) =
     { imports = List.map toStr imports
     , tests =
         tests
@@ -31,14 +44,14 @@ toTestSuite ( imports, tests ) =
             |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
             |> List.map filterNotDocTest
             |> List.filterMap toTest
-    , functionName = Nothing
+    , functionName = maybeFunctionName
     }
 
 
 splitOneLiners : String -> List String
 splitOneLiners str =
     str
-        |> Regex.replace Regex.All
+        |> Regex.replace All
             (Regex.regex "\\s\\-\\->\\s")
             (\_ -> "\n    --> ")
         |> String.lines
@@ -69,6 +82,11 @@ newLineRegex =
 importRegex : Regex
 importRegex =
     Regex.regex "^\\s{4}(import\\s.*)"
+
+
+functionNameRegex : Regex
+functionNameRegex =
+    Regex.regex "(\\w+)\\s:"
 
 
 commentRegex : Regex
