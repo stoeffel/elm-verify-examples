@@ -5,13 +5,16 @@ import Regex exposing (HowMany(..), regex)
 import String
 
 
-compile : String -> TestSuite -> String
-compile moduleName suite =
+compile : String -> List TestSuite -> String
+compile moduleName suites =
+    let
+        filteredSuites =
+            List.filter (.tests >> List.isEmpty >> not) suites
+    in
     String.join "\n" <|
-        List.concatMap identity
-            [ moduleHeader moduleName suite.imports
-            , testDescribe moduleName
-            , testBodies suite.tests
+        List.concat
+            [ moduleHeader moduleName <| List.concatMap .imports suites
+            , spec moduleName filteredSuites
             ]
 
 
@@ -26,35 +29,67 @@ moduleHeader moduleName imports =
         ++ imports
 
 
-testDescribe : String -> List String
-testDescribe moduleName =
+spec : String -> List TestSuite -> List String
+spec moduleName suites =
+    let
+        renderedSuites =
+            List.indexedMap toDescribe suites
+                |> List.concat
+    in
     [ ""
+    , ""
     , "spec : Test.Test"
     , "spec ="
-    , indent 1 "Test.describe \"" ++ moduleName ++ "\""
+    , indent 1 "Test.describe \"" ++ escape moduleName ++ "\" <|"
+    ]
+        ++ List.map (indent 2) renderedSuites
+        ++ [ indent 1 "]" ]
+
+
+toDescribe : Int -> TestSuite -> List String
+toDescribe index suite =
+    let
+        renderedTests =
+            List.indexedMap toTest suite.tests
+                |> List.concat
+    in
+    (startOfListOrNot index
+        ++ "Test.describe \""
+        ++ escape ("Comment: " ++ toString (index + 1))
+        ++ "\" <|"
+    )
+        :: List.map (indent 1) renderedTests
+        ++ [ indent 1 "]" ]
+
+
+toDescribtion : Test -> String
+toDescribtion test =
+    escape test.assertion ++ " --> " ++ escape test.expectation
+
+
+toTest : Int -> Test -> List String
+toTest index test =
+    [ indent 0
+        (startOfListOrNot index
+            ++ "Test.test \""
+            ++ toDescribtion test
+            ++ "\" <|"
+        )
+    , indent 1 "\\() ->"
+    , indent 2 "Expect.equal"
+    , indent 3 ("(" ++ test.assertion)
+    , indent 3 ")"
+    , indent 3 ("(" ++ test.expectation)
+    , indent 3 ")"
     ]
 
 
-testBodies : List Test -> List String
-testBodies tests =
-    [ tests
-        |> List.map toTest
-        |> String.join ",\n"
-        |> (\tests -> indent 2 "[\n" ++ tests ++ "\n        ]")
-    ]
-
-
-toTest : Test -> String
-toTest test =
-    String.join "\n"
-        [ indent 2 "Test.test \"" ++ escape test.assertion ++ " --> " ++ escape test.expectation ++ "\" <|"
-        , indent 3 "\\() ->"
-        , indent 4 "("
-        , indent 5 test.assertion
-        , indent 4 ") |> Expect.equal ("
-        , indent 5 test.expectation
-        , indent 4 ")"
-        ]
+startOfListOrNot : Int -> String
+startOfListOrNot index =
+    if index == 0 then
+        "[ "
+    else
+        ", "
 
 
 indent : Int -> String -> String

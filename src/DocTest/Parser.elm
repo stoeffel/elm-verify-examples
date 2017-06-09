@@ -6,19 +6,24 @@ import Regex exposing (HowMany(..), Regex)
 import String
 
 
-parse : String -> TestSuite
+parse : String -> List TestSuite
 parse str =
-    let
-        ( imports, tests ) =
-            parseComments str
-                |> List.concatMap
-                    (.match
-                        >> String.lines
-                        >> List.concatMap splitOneLiners
-                        >> parseDocTests
-                    )
-                |> List.partition isImport
-    in
+    str
+        |> parseComments
+        |> List.map
+            (\parsedComment ->
+                parsedComment
+                    |> .match
+                    |> String.lines
+                    |> List.concatMap splitOneLiners
+                    |> parseDocTests
+                    |> List.partition isImport
+                    |> toTestSuite
+            )
+
+
+toTestSuite : ( List Syntax, List Syntax ) -> TestSuite
+toTestSuite ( imports, tests ) =
     { imports = List.map toStr imports
     , tests =
         tests
