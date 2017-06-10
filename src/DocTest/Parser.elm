@@ -31,10 +31,12 @@ parse str =
 
 splitOneLiners : String -> List String
 splitOneLiners str =
+    let
+        breakIntoTwoLines =
+            Regex.replace Regex.All inlineExpectationRegex (\_ -> "\n    --> ")
+    in
     str
-        |> Regex.replace Regex.All
-            (Regex.regex "\\s\\-\\->\\s")
-            (\_ -> "\n    --> ")
+        |> breakIntoTwoLines
         |> String.lines
 
 
@@ -83,6 +85,11 @@ continuationRegex =
 expectationRegex : Regex
 expectationRegex =
     Regex.regex "^\\s{4}\\-\\->\\s(.*)"
+
+
+inlineExpectationRegex : Regex
+inlineExpectationRegex =
+    Regex.regex "\\s\\-\\->\\s"
 
 
 oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
