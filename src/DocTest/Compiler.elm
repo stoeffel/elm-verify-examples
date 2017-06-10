@@ -62,7 +62,8 @@ toDescribe index suite =
            )
         ++ "\" <|"
     )
-        :: List.map (indent 1) renderedTests
+        :: List.map (indent 1) (toLetIn suite.functions)
+        ++ List.map (indent 1) renderedTests
         ++ [ indent 1 "]" ]
 
 
@@ -86,6 +87,19 @@ toTest index test =
     , indent 3 ("(" ++ test.expectation)
     , indent 3 ")"
     ]
+
+
+toLetIn : List String -> List String
+toLetIn fns =
+    case fns of
+        [] ->
+            []
+
+        _ ->
+            indent 0 "let"
+                :: List.concatMap (List.map (indent 1) << String.lines) fns
+                ++ [ indent 0 "in"
+                   ]
 
 
 startOfListOrNot : Int -> String

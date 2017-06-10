@@ -5,6 +5,7 @@ type alias TestSuite =
     { imports : List String
     , tests : List Test
     , functionName : Maybe String
+    , functions : List String
     }
 
 
@@ -19,4 +20,5 @@ type Syntax
     | Continuation String
     | Expectation String
     | Import String
+    | LocalFunction String
     | NewLine

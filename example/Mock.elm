@@ -26,6 +26,22 @@ add =
     (+)
 
 
+{-|
+
+    inc $ inc 1 --> 3
+
+    add : Int -> Int -> Int
+    add = (+)
+
+    inc : Int -> Int
+    inc x = add 1 x
+
+-}
+($) : (a -> b) -> a -> b
+($) f x =
+    f x
+
+
 {-| Cool or not
 -}
 type IsItCool
@@ -35,7 +51,6 @@ type IsItCool
 
 {-| This is my cool function.
 
-    -- basic usage in your view function
     view : Html msg
     view =
         case coolFunc 42 of
