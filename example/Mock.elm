@@ -117,8 +117,8 @@ bar a b =
         , 1
         ]
     --> [ 1
-    --- , 41
-    --- ]
+    --> , 41
+    --> ]
 
     rev [1, 2, 3]
         |> List.map toString
@@ -133,9 +133,9 @@ rev =
 
 {-| some inline comments
 
-    >>> -- comment
-    >>> quux 10 32 -- another
-    42 --result
+    -- comment
+    quux 10 32 -- another
+    --> 42 --result
 
 -}
 quux : Int -> Int -> Int

@@ -1,6 +1,6 @@
 module DocTest.Compiler exposing (compile)
 
-import DocTest.Types exposing (..)
+import DocTest.Ast exposing (..)
 import Regex exposing (HowMany(..), regex)
 import String
 
@@ -62,14 +62,9 @@ toDescribe index suite =
            )
         ++ "\" <|"
     )
-        :: List.map (indent 1) (toLetIn suite.functions)
+        :: List.map (indent 1) (toLetIns suite.functions)
         ++ List.map (indent 1) renderedTests
         ++ [ indent 1 "]" ]
-
-
-toDescribtion : Test -> String
-toDescribtion test =
-    escape test.assertion ++ " --> " ++ escape test.expectation
 
 
 toTest : Int -> Test -> List String
@@ -77,27 +72,32 @@ toTest index test =
     [ indent 0
         (startOfListOrNot index
             ++ "Test.test \""
-            ++ toDescribtion test
+            ++ "Example:"
+            ++ toString (index + 1)
             ++ "\" <|"
         )
     , indent 1 "\\() ->"
     , indent 2 "Expect.equal"
-    , indent 3 ("(" ++ test.assertion)
-    , indent 3 ")"
-    , indent 3 ("(" ++ test.expectation)
-    , indent 3 ")"
+    , indent 3 "("
     ]
+        ++ (List.map (indent 4) <| String.lines test.assertion)
+        ++ [ indent 3 ")"
+           , indent 3 "("
+           ]
+        ++ (List.map (indent 4) <| String.lines test.expectation)
+        ++ [ indent 3 ")"
+           ]
 
 
-toLetIn : List String -> List String
-toLetIn fns =
-    case fns of
+toLetIns : List Function -> List String
+toLetIns fns =
+    case List.filter .used fns of
         [] ->
             []
 
         _ ->
             indent 0 "let"
-                :: List.concatMap (List.map (indent 1) << String.lines) fns
+                :: List.concatMap (List.map (indent 1) << String.lines << .value) fns
                 ++ [ indent 0 "in"
                    ]
 

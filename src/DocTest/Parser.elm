@@ -1,6 +1,6 @@
 module DocTest.Parser exposing (parse)
 
-import DocTest.Types exposing (..)
+import DocTest.Ast exposing (..)
 import List.Extra
 import Regex exposing (HowMany(..), Regex)
 import String
@@ -11,92 +11,171 @@ parse str =
     str
         |> parseComments
         |> List.map
-            (\parsedComment ->
-                let
-                    maybeFunctionName =
-                        case parsedComment.submatches of
-                            _ :: name :: _ ->
-                                Maybe.andThen findFunctionName name
-
-                            _ ->
-                                Nothing
-                in
-                parsedComment
-                    |> .match
-                    |> String.lines
-                    |> List.concatMap splitOneLiners
-                    |> parseDocTests
-                    |> List.partition isImport
-                    |> toTestSuite maybeFunctionName
+            (\( comment, fnName ) ->
+                comment
+                    |> commentToIntermediateAst
+                    |> intermediateAstToAst
+                    |> astToTestSuite fnName
             )
 
 
-toTestSuite : Maybe String -> ( List Syntax, List Syntax ) -> TestSuite
-toTestSuite maybeFunctionName ( imports, tests ) =
-    { imports = List.map toStr imports
+astToTestSuite : String -> List Ast -> TestSuite
+astToTestSuite fnName ast =
+    let
+        toTests : List Test -> List Ast -> List Test
+        toTests acc xs =
+            case xs of
+                (Assertion x) :: (Assertion y) :: rest ->
+                    toTests acc (Assertion y :: rest)
+
+                (Assertion x) :: (Expectation y) :: rest ->
+                    toTests
+                        ({ assertion = x
+                         , expectation = y
+                         }
+                            :: acc
+                        )
+                        rest
+
+                _ ->
+                    acc
+    in
+    { imports =
+        List.filter isImport ast
+            |> List.map astToString
     , tests =
-        tests
-            |> List.filter (not << isLocalFunction)
-            |> List.Extra.groupWhile (\x y -> not <| isAssertion y)
-            |> List.map filterNotDocTest
-            |> List.filterMap toTest
-    , functionName = maybeFunctionName
+        ast
+            |> List.filter (\a -> isAssertion a || isExpectiation a)
+            |> toTests []
+            |> List.reverse
+    , functionName = Just fnName
     , functions =
-        tests
+        ast
             |> List.filter isLocalFunction
-            |> List.filter (isUsed <| List.filter (not << isLocalFunction) tests)
-            |> List.map toStr
+            |> List.filterMap (astToFunction ast)
     }
+
+
+parseComments : String -> List ( String, String )
+parseComments str =
+    let
+        nameAndComment matches =
+            case matches of
+                comment :: name :: _ ->
+                    Just ( Maybe.withDefault "" comment, Maybe.withDefault "" name )
+
+                _ ->
+                    Nothing
+    in
+    Regex.find All commentRegex str
+        |> List.map .submatches
+        |> List.filterMap nameAndComment
+
+
+commentToIntermediateAst : String -> List IntermediateAst
+commentToIntermediateAst parsedComment =
+    commentLines parsedComment
+        |> List.filterMap toIntermediateAst
+
+
+commentLines : String -> List String
+commentLines str =
+    str
+        |> String.lines
+        |> List.concatMap splitOneLiners
 
 
 splitOneLiners : String -> List String
 splitOneLiners str =
+    let
+        breakIntoTwoLines a =
+            if Regex.contains expectationRegex a then
+                a
+            else
+                Regex.replace Regex.All arrowRegex (\_ -> "\n    --> ") a
+    in
     str
-        |> Regex.replace All
-            (Regex.regex "\\s\\-\\->\\s")
-            (\_ -> "\n    --> ")
+        |> breakIntoTwoLines
         |> String.lines
 
 
-parseComments : String -> List Regex.Match
-parseComments str =
-    Regex.find All commentRegex str
+toIntermediateAst : String -> Maybe IntermediateAst
+toIntermediateAst =
+    oneOf
+        [ makeSyntaxRegex newLineRegex (\_ -> NewLine)
+        , makeSyntaxRegex importRegex (Expression ImportPrefix)
+        , makeSyntaxRegex expectationRegex (Expression ArrowPrefix)
+        , makeSyntaxRegex localFunctionRegex toFunctionExpression
+        , makeSyntaxRegex assertionRegex MaybeExpression
+        ]
 
 
-parseDocTests : List String -> List Syntax
-parseDocTests lines =
+toFunctionExpression : String -> IntermediateAst
+toFunctionExpression str =
     let
-        collapseLines : List Syntax -> List Syntax -> List Syntax
-        collapseLines acc xs =
-            case ( acc, xs ) of
-                ( (Assertion a) :: rest1, (Assertion b) :: rest2 ) ->
-                    collapseLines (Assertion (a ++ b) :: rest1) rest2
-
-                ( (LocalFunction a) :: rest1, (Assertion b) :: rest2 ) ->
-                    collapseLines (LocalFunction (a ++ "\n" ++ b) :: rest1) rest2
-
-                ( a :: _, b :: rest2 ) ->
-                    collapseLines (b :: acc) rest2
-
-                ( [], b :: rest2 ) ->
-                    collapseLines [ b ] rest2
-
-                ( _, [] ) ->
-                    acc
+        functionName : String
+        functionName =
+            str
+                |> Regex.find (AtMost 1) functionNameRegex
+                |> List.head
+                |> Maybe.andThen (.submatches >> List.head)
+                |> Maybe.andThen identity
+                |> Maybe.withDefault "no function name given!"
     in
-    lines
-        |> List.filterMap
-            (oneOf
-                [ makeSyntaxRegex newLineRegex (\_ -> NewLine)
-                , makeSyntaxRegex importRegex Import
-                , makeSyntaxRegex expectationRegex Expectation
-                , makeSyntaxRegex continuationRegex Continuation
-                , makeSyntaxRegex localFunctionRegex LocalFunction
-                , makeSyntaxRegex assertionRegex Assertion
-                ]
-            )
-        |> collapseLines []
-        |> List.reverse
+    Func functionName str
+
+
+intermediateAstToAst : List IntermediateAst -> List Ast
+intermediateAstToAst xs =
+    let
+        groupToAst : List IntermediateAst -> Maybe Ast
+        groupToAst xs =
+            case xs of
+                (MaybeExpression x) :: rest ->
+                    Assertion (String.join "\n" <| x :: List.map intermediateToString rest)
+                        |> Just
+
+                (Expression ArrowPrefix x) :: rest ->
+                    Expectation (String.join "\n" <| x :: List.map intermediateToString rest)
+                        |> Just
+
+                (Expression ImportPrefix x) :: rest ->
+                    Import (String.join "\n" <| x :: List.map intermediateToString rest)
+                        |> Just
+
+                (Func name x) :: rest ->
+                    LocalFunction name (String.join "\n" <| x :: List.map intermediateToString rest)
+                        |> Just
+
+                _ ->
+                    Nothing
+
+        groupBy : IntermediateAst -> IntermediateAst -> Bool
+        groupBy x y =
+            case ( x, y ) of
+                ( _, NewLine ) ->
+                    False
+
+                ( NewLine, MaybeExpression _ ) ->
+                    False
+
+                ( _, MaybeExpression _ ) ->
+                    True
+
+                ( Expression ArrowPrefix _, Expression ArrowPrefix _ ) ->
+                    True
+
+                _ ->
+                    False
+    in
+    xs
+        |> List.Extra.groupWhileTransitively groupBy
+        |> List.filterMap groupToAst
+
+
+arrowRegex : Regex
+arrowRegex =
+    Regex.regex "\\s\\-\\->\\s"
 
 
 newLineRegex : Regex
@@ -116,17 +195,12 @@ functionNameRegex =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "({-[^]*?-})(\n[^\n]*)"
+    Regex.regex "({-[^]*?-})\n([^\n]*)\\s[:=]"
 
 
 assertionRegex : Regex
 assertionRegex =
     Regex.regex "^\\s{4}(.*)"
-
-
-continuationRegex : Regex
-continuationRegex =
-    Regex.regex "^\\s{4}\\-\\-\\-\\s(.*)"
 
 
 expectationRegex : Regex
@@ -139,7 +213,7 @@ localFunctionRegex =
     Regex.regex "^\\s{4}(\\w+\\s:\\s.*)"
 
 
-oneOf : List (String -> Maybe Syntax) -> String -> Maybe Syntax
+oneOf : List (a -> Maybe b) -> a -> Maybe b
 oneOf fs str =
     case fs of
         [] ->
@@ -154,127 +228,11 @@ oneOf fs str =
                     oneOf rest str
 
 
-makeSyntaxRegex : Regex -> (String -> Syntax) -> (String -> Maybe Syntax)
-makeSyntaxRegex regex e str =
+makeSyntaxRegex : Regex -> (String -> a) -> (String -> Maybe a)
+makeSyntaxRegex regex f str =
     Regex.find (AtMost 1) regex str
         |> List.map .submatches
         |> List.concat
         |> List.filterMap identity
         |> List.head
-        |> Maybe.map e
-
-
-filterNotDocTest : List Syntax -> List Syntax
-filterNotDocTest xs =
-    case List.filter (\x -> isImport x || isExpectiation x) xs of
-        [] ->
-            []
-
-        _ ->
-            xs
-
-
-toTest : List Syntax -> Maybe Test
-toTest e =
-    let
-        ( assertion, expectation ) =
-            List.partition isAssertion e
-                |> Tuple.mapFirst (List.map toStr)
-                |> Tuple.mapSecond (List.map toStr)
-    in
-    if List.isEmpty assertion || List.isEmpty expectation then
-        Nothing
-    else
-        Test (String.join " " assertion) (String.join " " expectation)
-            |> Just
-
-
-isExpectiation : Syntax -> Bool
-isExpectiation e =
-    case e of
-        Expectation str ->
-            True
-
-        _ ->
-            False
-
-
-toStr : Syntax -> String
-toStr e =
-    case e of
-        Assertion str ->
-            str
-
-        Continuation str ->
-            str
-
-        Expectation str ->
-            str
-
-        Import str ->
-            str
-
-        LocalFunction str ->
-            str
-
-        NewLine ->
-            ""
-
-
-isNewLine : Syntax -> Bool
-isNewLine e =
-    case e of
-        NewLine ->
-            True
-
-        _ ->
-            False
-
-
-isAssertion : Syntax -> Bool
-isAssertion e =
-    case e of
-        Assertion str ->
-            True
-
-        _ ->
-            False
-
-
-isImport : Syntax -> Bool
-isImport e =
-    case e of
-        Import str ->
-            True
-
-        _ ->
-            False
-
-
-isLocalFunction : Syntax -> Bool
-isLocalFunction e =
-    case e of
-        LocalFunction str ->
-            True
-
-        _ ->
-            False
-
-
-isUsed : List Syntax -> Syntax -> Bool
-isUsed xs x =
-    findFunctionName (toStr x)
-        |> Maybe.map
-            (\fn ->
-                List.any (toStr >> String.contains fn) xs
-            )
-        |> Maybe.withDefault False
-
-
-findFunctionName : String -> Maybe String
-findFunctionName str =
-    str
-        |> Regex.find (AtMost 1) functionNameRegex
-        |> List.head
-        |> Maybe.andThen (.submatches >> List.head)
-        |> Maybe.andThen identity
+        |> Maybe.map f
