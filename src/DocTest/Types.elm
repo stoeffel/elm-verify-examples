@@ -18,3 +18,4 @@ type Syntax
     | Continuation String
     | Expectation String
     | Import String
+    | NewLine

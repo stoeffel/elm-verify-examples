@@ -1,22 +1,24 @@
 module Mock exposing (..)
 
-{-| imports for examples
-    >>> import Dict exposing (Dict, fromList)
-    >>> import String exposing (join)
+{-|
+
+@docs add, sum, bar, rev, IsItCool, coolFunc
+
+    -- These imports are only used in doc-tests
+    import Dict exposing (Dict, fromList)
+    import String exposing (join)
+
 -}
 
 import Dict exposing (Dict, fromList)
 
 
 {-| returns the sum of two int.
-    >>> 3 - 1
-    2
 
-    >>> add 41 1
-    42
+    add 41 1
+    --> 42
 
-    >>> add 3 3
-    6
+    add 3 3 --> 6
 
 -}
 add : Int -> Int -> Int
@@ -24,13 +26,56 @@ add =
     (+)
 
 
+{-| Cool or not
+-}
+type IsItCool
+    = Cool
+    | Uncool
+
+
+{-| This is my cool function.
+
+    -- basic usage in your view function
+    view : Html msg
+    view =
+        case coolFunc 42 of
+            Cool -> showSomeCoolStuff
+            NotCool -> text "uncool, man"
+
+    -- Cool values
+
+    coolFunc 42    --> Cool
+
+    coolFunc 10000 --> Cool
+
+    -- Uncool values
+
+    coolFunc 1 --> Uncool
+
+-}
+coolFunc : Int -> IsItCool
+coolFunc x =
+    case x of
+        42 ->
+            Cool
+
+        10000 ->
+            Cool
+
+        _ ->
+            Uncool
+
+
 {-| returns the sum of a list of int
 
-    >>> sum
-    ...     [ 41
-    ...     , 1
-    ...     ]
-    42
+    sum aList -- no expectation, this is not a test
+
+    sum
+        [ 41
+        , 1
+        ]
+    --> 42
+
 -}
 sum : List Int -> Int
 sum =
@@ -38,8 +83,12 @@ sum =
 
 
 {-|
-    >>> bar 1 "foo"
-    fromList [(1, "foo")]
+
+    import Dict exposing (Dict, fromList)
+
+    bar 1 "foo"
+    --> fromList [(1, "foo")]
+
 -}
 bar : Int -> String -> Dict Int String
 bar a b =
@@ -48,18 +97,19 @@ bar a b =
 
 {-| reverses the list
 
-    >>> rev
-    ...     [ 41
-    ...     , 1
-    ...     ]
-    [ 1
-    , 41
-    ]
+    rev
+        [ 41
+        , 1
+        ]
+    --> [ 1
+    --- , 41
+    --- ]
 
-    >>> rev [1, 2, 3]
-    ... |> List.map toString
-    ... |> join ""
-    "321"
+    rev [1, 2, 3]
+        |> List.map toString
+        |> join ""
+    --> "321"
+
 -}
 rev : List a -> List a
 rev =

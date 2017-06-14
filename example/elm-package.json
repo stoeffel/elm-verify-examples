@@ -6,7 +6,7 @@
     "source-directories": [
         "."
     ],
-    "exposed-modules": [],
+    "exposed-modules": ["Mock", "Mock.Foo.Bar.Moo"],
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0"

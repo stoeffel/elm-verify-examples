@@ -1,5 +1,5 @@
 #! /bin/bash -ex
-TEST_COUNT=11
+TEST_COUNT=13
 
 elm-make src/DocTest.elm --output bin/elm.js &&
 cd example &&
