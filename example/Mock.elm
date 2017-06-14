@@ -51,6 +51,8 @@ type IsItCool
 
 {-| This is my cool function.
 
+    -- This is how you use it in a view.
+
     view : Html msg
     view =
         case coolFunc 42 of

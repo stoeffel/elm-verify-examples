@@ -117,7 +117,7 @@ intermediateToString ast =
             "\n"
 
 
-astToFunction : List Ast -> Ast -> Maybe Function
+astToFunction : List Test -> Ast -> Maybe Function
 astToFunction rest ast =
     case ast of
         LocalFunction name value ->
@@ -125,9 +125,12 @@ astToFunction rest ast =
                 { name = name
                 , value = value
                 , used =
-                    rest
-                        |> List.filter (\a -> isAssertion a || isExpectiation a)
-                        |> List.any (astToString >> String.contains name)
+                    List.any
+                        (\{ assertion, expectation } ->
+                            String.contains name assertion
+                                || String.contains name expectation
+                        )
+                        rest
                 }
 
         _ ->

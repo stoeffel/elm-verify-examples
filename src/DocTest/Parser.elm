@@ -40,20 +40,22 @@ astToTestSuite fnName ast =
 
                 _ ->
                     acc
+
+        tests =
+            ast
+                |> List.filter (\a -> isAssertion a || isExpectiation a)
+                |> toTests []
+                |> List.reverse
     in
     { imports =
         List.filter isImport ast
             |> List.map astToString
-    , tests =
-        ast
-            |> List.filter (\a -> isAssertion a || isExpectiation a)
-            |> toTests []
-            |> List.reverse
+    , tests = tests
     , functionName = Just fnName
     , functions =
         ast
             |> List.filter isLocalFunction
-            |> List.filterMap (astToFunction ast)
+            |> List.filterMap (astToFunction tests)
     }
 
 
