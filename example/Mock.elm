@@ -4,7 +4,7 @@ module Mock exposing (..)
 
 @docs add, sum, bar, rev, IsItCool, coolFunc
 
-    -- Imports for doc-tests
+    -- These imports are only used in doc-tests
     import Dict exposing (Dict, fromList)
     import String exposing (join)
 

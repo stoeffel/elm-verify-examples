@@ -1,5 +1,5 @@
 #! /bin/bash -ex
-TEST_COUNT=`find ./example/tests/Doc -name "*.elm" | xargs cat | grep 'Test.test' | wc -l`
+TEST_COUNT=15
 
 elm-make src/DocTest.elm --output bin/elm.js &&
 cd example &&

@@ -101,6 +101,22 @@ astToString ast =
             str
 
 
+intermediateToString : IntermediateAst -> String
+intermediateToString ast =
+    case ast of
+        MaybeExpression str ->
+            str
+
+        Expression _ str ->
+            str
+
+        Func _ str ->
+            str
+
+        NewLine ->
+            "\n"
+
+
 astToFunction : List Ast -> Ast -> Maybe Function
 astToFunction rest ast =
     case ast of
