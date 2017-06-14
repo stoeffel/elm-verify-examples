@@ -25,6 +25,7 @@ astToTestSuite fnName ast =
         toTests : List Test -> List Ast -> List Test
         toTests acc xs =
             case xs of
+                -- Drop assertions without an expectation
                 (Assertion x) :: (Assertion y) :: rest ->
                     toTests acc (Assertion y :: rest)
 

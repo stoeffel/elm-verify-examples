@@ -3,6 +3,7 @@ module DocTest.Compiler exposing (compile)
 import DocTest.Ast exposing (..)
 import Regex exposing (HowMany(..), regex)
 import String
+import String.Extra
 
 
 compile : String -> List TestSuite -> String
@@ -69,11 +70,22 @@ toDescribe index suite =
 
 toTest : Int -> Test -> List String
 toTest index test =
+    let
+        exampleName =
+            (test.assertion ++ " --> " ++ test.expectation)
+                |> String.Extra.replace "\n" " "
+                |> String.Extra.clean
+                |> String.Extra.ellipsis 40
+                |> String.Extra.surround "`"
+                |> escape
+    in
     [ indent 0
         (startOfListOrNot index
             ++ "Test.test \""
-            ++ "Example:"
+            ++ "Example: "
             ++ toString (index + 1)
+            ++ " -- "
+            ++ exampleName
             ++ "\" <|"
         )
     , indent 1 "\\() ->"
