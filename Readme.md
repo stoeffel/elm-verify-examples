@@ -95,10 +95,10 @@ You can specify imports, if you want to use a module or a special test util.
 -}
 ```
 
-Running VerifyExamples
+Verify Examples
 ----------------
 
-`elm-verify-examples` only converts your verify-exampless into elm-tests.
+`elm-verify-examples` only converts your verify-examples into elm-tests.
 You have to use elm-test in order to run them.
 
 ```bash

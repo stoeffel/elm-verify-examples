@@ -4,7 +4,7 @@ module Mock exposing (..)
 
 @docs add, sum, bar, rev, IsItCool, coolFunc
 
-    -- These imports are only used in verify-exampless
+    -- These imports are only used in verify-examples
     import Dict exposing (Dict, fromList)
     import String exposing (join)
 
