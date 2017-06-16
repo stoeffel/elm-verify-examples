@@ -6,10 +6,11 @@ cd example
 ../bin/cli.js
 
 {
-  ./node_modules/.bin/elm-test | grep "Passed" | grep $TEST_COUNT
-  echo "👍"
+  elm-test > ../result.json
+  cd ..
+  cat result.json | grep "Passed:   ${TEST_COUNT}"
+  cat result.json | grep "Failed:   0"
 } || {
   echo "Expected $TEST_COUNT passing specs!"
-  npm start
   exit -1
 }
