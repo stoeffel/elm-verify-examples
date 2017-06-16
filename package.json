@@ -1,7 +1,7 @@
 {
   "name": "elm-verify-examples",
-  "version": "4.0.0",
-  "description": "verify-examples for elm",
+  "version": "1.0.0",
+  "description": "Verify examples in Elm doc-comments",
   "main": "index.js",
   "directories": {
     "test": "tests",
@@ -26,7 +26,9 @@
   "keywords": [
     "elm",
     "doc",
-    "test"
+    "test",
+    "doc-tests",
+    "doc-test"
   ],
   "author": "schtoeffel",
   "license": "BSD-3-Clause",
