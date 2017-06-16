@@ -26,6 +26,22 @@ add =
     (+)
 
 
+{-|
+
+    inc $ inc 1 --> 3
+
+    add : Int -> Int -> Int
+    add = (+)
+
+    inc : Int -> Int
+    inc x = add 1 x
+
+-}
+($) : (a -> b) -> a -> b
+($) f x =
+    f x
+
+
 {-| Cool or not
 -}
 type IsItCool
@@ -35,7 +51,8 @@ type IsItCool
 
 {-| This is my cool function.
 
-    -- basic usage in your view function
+    -- This is how you use it in a view.
+
     view : Html msg
     view =
         case coolFunc 42 of
@@ -102,8 +119,8 @@ bar a b =
         , 1
         ]
     --> [ 1
-    --- , 41
-    --- ]
+    --> , 41
+    --> ]
 
     rev [1, 2, 3]
         |> List.map toString
@@ -118,9 +135,9 @@ rev =
 
 {-| some inline comments
 
-    >>> -- comment
-    >>> quux 10 32 -- another
-    42 --result
+    -- comment
+    quux 10 32 -- another
+    --> 42 --result
 
 -}
 quux : Int -> Int -> Int

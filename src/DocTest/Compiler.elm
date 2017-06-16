@@ -1,17 +1,21 @@
 module DocTest.Compiler exposing (compile)
 
-import DocTest.Types exposing (..)
+import DocTest.Ast exposing (..)
 import Regex exposing (HowMany(..), regex)
 import String
+import String.Extra
 
 
-compile : String -> TestSuite -> String
-compile moduleName suite =
+compile : String -> List TestSuite -> String
+compile moduleName suites =
+    let
+        filteredSuites =
+            List.filter (.tests >> List.isEmpty >> not) suites
+    in
     String.join "\n" <|
-        List.concatMap identity
-            [ moduleHeader moduleName suite.imports
-            , testDescribe moduleName
-            , testBodies suite.tests
+        List.concat
+            [ moduleHeader moduleName <| List.concatMap .imports suites
+            , spec moduleName filteredSuites
             ]
 
 
@@ -26,35 +30,97 @@ moduleHeader moduleName imports =
         ++ imports
 
 
-testDescribe : String -> List String
-testDescribe moduleName =
+spec : String -> List TestSuite -> List String
+spec moduleName suites =
+    let
+        renderedSuites =
+            List.indexedMap toDescribe suites
+                |> List.concat
+    in
     [ ""
+    , ""
     , "spec : Test.Test"
     , "spec ="
-    , indent 1 "Test.describe \"" ++ moduleName ++ "\""
+    , indent 1 "Test.describe \"" ++ escape moduleName ++ "\" <|"
     ]
+        ++ List.map (indent 2) renderedSuites
+        ++ [ indent 1 "]" ]
 
 
-testBodies : List Test -> List String
-testBodies tests =
-    [ tests
-        |> List.map toTest
-        |> String.join ",\n"
-        |> (\tests -> indent 2 "[\n" ++ tests ++ "\n        ]")
+toDescribe : Int -> TestSuite -> List String
+toDescribe index suite =
+    let
+        renderedTests =
+            List.indexedMap toTest suite.tests
+                |> List.concat
+    in
+    (startOfListOrNot index
+        ++ "Test.describe \""
+        ++ (suite.functionToTest
+                |> Maybe.map ((++) "#")
+                |> Maybe.withDefault ("Comment: " ++ toString (index + 1))
+                |> escape
+           )
+        ++ "\" <|"
+    )
+        :: List.map (indent 1) (toLetIns suite.helperFunctions)
+        ++ List.map (indent 1) renderedTests
+        ++ [ indent 1 "]" ]
+
+
+toTest : Int -> Test -> List String
+toTest index test =
+    [ indent 0
+        (startOfListOrNot index
+            ++ "Test.test \""
+            ++ "Example: "
+            ++ toString (index + 1)
+            ++ " -- "
+            ++ exampleName test
+            ++ "\" <|"
+        )
+    , indent 1 "\\() ->"
+    , indent 2 "Expect.equal"
+    , indent 3 "("
     ]
+        ++ (List.map (indent 4) <| String.lines test.assertion)
+        ++ [ indent 3 ")"
+           , indent 3 "("
+           ]
+        ++ (List.map (indent 4) <| String.lines test.expectation)
+        ++ [ indent 3 ")"
+           ]
 
 
-toTest : Test -> String
-toTest test =
-    String.join "\n"
-        [ indent 2 "Test.test \"" ++ escape test.assertion ++ " --> " ++ escape test.expectation ++ "\" <|"
-        , indent 3 "\\() ->"
-        , indent 4 "("
-        , indent 5 test.assertion
-        , indent 4 ") |> Expect.equal ("
-        , indent 5 test.expectation
-        , indent 4 ")"
-        ]
+exampleName : Test -> String
+exampleName test =
+    (test.assertion ++ " --> " ++ test.expectation)
+        |> String.Extra.replace "\n" " "
+        |> String.Extra.clean
+        |> String.Extra.ellipsis 40
+        |> String.Extra.surround "`"
+        |> escape
+
+
+toLetIns : List Function -> List String
+toLetIns fns =
+    case List.filter .isUsed fns of
+        [] ->
+            []
+
+        _ ->
+            indent 0 "let"
+                :: List.concatMap (List.map (indent 1) << String.lines << .value) fns
+                ++ [ indent 0 "in"
+                   ]
+
+
+startOfListOrNot : Int -> String
+startOfListOrNot index =
+    if index == 0 then
+        "[ "
+    else
+        ", "
 
 
 indent : Int -> String -> String
