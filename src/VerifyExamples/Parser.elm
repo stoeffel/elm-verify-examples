@@ -1,6 +1,6 @@
-module DocTest.Parser exposing (parse)
+module VerifyExamples.Parser exposing (parse)
 
-import DocTest.Ast exposing (..)
+import VerifyExamples.Ast exposing (..)
 import List.Extra
 import Regex exposing (HowMany(..), Regex)
 import String

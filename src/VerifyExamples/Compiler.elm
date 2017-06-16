@@ -1,6 +1,6 @@
-module DocTest.Compiler exposing (compile)
+module VerifyExamples.Compiler exposing (compile)
 
-import DocTest.Ast exposing (..)
+import VerifyExamples.Ast exposing (..)
 import Regex exposing (HowMany(..), regex)
 import String
 import String.Extra

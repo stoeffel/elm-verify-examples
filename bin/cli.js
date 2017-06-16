@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var processTitle = "elm-doc-test";
+var processTitle = "elm-verify-examples";
 
 process.title = processTitle;
 
