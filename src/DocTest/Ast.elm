@@ -121,17 +121,17 @@ astToFunction : List Test -> Ast -> Maybe Function
 astToFunction rest ast =
     case ast of
         LocalFunction name value ->
-            Just
-                { name = name
-                , value = value
-                , isUsed =
-                    List.any
-                        (\{ assertion, expectation } ->
-                            String.contains name assertion
-                                || String.contains name expectation
-                        )
-                        rest
-                }
+            { name = name
+            , value = value
+            , isUsed =
+                List.any
+                    (\{ assertion, expectation } ->
+                        String.contains name assertion
+                            || String.contains name expectation
+                    )
+                    rest
+            }
+                |> Just
 
         _ ->
             Nothing

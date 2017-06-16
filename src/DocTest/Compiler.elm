@@ -70,22 +70,13 @@ toDescribe index suite =
 
 toTest : Int -> Test -> List String
 toTest index test =
-    let
-        exampleName =
-            (test.assertion ++ " --> " ++ test.expectation)
-                |> String.Extra.replace "\n" " "
-                |> String.Extra.clean
-                |> String.Extra.ellipsis 40
-                |> String.Extra.surround "`"
-                |> escape
-    in
     [ indent 0
         (startOfListOrNot index
             ++ "Test.test \""
             ++ "Example: "
             ++ toString (index + 1)
             ++ " -- "
-            ++ exampleName
+            ++ exampleName test
             ++ "\" <|"
         )
     , indent 1 "\\() ->"
@@ -99,6 +90,16 @@ toTest index test =
         ++ (List.map (indent 4) <| String.lines test.expectation)
         ++ [ indent 3 ")"
            ]
+
+
+exampleName : Test -> String
+exampleName test =
+    (test.assertion ++ " --> " ++ test.expectation)
+        |> String.Extra.replace "\n" " "
+        |> String.Extra.clean
+        |> String.Extra.ellipsis 40
+        |> String.Extra.surround "`"
+        |> escape
 
 
 toLetIns : List Function -> List String
