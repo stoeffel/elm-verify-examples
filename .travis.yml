@@ -24,6 +24,7 @@ before_install:
       cd ..;
     fi
   - npm install -g elm
+  - npm install -g elm-test
   - git clone https://github.com/NoRedInk/elm-ops-tooling
   - elm-ops-tooling/with_retry.rb elm-package install --yes
 
