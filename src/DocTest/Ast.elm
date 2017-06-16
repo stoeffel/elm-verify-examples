@@ -4,8 +4,8 @@ module DocTest.Ast exposing (..)
 type alias TestSuite =
     { imports : List String
     , tests : List Test
-    , functionName : Maybe String
-    , functions : List Function
+    , functionToTest : Maybe String
+    , helperFunctions : List Function
     }
 
 
@@ -16,7 +16,7 @@ type alias Test =
 
 
 type alias Function =
-    { used : Bool
+    { isUsed : Bool
     , name : String
     , value : String
     }
@@ -124,7 +124,7 @@ astToFunction rest ast =
             Just
                 { name = name
                 , value = value
-                , used =
+                , isUsed =
                     List.any
                         (\{ assertion, expectation } ->
                             String.contains name assertion

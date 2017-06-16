@@ -56,14 +56,14 @@ toDescribe index suite =
     in
     (startOfListOrNot index
         ++ "Test.describe \""
-        ++ (suite.functionName
+        ++ (suite.functionToTest
                 |> Maybe.map ((++) "#")
                 |> Maybe.withDefault ("Comment: " ++ toString (index + 1))
                 |> escape
            )
         ++ "\" <|"
     )
-        :: List.map (indent 1) (toLetIns suite.functions)
+        :: List.map (indent 1) (toLetIns suite.helperFunctions)
         ++ List.map (indent 1) renderedTests
         ++ [ indent 1 "]" ]
 
@@ -103,7 +103,7 @@ toTest index test =
 
 toLetIns : List Function -> List String
 toLetIns fns =
-    case List.filter .used fns of
+    case List.filter .isUsed fns of
         [] ->
             []
 

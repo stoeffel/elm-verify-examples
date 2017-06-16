@@ -51,8 +51,8 @@ astToTestSuite fnName ast =
         List.filter isImport ast
             |> List.map astToString
     , tests = tests
-    , functionName = Just fnName
-    , functions =
+    , functionToTest = Just fnName
+    , helperFunctions =
         ast
             |> List.filter isLocalFunction
             |> List.filterMap (astToFunction tests)
@@ -116,8 +116,8 @@ toIntermediateAst =
 toFunctionExpression : String -> IntermediateAst
 toFunctionExpression str =
     let
-        functionName : String
-        functionName =
+        functionToTest : String
+        functionToTest =
             str
                 |> Regex.find (AtMost 1) functionNameRegex
                 |> List.head
@@ -125,7 +125,7 @@ toFunctionExpression str =
                 |> Maybe.andThen identity
                 |> Maybe.withDefault "no function name given!"
     in
-    Func functionName str
+    Func functionToTest str
 
 
 intermediateAstToAst : List IntermediateAst -> List Ast
