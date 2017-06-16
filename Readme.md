@@ -3,6 +3,10 @@ elm-verify-examples [![Build Status](https://travis-ci.org/stoeffel/elm-verify-e
 
 > Verify examples in your docs.
 
+:information_source: This was formerly known as `elm-doc-test`.
+
+:warning: This is not a replacement for tests, this tool should be used for improving your documentation.
+
 
 Install
 -------
