@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "DocTest for elm",
-    "repository": "https://github.com/stoeffel/elm-doc-test.git",
+    "summary": "VerifyExamples for elm",
+    "repository": "https://github.com/stoeffel/elm-verify-examples.git",
     "license": "BSD3",
     "source-directories": [
         ".",

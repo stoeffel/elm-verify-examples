@@ -1,7 +1,7 @@
-port module DocTest exposing (..)
+port module VerifyExamples exposing (..)
 
-import DocTest.Compiler as Compiler
-import DocTest.Parser as Parser
+import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Parser as Parser
 import Json.Decode as Decode exposing (decodeValue, field, string, list, Value)
 import Platform
 import Task
@@ -77,7 +77,7 @@ port readFile : String -> Cmd msg
 port writeFile : ( String, String ) -> Cmd msg
 
 
-port generateModuleDoctest : (( String, String ) -> msg) -> Sub msg
+port generateModuleVerifyExamples : (( String, String ) -> msg) -> Sub msg
 
 
 
@@ -86,7 +86,7 @@ port generateModuleDoctest : (( String, String ) -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    generateModuleDoctest CompileModule
+    generateModuleVerifyExamples CompileModule
 
 
 

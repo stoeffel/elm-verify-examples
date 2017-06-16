@@ -26,11 +26,11 @@ running_mode_runners[RUNNING_MODE.RUN] = run;
 var running_mode_loaders = {};
 
 running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
-  var docTestConfig = helpers.loadDocTestConfig(options.configPath);
+  var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
-    config: docTestConfig,
+    config: verifyExamplesConfig,
     run: running_mode_runners[RUNNING_MODE.GENERATE],
     showWarnings: options.showWarnings,
     output: options.output,
@@ -59,7 +59,7 @@ running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
 // parse args
 function init(argv){
   var model = null;
-  var defaultConfigPath = path.join(process.cwd(), 'tests/elm-doc-test.json');
+  var defaultConfigPath = path.join(process.cwd(), 'tests/elm-verify-examples.json');
 
   var options = {
     showWarnings: true,
@@ -111,12 +111,12 @@ function generate(model, allTestsGenerated) {
 
   if (config.tests.length === 0){
     if (model.showWarnings) {
-      console.log('No tests listed! Modify your elm-doc-test.json file to include modules');
+      console.log('No tests listed! Modify your elm-verify-examples.json file to include modules');
     }
     return;
   }
 
-  var app = Elm.DocTest.worker(config);
+  var app = Elm.VerifyExamples.worker(config);
 
   app.ports.readFile.subscribe(function(test) {
     var pathToModule = path.join(
@@ -133,7 +133,7 @@ function generate(model, allTestsGenerated) {
         process.exit(-1);
         return;
       }
-      app.ports.generateModuleDoctest.send([test, data]);
+      app.ports.generateModuleVerifyExamples.send([test, data]);
     });
   });
 

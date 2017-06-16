@@ -1,4 +1,4 @@
-module DocTest.Ast exposing (..)
+module VerifyExamples.Ast exposing (..)
 
 
 type alias TestSuite =
