@@ -91,7 +91,7 @@ You can specify imports, if you want to use a module or a special test util.
 -}
 ```
 
-Running VerifyExampless
+Running VerifyExamples
 ----------------
 
 `elm-verify-examples` only converts your verify-exampless into elm-tests.
