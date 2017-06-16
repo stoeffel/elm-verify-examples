@@ -1,7 +1,8 @@
 elm-doc-test [![Build Status](https://travis-ci.org/stoeffel/elm-doc-test.svg?branch=master)](https://travis-ci.org/stoeffel/elm-doc-test)
 ============
 
-> Create doc test and run them with elm-test
+> Verify examples in your docs.
+
 
 Install
 -------
@@ -19,7 +20,7 @@ Setup
 $ touch tests/elm-doc-test.json
 ```
 
-`elm-doc-test.json` contains information on which files contain doc tests and where to find them.
+`elm-doc-test.json` contains information on which files contain verified examples and where to find them.
 
 ```json
 {
@@ -33,23 +34,31 @@ $ touch tests/elm-doc-test.json
 
 It's recommended to add `./tests/Doc` to your `.gitignore`.
 
-Writing DocTests
+Writing Verified Examples
 ----------------
 
-Tests start with four spaces!
+Verified examples look like normal code examples in doc-comments. \
+Code needs to be indented by 4 spaces.
+You can specify the expected result of an expression, by adding a comment `-->` (the `>` is important) and an expected expression.
 
 ```elm
 {-| returns the sum of two int.
 
+    -- You can write the expected result on the next line,
+
     add 41 1
     --> 42
 
+    -- or on the same line.
+
     add 3 3 --> 6
+
 -}
 add : Int -> Int -> Int
 add =
     (+)
 
+You can write examples on multiple lines.
 
 {-| reverses the list
 
@@ -71,17 +80,14 @@ rev =
     List.reverse
 ```
 
-You can specify imports for doc-test, if you want to use a module or a special test util.
+You can specify imports, if you want to use a module or a special test util.
 
 ```elm
-{-| returns some html
+{-|
+    import Dict
 
-    -- HtmlToString is only used for doc tests.
-    import HtmlToString exposing (htmlToString, nodeTypeToString)
-
-    header "World"
-        |> htmlToString
-    --> "<h1>Hello, World!</h1>"
+    myWeirdFunc (Dict.fromList [(1, "a"), (2, "b")]) [2, 1]
+    --> "ba"
 -}
 ```
 
