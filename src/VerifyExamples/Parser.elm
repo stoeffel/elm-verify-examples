@@ -1,9 +1,9 @@
 module VerifyExamples.Parser exposing (parse)
 
-import VerifyExamples.Ast exposing (..)
 import List.Extra
 import Regex exposing (HowMany(..), Regex)
 import String
+import VerifyExamples.Ast exposing (..)
 
 
 parse : String -> List TestSuite
@@ -56,7 +56,31 @@ astToTestSuite fnName ast =
         ast
             |> List.filter isLocalFunction
             |> List.filterMap (astToFunction tests)
+            |> usedByOtherHelperFunctions
     }
+
+
+usedByOtherHelperFunctions : List Function -> List Function
+usedByOtherHelperFunctions fns =
+    let
+        ( used, probablyNotUsed ) =
+            List.partition .isUsed fns
+
+        isUsedAfterAll f =
+            List.any (String.contains f.name << .value) used
+
+        ( fnsUsedAfterAll, notUsed ) =
+            List.partition isUsedAfterAll probablyNotUsed
+    in
+    case fnsUsedAfterAll of
+        [] ->
+            fns
+
+        xs ->
+            xs
+                |> List.map (\x -> { x | isUsed = True })
+                |> List.append (used ++ notUsed)
+                |> usedByOtherHelperFunctions
 
 
 parseComments : String -> List ( String, String )
