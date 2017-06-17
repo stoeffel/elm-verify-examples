@@ -121,6 +121,23 @@ You can specify imports, if you want to use a module or a special test util.
 -}
 ```
 
+### Intermediate Definitions
+
+You can use intermediate definitions in your example.
+:information: Unused functions don't get added to the test. This is useful if you wanna add incomplete examples to your docs.
+:warning: Intermediate definitions need a type signature!
+
+```elm
+{-|
+    isEven : Int -> Bool
+    isEven n =
+        n % 2 == 0
+
+    List.Extra.filterNot isEven [1,2,3,4] --> [1,3]
+-}
+filterNot : (a -> Bool) -> List a -> List a
+```
+
 Verify Examples
 ----------------
 
