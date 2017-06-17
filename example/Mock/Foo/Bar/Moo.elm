@@ -5,7 +5,7 @@ module Mock.Foo.Bar.Moo exposing (..)
 
 ## Foo bar
 
-@docs foo, bar, moo
+@docs foo, bar, moo, test
 
 -}
 
@@ -45,3 +45,19 @@ bar a b c =
 moo : (a -> a -> a) -> a -> a
 moo fn x =
     fn x x
+
+
+{-|
+
+    findMe : Int
+    findMe = 42
+
+    minimizeMe : Int -> Int
+    minimizeMe n = abs (n-findMe)
+
+    test (minimizeMe 3) 39 --> True
+
+-}
+test : Int -> Int -> Bool
+test a b =
+    a == b
