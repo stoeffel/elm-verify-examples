@@ -1,9 +1,9 @@
 module VerifyExamples.Compiler exposing (compile)
 
-import VerifyExamples.Ast exposing (..)
 import Regex exposing (HowMany(..), regex)
 import String
 import String.Extra
+import VerifyExamples.Ast exposing (..)
 
 
 compile : String -> List TestSuite -> String
@@ -108,9 +108,9 @@ toLetIns fns =
         [] ->
             []
 
-        _ ->
+        usedFns ->
             indent 0 "let"
-                :: List.concatMap (List.map (indent 1) << String.lines << .value) fns
+                :: List.concatMap (List.map (indent 1) << String.lines << .value) usedFns
                 ++ [ indent 0 "in"
                    ]
 
