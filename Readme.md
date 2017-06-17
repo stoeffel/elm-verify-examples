@@ -61,9 +61,32 @@ You can specify the expected result of an expression, by adding a comment `-->` 
 add : Int -> Int -> Int
 add =
     (+)
+```
+
+:warning: **It's important that each example is separated by a newline.**
+
+```elm
+{-| This will break!
+
+    add 1 2 --> 3
+    add 1 3 --> 4
+-}
+```
+
+```elm
+{-| This works!
+
+    add 1 2 --> 3
+
+    add 1 3 --> 4
+-}
+```
+
+### Multiline Examples
 
 You can write examples on multiple lines.
 
+```elm
 {-| reverses the list
 
     rev
@@ -83,6 +106,9 @@ rev : List a -> List a
 rev =
     List.reverse
 ```
+
+
+### Imports
 
 You can specify imports, if you want to use a module or a special test util.
 
