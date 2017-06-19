@@ -46,6 +46,7 @@ spec moduleName suites =
     , "spec ="
     , indent 1 "Test.describe \"" ++ escape moduleName ++ "\" <|"
     ]
+        ++ [ indent 1 "[" ]
         ++ List.map (indent 2) renderedSuites
         ++ [ indent 1 "]" ]
 
@@ -57,7 +58,7 @@ toDescribe index suite =
             List.indexedMap toTest suite.tests
                 |> List.concat
     in
-    (startOfListOrNot index
+    (addCommaIfNotFirstItem index
         ++ "Test.describe \""
         ++ (suite.functionToTest
                 |> Maybe.map ((++) "#")
@@ -67,6 +68,7 @@ toDescribe index suite =
         ++ "\" <|"
     )
         :: List.map (indent 1) (toLetIns suite.helperFunctions)
+        ++ [ indent 1 "[" ]
         ++ List.map (indent 1) renderedTests
         ++ [ indent 1 "]" ]
 
@@ -74,7 +76,7 @@ toDescribe index suite =
 toTest : Int -> Test -> List String
 toTest index test =
     [ indent 0
-        (startOfListOrNot index
+        (addCommaIfNotFirstItem index
             ++ "Test.test \""
             ++ "Example: "
             ++ toString (index + 1)
@@ -118,10 +120,10 @@ toLetIns fns =
                    ]
 
 
-startOfListOrNot : Int -> String
-startOfListOrNot index =
+addCommaIfNotFirstItem : Int -> String
+addCommaIfNotFirstItem index =
     if index == 0 then
-        "[ "
+        ""
     else
         ", "
 
