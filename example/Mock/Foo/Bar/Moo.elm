@@ -15,6 +15,10 @@ module Mock.Foo.Bar.Moo exposing (..)
     foo "a" "b" "c"
     --> "bca"
 
+    --> 2
+
+    --> 2
+
     foo "a" "b" "!" --> "b!a"
 
 -}
