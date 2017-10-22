@@ -25,10 +25,6 @@ astToTestSuite fnName ast =
         toTests : List Test -> List Ast -> List Test
         toTests acc xs =
             case xs of
-                -- Drop assertions without an expectation
-                (Assertion x) :: (Assertion y) :: rest ->
-                    toTests acc (Assertion y :: rest)
-
                 (Assertion x) :: (Expectation y) :: rest ->
                     toTests
                         ({ assertion = x
@@ -38,7 +34,11 @@ astToTestSuite fnName ast =
                         )
                         rest
 
-                _ ->
+                -- drop items until a valid sequence of items is found
+                _ :: rest ->
+                    toTests acc rest
+
+                [] ->
                     acc
 
         tests =
