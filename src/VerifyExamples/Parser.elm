@@ -222,7 +222,7 @@ functionNameRegex =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "({-[^]*?-})\n([^\n]*)\\s[:=]"
+    Regex.regex "({-[^]*?-})\x0D?\n([^\x0D\n]*)\\s[:=]"
 
 
 assertionRegex : Regex
