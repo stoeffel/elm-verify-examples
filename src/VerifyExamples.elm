@@ -1,10 +1,10 @@
 port module VerifyExamples exposing (..)
 
-import VerifyExamples.Compiler as Compiler
-import VerifyExamples.Parser as Parser
-import Json.Decode as Decode exposing (decodeValue, field, string, list, Value)
+import Json.Decode as Decode exposing (Value, decodeValue, field, list, string)
 import Platform
 import Task
+import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Parser as Parser
 
 
 main : Program Value Model Msg
@@ -60,11 +60,15 @@ update msg model =
 
         CompileModule ( moduleName, fileText ) ->
             let
-                generatedTestFileText =
+                generatedTests =
                     Parser.parse fileText
-                        |> Compiler.compile moduleName
+                        |> List.concatMap (Compiler.compile moduleName)
             in
-                model ! [ writeFile ( moduleName, generatedTestFileText ) ]
+            ( model
+            , generatedTests
+                |> List.map writeFile
+                |> Cmd.batch
+            )
 
 
 
