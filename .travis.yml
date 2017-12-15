@@ -32,7 +32,7 @@ install:
   - npm install
 
 script:
-  - npm test
+  - $TRAVIS_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 npm test
 
 notifications:
   email: false
