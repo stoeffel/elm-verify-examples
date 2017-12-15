@@ -3,7 +3,9 @@ module VerifyExamples.Compiler exposing (compile)
 import Regex exposing (HowMany(..), regex)
 import String
 import String.Extra
-import VerifyExamples.Ast exposing (..)
+import VerifyExamples.Function exposing (Function)
+import VerifyExamples.Test exposing (Test)
+import VerifyExamples.TestSuite exposing (TestSuite)
 
 
 compile : String -> List TestSuite -> String

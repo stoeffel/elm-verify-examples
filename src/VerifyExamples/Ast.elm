@@ -1,43 +1,16 @@
-module VerifyExamples.Ast exposing (..)
+module VerifyExamples.Ast
+    exposing
+        ( Ast(..)
+        , fromIntermediateAst
+        , isAssertion
+        , isExpectiation
+        , isImport
+        , isLocalFunction
+        , isType
+        , toString
+        )
 
-
-type alias TestSuite =
-    { imports : List String
-    , types : List String
-    , tests : List Test
-    , functionToTest : Maybe String
-    , helperFunctions : List Function
-    }
-
-
-type alias Test =
-    { assertion : String
-    , expectation : String
-    }
-
-
-type alias Function =
-    { isUsed : Bool
-    , name : String
-    , value : String
-    }
-
-
-type IntermediateAst
-    = MaybeExpression String
-    | Expression Prefix String
-    | Func Name String
-    | NewLine
-
-
-type alias Name =
-    String
-
-
-type Prefix
-    = ArrowPrefix
-    | ImportPrefix
-    | TypePrefix
+import VerifyExamples.IntermediateAst as IAst exposing (IntermediateAst)
 
 
 type Ast
@@ -98,8 +71,8 @@ isLocalFunction x =
             False
 
 
-astToString : Ast -> String
-astToString ast =
+toString : Ast -> String
+toString ast =
     case ast of
         Assertion str ->
             str
@@ -117,36 +90,32 @@ astToString ast =
             str
 
 
-intermediateToString : IntermediateAst -> String
-intermediateToString ast =
-    case ast of
-        MaybeExpression str ->
-            str
-
-        Expression _ str ->
-            str
-
-        Func _ str ->
-            str
-
-        NewLine ->
-            "\n"
+fromIntermediateAst : List IntermediateAst -> List Ast
+fromIntermediateAst =
+    List.filterMap groupToAst << IAst.group
 
 
-astToFunction : List Test -> Ast -> Maybe Function
-astToFunction rest ast =
-    case ast of
-        LocalFunction name value ->
-            { name = name
-            , value = value
-            , isUsed =
-                List.any
-                    (\{ assertion, expectation } ->
-                        String.contains name assertion
-                            || String.contains name expectation
-                    )
-                    rest
-            }
+groupToAst : List IntermediateAst -> Maybe Ast
+groupToAst xs =
+    case xs of
+        (IAst.MaybeExpression x) :: rest ->
+            Assertion (String.join "\n" <| x :: List.map IAst.toString rest)
+                |> Just
+
+        (IAst.Expression IAst.ArrowPrefix x) :: rest ->
+            Expectation (String.join "\n" <| x :: List.map IAst.toString rest)
+                |> Just
+
+        (IAst.Expression IAst.ImportPrefix x) :: rest ->
+            Import (String.join "\n" <| x :: List.map IAst.toString rest)
+                |> Just
+
+        (IAst.Expression IAst.TypePrefix x) :: rest ->
+            Type (String.join "\n" <| x :: List.map IAst.toString rest)
+                |> Just
+
+        (IAst.Func name x) :: rest ->
+            LocalFunction name (String.join "\n" <| x :: List.map IAst.toString rest)
                 |> Just
 
         _ ->
