@@ -140,10 +140,10 @@ filterNot : (a -> Bool) -> List a -> List a
 
 ### Types in Examples
 
-You can define uniontypes and records in your examples.
+You can define union types and type aliases in your examples.
 
 ```elm
-{-|
+{-| With a union type in the example.
     type Animal
         = Dog
         | Cat
@@ -154,6 +154,32 @@ You can define uniontypes and records in your examples.
 double : a -> (a, a)
 double a =
     (a, a)
+```
+
+```elm
+{-| With a type alias in the example.
+
+    customTypeAlias defaultUser "?"
+    --> "?Luke"
+
+    type alias User =
+        { id: Int -- ID
+        , name: String
+        }
+
+    defaultUser : User
+    defaultUser =
+        { id = 1
+        , name = "Luke"
+        }
+
+    customTypeAlias defaultUser "_"
+    --> "_Luke"
+
+-}
+customTypeAlias : { a | name : String } -> String -> String
+customTypeAlias { name } prefix =
+    prefix ++ name
 ```
 
 Verify Examples
