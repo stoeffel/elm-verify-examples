@@ -3,6 +3,7 @@ module VerifyExamples.Compiler exposing (compile)
 import Regex exposing (HowMany(..), regex)
 import String
 import String.Extra
+import String.Util exposing (escape, indent, unlines)
 import VerifyExamples.Function exposing (Function)
 import VerifyExamples.Test exposing (Test)
 import VerifyExamples.TestSuite exposing (TestSuite)
@@ -48,7 +49,7 @@ compile moduleName suite =
                     |> List.indexedMap (compileTest info)
                     |> List.concat
                 ]
-                |> String.join "\n"
+                |> unlines
           )
         ]
 
@@ -65,7 +66,7 @@ testName moduleName functionToTest index =
 compileTestPerFunction : Info -> Int -> Test -> ( String, String )
 compileTestPerFunction info index test =
     ( info.testName
-    , String.join "\n" <|
+    , unlines <|
         List.concat
             [ moduleHeader info
             , info.types
@@ -135,17 +136,3 @@ exampleName test =
         |> String.Extra.ellipsis 40
         |> String.Extra.surround "`"
         |> escape
-
-
-indent : Int -> String -> String
-indent count str =
-    List.repeat (count * 4) " "
-        ++ [ str ]
-        |> String.join ""
-
-
-escape : String -> String
-escape =
-    Regex.replace All (regex "\\\\") (\_ -> "\\\\")
-        >> Regex.replace All (regex "\\\"") (\_ -> "\\\"")
-        >> Regex.replace All (regex "\\s\\s+") (\_ -> " ")
