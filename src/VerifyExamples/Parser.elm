@@ -50,6 +50,9 @@ astToTestSuite fnName ast =
     { imports =
         List.filter isImport ast
             |> List.map astToString
+    , types =
+        List.filter isType ast
+            |> List.map astToString
     , tests = tests
     , functionToTest = Just fnName
     , helperFunctions =
@@ -131,6 +134,7 @@ toIntermediateAst =
     oneOf
         [ makeSyntaxRegex newLineRegex (\_ -> NewLine)
         , makeSyntaxRegex importRegex (Expression ImportPrefix)
+        , makeSyntaxRegex typeRegex (Expression TypePrefix)
         , makeSyntaxRegex expectationRegex (Expression ArrowPrefix)
         , makeSyntaxRegex localFunctionRegex toFunctionExpression
         , makeSyntaxRegex assertionRegex MaybeExpression
@@ -168,6 +172,10 @@ intermediateAstToAst xs =
 
                 (Expression ImportPrefix x) :: rest ->
                     Import (String.join "\n" <| x :: List.map intermediateToString rest)
+                        |> Just
+
+                (Expression TypePrefix x) :: rest ->
+                    Type (String.join "\n" <| x :: List.map intermediateToString rest)
                         |> Just
 
                 (Func name x) :: rest ->
@@ -213,6 +221,11 @@ newLineRegex =
 importRegex : Regex
 importRegex =
     Regex.regex "^\\s{4}(import\\s.*)"
+
+
+typeRegex : Regex
+typeRegex =
+    Regex.regex "^\\s{4}(type\\s.*)"
 
 
 functionNameRegex : Regex

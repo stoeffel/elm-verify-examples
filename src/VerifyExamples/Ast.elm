@@ -3,6 +3,7 @@ module VerifyExamples.Ast exposing (..)
 
 type alias TestSuite =
     { imports : List String
+    , types : List String
     , tests : List Test
     , functionToTest : Maybe String
     , helperFunctions : List Function
@@ -36,6 +37,7 @@ type alias Name =
 type Prefix
     = ArrowPrefix
     | ImportPrefix
+    | TypePrefix
 
 
 type Ast
@@ -43,12 +45,23 @@ type Ast
     | Expectation String
     | Import String
     | LocalFunction String String
+    | Type String
 
 
 isImport : Ast -> Bool
 isImport x =
     case x of
         Import _ ->
+            True
+
+        _ ->
+            False
+
+
+isType : Ast -> Bool
+isType x =
+    case x of
+        Type _ ->
             True
 
         _ ->
@@ -95,6 +108,9 @@ astToString ast =
             str
 
         Import str ->
+            str
+
+        Type str ->
             str
 
         LocalFunction _ str ->

@@ -143,3 +143,40 @@ rev =
 quux : Int -> Int -> Int
 quux n m =
     n + m
+
+
+{-| with a custom type in the example
+
+    type Foo
+        = A
+        | B
+
+    customType B 1
+    --> (B, 1)
+
+-}
+customType : a -> Int -> ( a, Int )
+customType n m =
+    ( n, m )
+
+
+{-| with a custom type alias in the example
+
+    type alias User =
+       { id: Int
+       , name: String
+       }
+
+    defaultUser : User
+    defaultUser =
+        { id = 1
+        , name = "Luke"
+        }
+
+    customTypeAlias defaultUser "_"
+    --> "_Luke"
+
+-}
+customTypeAlias : { a | name : String } -> String -> String
+customTypeAlias { name } prefix =
+    prefix ++ name
