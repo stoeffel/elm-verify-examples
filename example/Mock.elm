@@ -162,10 +162,13 @@ customType n m =
 
 {-| with a custom type alias in the example
 
+    customTypeAlias defaultUser "?"
+    --> "?Luke"
+
     type alias User =
-       { id: Int
-       , name: String
-       }
+        { id: Int -- ID
+        , name: String
+        }
 
     defaultUser : User
     defaultUser =

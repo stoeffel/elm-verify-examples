@@ -138,6 +138,24 @@ You can use intermediate definitions in your example.
 filterNot : (a -> Bool) -> List a -> List a
 ```
 
+### Types in Examples
+
+You can define uniontypes and records in your examples.
+
+```elm
+{-|
+    type Animal
+        = Dog
+        | Cat
+
+    double Dog
+    --> (Dog, Dog)
+-}
+double : a -> (a, a)
+double a =
+    (a, a)
+```
+
 Verify Examples
 ----------------
 
