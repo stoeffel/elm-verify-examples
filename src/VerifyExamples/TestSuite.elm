@@ -1,4 +1,4 @@
-module VerifyExamples.TestSuite exposing (TestSuite, fromAst)
+module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group)
 
 import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Function as Function exposing (Function)
@@ -34,3 +34,37 @@ fromAst fnName ast =
             |> List.filterMap (Function.fromAst tests)
             |> Function.onlyUsed
     }
+
+
+group : List TestSuite -> List TestSuite
+group suites =
+    let
+        ( hasTypes, rest ) =
+            List.partition hasTypesOrDefs suites
+    in
+    List.foldr combine empty rest :: hasTypes
+
+
+combine : TestSuite -> TestSuite -> TestSuite
+combine suite acc =
+    { imports = suite.imports ++ acc.imports
+    , types = suite.types ++ acc.types
+    , tests = suite.tests ++ acc.tests
+    , functionToTest = suite.functionToTest
+    , helperFunctions = suite.helperFunctions ++ acc.helperFunctions
+    }
+
+
+empty : TestSuite
+empty =
+    { imports = []
+    , types = []
+    , tests = []
+    , functionToTest = Nothing
+    , helperFunctions = []
+    }
+
+
+hasTypesOrDefs : TestSuite -> Bool
+hasTypesOrDefs { types, helperFunctions } =
+    not (List.isEmpty types) || not (List.isEmpty helperFunctions)

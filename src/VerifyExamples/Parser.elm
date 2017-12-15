@@ -21,6 +21,7 @@ parse str =
                     |> Ast.fromIntermediateAst
                     |> TestSuite.fromAst fnName
             )
+        |> TestSuite.group
 
 
 parseComments : String -> List ( String, String )
