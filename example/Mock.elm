@@ -4,10 +4,6 @@ module Mock exposing (..)
 
 @docs add, sum, bar, rev, IsItCool, coolFunc
 
-    -- These imports are only used in verify-examples
-    import Dict exposing (Dict, fromList)
-    import String exposing (join)
-
 -}
 
 import Dict exposing (Dict, fromList)
@@ -26,22 +22,6 @@ add =
     (+)
 
 
-{-|
-
-    inc $ inc 1 --> 3
-
-    add : Int -> Int -> Int
-    add = (+)
-
-    inc : Int -> Int
-    inc x = add 1 x
-
--}
-($) : (a -> b) -> a -> b
-($) f x =
-    f x
-
-
 {-| Cool or not
 -}
 type IsItCool
@@ -52,6 +32,7 @@ type IsItCool
 {-| This is my cool function.
 
     -- This is how you use it in a view.
+
 
     view : Html msg
     view =
@@ -113,6 +94,8 @@ bar a b =
 
 
 {-| reverses the list
+
+    import String exposing (join)
 
     rev
         [ 41

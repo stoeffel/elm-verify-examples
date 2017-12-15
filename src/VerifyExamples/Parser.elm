@@ -29,7 +29,14 @@ parseComments str =
         nameAndComment matches =
             case matches of
                 comment :: name :: _ ->
-                    Just ( Maybe.withDefault "" comment, Maybe.withDefault "" name )
+                    Just
+                        ( comment
+                            |> Maybe.withDefault ""
+                        , name
+                            |> Maybe.map (String.split " :")
+                            |> Maybe.andThen List.head
+                            |> Maybe.withDefault ""
+                        )
 
                 _ ->
                     Nothing
