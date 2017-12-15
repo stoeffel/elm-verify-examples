@@ -65,9 +65,7 @@ update msg model =
                         |> List.concatMap (Compiler.compile moduleName)
             in
             ( model
-            , generatedTests
-                |> List.map writeFile
-                |> Cmd.batch
+            , writeFiles generatedTests
             )
 
 
@@ -78,7 +76,7 @@ update msg model =
 port readFile : String -> Cmd msg
 
 
-port writeFile : ( String, String ) -> Cmd msg
+port writeFiles : List ( String, String ) -> Cmd msg
 
 
 port generateModuleVerifyExamples : (( String, String ) -> msg) -> Sub msg

@@ -31,7 +31,7 @@ compile moduleName suite =
             , testName = moduleName
             }
     in
-    if List.length suite.types > 0 then
+    if List.length suite.types > 0 || List.length suite.helperFunctions > 0 then
         suite.tests
             |> List.indexedMap
                 (\index ->

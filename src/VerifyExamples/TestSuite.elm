@@ -39,10 +39,11 @@ fromAst fnName ast =
 group : List TestSuite -> List TestSuite
 group suites =
     let
-        ( hasTypes, rest ) =
-            List.partition hasTypesOrDefs suites
+        ( rest, isSpecial ) =
+            List.partition notSpecial suites
     in
-    List.foldr combine empty rest :: hasTypes
+    List.foldr combine empty rest
+        :: isSpecial
 
 
 combine : TestSuite -> TestSuite -> TestSuite
@@ -65,6 +66,6 @@ empty =
     }
 
 
-hasTypesOrDefs : TestSuite -> Bool
-hasTypesOrDefs { types, helperFunctions } =
-    not (List.isEmpty types) || not (List.isEmpty helperFunctions)
+notSpecial : TestSuite -> Bool
+notSpecial { types, helperFunctions } =
+    List.isEmpty types && List.isEmpty helperFunctions

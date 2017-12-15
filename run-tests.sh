@@ -1,5 +1,5 @@
 #! /bin/bash -ex
-TEST_COUNT=14
+TEST_COUNT=21
 
 elm-make src/VerifyExamples.elm --output bin/elm.js
 pushd example
