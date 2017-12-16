@@ -117,11 +117,11 @@ spec { testName } test index =
     , indent 4 "("
     ]
         ++ (List.map (indent 4) <| String.lines test.assertion)
-        ++ [ indent 3 ")"
-           , indent 3 "("
+        ++ [ indent 4 ")"
+           , indent 4 "("
            ]
         ++ (List.map (indent 4) <| String.lines test.expectation)
-        ++ [ indent 3 ")"
+        ++ [ indent 4 ")"
            ]
 
 
