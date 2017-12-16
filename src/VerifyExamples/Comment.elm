@@ -11,22 +11,15 @@ type alias Comment =
 
 parse : String -> List Comment
 parse =
-    List.filterMap (nameAndComment << .submatches)
+    List.filterMap (toComment << .submatches)
         << Regex.find All commentRegex
 
 
-nameAndComment : List (Maybe String) -> Maybe Comment
-nameAndComment matches =
+toComment : List (Maybe String) -> Maybe Comment
+toComment matches =
     case matches of
         (Just comment) :: (Just functionName) :: _ ->
-            Just
-                { comment = comment
-                , functionName =
-                    functionName
-                        |> String.split " :"
-                        |> List.head
-                        |> Maybe.withDefault ""
-                }
+            Just { comment = comment, functionName = functionName }
 
         _ ->
             Nothing
@@ -34,4 +27,4 @@ nameAndComment matches =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "({-[^]*?-})\x0D?\n([^\x0D\n]*)\\s[:=]"
+    Regex.regex "({-[^]*?-})\x0D?\n([^\x0D\n(\\s:)(\\s=))]*)\\s[:=]"
