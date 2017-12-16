@@ -6,13 +6,13 @@ import String.Extra
 import String.Util exposing (escape, indent, unlines)
 import VerifyExamples.Function exposing (Function)
 import VerifyExamples.Test exposing (Test)
-import VerifyExamples.TestSuite exposing (TestSuite)
+import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
 type alias Info =
     { imports : List String
     , types : List String
-    , functionToTest : Maybe String
+    , functionToTest : String
     , helperFunctions : List Function
     , moduleName : String
     , testName : String
@@ -31,17 +31,7 @@ compile moduleName suite =
             , testName = moduleName
             }
     in
-    if List.length suite.types > 0 || List.length suite.helperFunctions > 0 then
-        suite.tests
-            |> List.indexedMap
-                (\index ->
-                    compileTestPerFunction
-                        { info
-                            | testName = testName moduleName suite.functionToTest index
-                        }
-                        index
-                )
-    else
+    if TestSuite.notSpecial suite then
         [ ( moduleName
           , List.concat
                 [ moduleHeader info
@@ -52,19 +42,26 @@ compile moduleName suite =
                 |> unlines
           )
         ]
+    else
+        List.indexedMap (compileTestPerFunction << withExtendedTestName info) suite.tests
 
 
-testName : String -> Maybe String -> Int -> String
-testName moduleName functionToTest index =
-    moduleName
-        ++ ".Function_"
-        ++ Maybe.withDefault "" functionToTest
-        ++ "_Example"
-        ++ toString index
+withExtendedTestName : Info -> Int -> ( Int, Info )
+withExtendedTestName info index =
+    ( index
+    , { info
+        | testName =
+            info.moduleName
+                ++ ".Function_"
+                ++ info.functionToTest
+                ++ "_Example"
+                ++ toString index
+      }
+    )
 
 
-compileTestPerFunction : Info -> Int -> Test -> ( String, String )
-compileTestPerFunction info index test =
+compileTestPerFunction : ( Int, Info ) -> Test -> ( String, String )
+compileTestPerFunction ( index, info ) test =
     ( info.testName
     , unlines <|
         List.concat

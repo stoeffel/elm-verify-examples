@@ -10,11 +10,10 @@ type alias Test =
 
 
 testsFromAst : List Ast -> List Test
-testsFromAst ast =
-    ast
-        |> List.filter Ast.isTest
-        |> toTests []
-        |> List.reverse
+testsFromAst =
+    List.filter Ast.isTest
+        >> toTests []
+        >> List.reverse
 
 
 toTests : List Test -> List Ast -> List Test

@@ -11,40 +11,41 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
 parse : String -> List TestSuite
-parse str =
-    str
-        |> parseComments
-        |> List.map
-            (\( comment, fnName ) ->
-                comment
-                    |> IntermediateAst.fromString
-                    |> Ast.fromIntermediateAst
-                    |> TestSuite.fromAst fnName
-            )
-        |> TestSuite.group
+parse =
+    parseComments
+        >> List.map toTestSuite
+        >> TestSuite.group
 
 
-parseComments : String -> List ( String, String )
-parseComments str =
-    let
-        nameAndComment matches =
-            case matches of
-                comment :: name :: _ ->
-                    Just
-                        ( comment
-                            |> Maybe.withDefault ""
-                        , name
-                            |> Maybe.map (String.split " :")
-                            |> Maybe.andThen List.head
-                            |> Maybe.withDefault ""
-                        )
+toTestSuite : { comment : String, functionName : String } -> TestSuite
+toTestSuite { comment, functionName } =
+    comment
+        |> IntermediateAst.fromString
+        |> Ast.fromIntermediateAst
+        |> TestSuite.fromAst functionName
 
-                _ ->
-                    Nothing
-    in
-    Regex.find All commentRegex str
-        |> List.map .submatches
-        |> List.filterMap nameAndComment
+
+parseComments : String -> List { comment : String, functionName : String }
+parseComments =
+    List.filterMap (nameAndComment << .submatches)
+        << Regex.find All commentRegex
+
+
+nameAndComment : List (Maybe String) -> Maybe { comment : String, functionName : String }
+nameAndComment matches =
+    case matches of
+        (Just comment) :: (Just functionName) :: _ ->
+            Just
+                { comment = comment
+                , functionName =
+                    functionName
+                        |> String.split " :"
+                        |> List.head
+                        |> Maybe.withDefault ""
+                }
+
+        _ ->
+            Nothing
 
 
 commentRegex : Regex

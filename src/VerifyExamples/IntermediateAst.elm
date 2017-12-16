@@ -42,30 +42,26 @@ toString ast =
 
 
 fromString : String -> List IntermediateAst
-fromString parsedComment =
-    commentLines parsedComment
-        |> List.filterMap toIntermediateAst
+fromString =
+    List.filterMap toIntermediateAst << commentLines
 
 
 commentLines : String -> List String
-commentLines str =
-    str
-        |> String.lines
-        |> List.concatMap splitOneLiners
+commentLines =
+    List.concatMap splitOneLiners << String.lines
 
 
 splitOneLiners : String -> List String
-splitOneLiners str =
-    let
-        breakIntoTwoLines a =
-            if Regex.contains expectationRegex a then
-                a
-            else
-                Regex.replace Regex.All arrowRegex (\_ -> "\n    --> ") a
-    in
-    str
-        |> breakIntoTwoLines
-        |> String.lines
+splitOneLiners =
+    String.lines << breakIntoTwoLines
+
+
+breakIntoTwoLines : String -> String
+breakIntoTwoLines a =
+    if Regex.contains expectationRegex a then
+        a
+    else
+        Regex.replace Regex.All arrowRegex (\_ -> "\n    --> ") a
 
 
 toIntermediateAst : String -> Maybe IntermediateAst
@@ -149,8 +145,7 @@ oneOf fs str =
 makeSyntaxRegex : Regex -> (String -> a) -> (String -> Maybe a)
 makeSyntaxRegex regex f str =
     Regex.find (AtMost 1) regex str
-        |> List.map .submatches
-        |> List.concat
+        |> List.concatMap .submatches
         |> List.filterMap identity
         |> List.head
         |> Maybe.map f

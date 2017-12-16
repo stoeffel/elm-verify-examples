@@ -1,4 +1,4 @@
-module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group)
+module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial)
 
 import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Function as Function exposing (Function)
@@ -9,7 +9,7 @@ type alias TestSuite =
     { imports : List String
     , types : List String
     , tests : List Test
-    , functionToTest : Maybe String
+    , functionToTest : String
     , helperFunctions : List Function
     }
 
@@ -17,18 +17,18 @@ type alias TestSuite =
 fromAst : String -> List Ast -> TestSuite
 fromAst fnName ast =
     let
-        groupped =
+        { imports, types, localFunctions } =
             Ast.group ast
 
         tests =
             Test.testsFromAst ast
     in
-    { imports = List.map Ast.toString groupped.imports
-    , types = List.map Ast.toString groupped.types
+    { imports = List.map Ast.toString imports
+    , types = List.map Ast.toString types
     , tests = tests
-    , functionToTest = Just fnName
+    , functionToTest = fnName
     , helperFunctions =
-        groupped.localFunctions
+        localFunctions
             |> List.filterMap (Function.fromAst tests)
             |> Function.onlyUsed
     }
@@ -40,12 +40,12 @@ group suites =
         ( rest, isSpecial ) =
             List.partition notSpecial suites
     in
-    List.foldr combine empty rest
+    List.foldr concat empty rest
         :: isSpecial
 
 
-combine : TestSuite -> TestSuite -> TestSuite
-combine suite acc =
+concat : TestSuite -> TestSuite -> TestSuite
+concat suite acc =
     { imports = suite.imports ++ acc.imports
     , types = suite.types ++ acc.types
     , tests = suite.tests ++ acc.tests
@@ -59,7 +59,7 @@ empty =
     { imports = []
     , types = []
     , tests = []
-    , functionToTest = Nothing
+    , functionToTest = ""
     , helperFunctions = []
     }
 
