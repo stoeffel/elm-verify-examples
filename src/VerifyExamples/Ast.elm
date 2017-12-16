@@ -2,11 +2,8 @@ module VerifyExamples.Ast
     exposing
         ( Ast(..)
         , fromIntermediateAst
-        , isAssertion
-        , isExpectiation
-        , isImport
-        , isLocalFunction
-        , isType
+        , group
+        , isTest
         , toString
         )
 
@@ -21,33 +18,22 @@ type Ast
     | Type String
 
 
-isImport : Ast -> Bool
-isImport x =
-    case x of
-        Import _ ->
-            True
-
-        _ ->
-            False
-
-
-isType : Ast -> Bool
-isType x =
-    case x of
-        Type _ ->
-            True
-
-        _ ->
-            False
-
-
-isAssertion : Ast -> Bool
-isAssertion x =
+isTest : Ast -> Bool
+isTest x =
     case x of
         Assertion _ ->
             True
 
-        _ ->
+        Expectation _ ->
+            True
+
+        Import _ ->
+            False
+
+        LocalFunction _ _ ->
+            False
+
+        Type _ ->
             False
 
 
@@ -61,14 +47,34 @@ isExpectiation x =
             False
 
 
-isLocalFunction : Ast -> Bool
-isLocalFunction x =
-    case x of
-        LocalFunction _ _ ->
-            True
+group : List Ast -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+group ast =
+    groupHelp ast { localFunctions = [], imports = [], types = [] }
 
-        _ ->
-            False
+
+groupHelp :
+    List Ast
+    -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+    -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+groupHelp ast acc =
+    case ast of
+        [] ->
+            acc
+
+        (Assertion _) :: rest ->
+            groupHelp rest acc
+
+        (Expectation str) :: rest ->
+            groupHelp rest acc
+
+        (Import str) :: rest ->
+            groupHelp rest { acc | imports = acc.imports ++ [ Import str ] }
+
+        (Type str) :: rest ->
+            groupHelp rest { acc | types = acc.types ++ [ Type str ] }
+
+        (LocalFunction name str) :: rest ->
+            groupHelp rest { acc | localFunctions = acc.localFunctions ++ [ LocalFunction name str ] }
 
 
 toString : Ast -> String
@@ -114,7 +120,7 @@ groupToAst xs =
             Type (String.join "\n" <| x :: List.map IAst.toString rest)
                 |> Just
 
-        (IAst.Func name x) :: rest ->
+        (IAst.Function name x) :: rest ->
             LocalFunction name (String.join "\n" <| x :: List.map IAst.toString rest)
                 |> Just
 

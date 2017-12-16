@@ -12,7 +12,7 @@ type alias Test =
 testsFromAst : List Ast -> List Test
 testsFromAst ast =
     ast
-        |> List.filter (\a -> Ast.isAssertion a || Ast.isExpectiation a)
+        |> List.filter Ast.isTest
         |> toTests []
         |> List.reverse
 

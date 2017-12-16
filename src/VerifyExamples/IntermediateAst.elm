@@ -15,7 +15,7 @@ import String
 type IntermediateAst
     = MaybeExpression String
     | Expression Prefix String
-    | Func String String
+    | Function String String
     | NewLine
 
 
@@ -34,7 +34,7 @@ toString ast =
         Expression _ str ->
             str
 
-        Func _ str ->
+        Function _ str ->
             str
 
         NewLine ->
@@ -82,17 +82,13 @@ toIntermediateAst =
 
 toFunctionExpression : String -> IntermediateAst
 toFunctionExpression str =
-    let
-        functionToTest : String
-        functionToTest =
-            str
-                |> Regex.find (AtMost 1) functionNameRegex
-                |> List.head
-                |> Maybe.andThen (.submatches >> List.head)
-                |> Maybe.andThen identity
-                |> Maybe.withDefault "no function name given!"
-    in
-    Func functionToTest str
+    str
+        |> Regex.find (AtMost 1) functionNameRegex
+        |> List.head
+        |> Maybe.andThen (.submatches >> List.head)
+        |> Maybe.andThen identity
+        |> Maybe.withDefault "no function name given!"
+        |> flip Function str
 
 
 arrowRegex : Regex
