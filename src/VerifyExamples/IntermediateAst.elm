@@ -10,6 +10,7 @@ module VerifyExamples.IntermediateAst
 import List.Extra
 import Maybe.Util exposing (oneOf)
 import Regex exposing (HowMany(..), Regex)
+import Regex.Util exposing (firstSubmatch)
 import String
 
 
@@ -62,28 +63,25 @@ breakIntoTwoLines a =
     if Regex.contains expectationRegex a then
         a
     else
-        Regex.replace Regex.All arrowRegex (\_ -> "\n    --> ") a
+        Regex.replace Regex.All arrowRegex (always "\n    --> ") a
 
 
 toIntermediateAst : String -> Maybe IntermediateAst
 toIntermediateAst =
     oneOf
-        [ makeSyntaxRegex newLineRegex (\_ -> NewLine)
-        , makeSyntaxRegex importRegex (Expression ImportPrefix)
-        , makeSyntaxRegex typeRegex (Expression TypePrefix)
-        , makeSyntaxRegex expectationRegex (Expression ArrowPrefix)
-        , makeSyntaxRegex localFunctionRegex toFunctionExpression
-        , makeSyntaxRegex assertionRegex MaybeExpression
+        [ firstSubmatch newLineRegex >> Maybe.map (always NewLine)
+        , firstSubmatch importRegex >> Maybe.map (Expression ImportPrefix)
+        , firstSubmatch typeRegex >> Maybe.map (Expression TypePrefix)
+        , firstSubmatch expectationRegex >> Maybe.map (Expression ArrowPrefix)
+        , firstSubmatch localFunctionRegex >> Maybe.map toFunctionExpression
+        , firstSubmatch assertionRegex >> Maybe.map MaybeExpression
         ]
 
 
 toFunctionExpression : String -> IntermediateAst
 toFunctionExpression str =
     str
-        |> Regex.find (AtMost 1) functionNameRegex
-        |> List.head
-        |> Maybe.andThen (.submatches >> List.head)
-        |> Maybe.andThen identity
+        |> firstSubmatch functionNameRegex
         |> Maybe.withDefault "no function name given!"
         |> flip Function str
 
@@ -126,15 +124,6 @@ expectationRegex =
 localFunctionRegex : Regex
 localFunctionRegex =
     Regex.regex "^\\s{4}(\\w+\\s:\\s.*)"
-
-
-makeSyntaxRegex : Regex -> (String -> a) -> (String -> Maybe a)
-makeSyntaxRegex regex f str =
-    Regex.find (AtMost 1) regex str
-        |> List.concatMap .submatches
-        |> List.filterMap identity
-        |> List.head
-        |> Maybe.map f
 
 
 group : List IntermediateAst -> List (List IntermediateAst)
