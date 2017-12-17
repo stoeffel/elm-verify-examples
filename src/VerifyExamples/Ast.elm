@@ -130,7 +130,9 @@ groupToAst xs =
                 |> Just
 
         (IAst.Function name x) :: rest ->
-            LocalFunction name (unlines <| x :: List.map IAst.toString rest)
+            (x :: List.map IAst.toString rest)
+                |> unlines
+                |> LocalFunction name
                 |> Just
 
         _ ->
