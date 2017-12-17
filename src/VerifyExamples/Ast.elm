@@ -7,6 +7,7 @@ module VerifyExamples.Ast
         , toString
         )
 
+import String.Util exposing (unlines)
 import VerifyExamples.IntermediateAst as IAst exposing (IntermediateAst)
 
 
@@ -105,23 +106,31 @@ groupToAst : List IntermediateAst -> Maybe Ast
 groupToAst xs =
     case xs of
         (IAst.MaybeExpression x) :: rest ->
-            Assertion (String.join "\n" <| x :: List.map IAst.toString rest)
+            (x :: List.map IAst.toString rest)
+                |> unlines
+                |> Assertion
                 |> Just
 
         (IAst.Expression IAst.ArrowPrefix x) :: rest ->
-            Expectation (String.join "\n" <| x :: List.map IAst.toString rest)
+            (x :: List.map IAst.toString rest)
+                |> unlines
+                |> Expectation
                 |> Just
 
         (IAst.Expression IAst.ImportPrefix x) :: rest ->
-            Import (String.join "\n" <| x :: List.map IAst.toString rest)
+            (x :: List.map IAst.toString rest)
+                |> unlines
+                |> Import
                 |> Just
 
         (IAst.Expression IAst.TypePrefix x) :: rest ->
-            Type (String.join "\n" <| x :: List.map IAst.toString rest)
+            (x :: List.map IAst.toString rest)
+                |> unlines
+                |> Type
                 |> Just
 
         (IAst.Function name x) :: rest ->
-            LocalFunction name (String.join "\n" <| x :: List.map IAst.toString rest)
+            LocalFunction name (unlines <| x :: List.map IAst.toString rest)
                 |> Just
 
         _ ->
