@@ -1,10 +1,8 @@
 module VerifyExamples.IntermediateAst
     exposing
-        ( IntermediateAst(..)
-        , Prefix(..)
+        ( IntermediateAst
+        , convert
         , fromString
-        , group
-        , toString
         )
 
 import List.Extra
@@ -12,6 +10,7 @@ import Maybe.Util exposing (oneOf)
 import Regex exposing (HowMany(..), Regex)
 import Regex.Util exposing (firstSubmatch)
 import String
+import String.Util exposing (unlines)
 
 
 type IntermediateAst
@@ -25,22 +24,6 @@ type Prefix
     = ArrowPrefix
     | ImportPrefix
     | TypePrefix
-
-
-toString : IntermediateAst -> String
-toString ast =
-    case ast of
-        MaybeExpression str ->
-            str
-
-        Expression _ str ->
-            str
-
-        Function _ str ->
-            str
-
-        NewLine ->
-            "\n"
 
 
 fromString : String -> List IntermediateAst
@@ -126,6 +109,54 @@ localFunctionRegex =
     Regex.regex "^\\s{4}(\\w+\\s:\\s.*)"
 
 
+type alias Converter a =
+    { maybeExpression : String -> a
+    , arrowPrefixed : String -> a
+    , importPrefixed : String -> a
+    , typePrefixed : String -> a
+    , function : String -> String -> a
+    }
+
+
+convert : Converter a -> List IntermediateAst -> List a
+convert to =
+    group >> List.filterMap (convertGroup to)
+
+
+convertGroup : Converter a -> List IntermediateAst -> Maybe a
+convertGroup to ast =
+    case ast of
+        first :: _ ->
+            List.map toString ast
+                |> unlines
+                |> convertWithString to first
+
+        [] ->
+            Nothing
+
+
+convertWithString : Converter a -> IntermediateAst -> String -> Maybe a
+convertWithString to ast str =
+    case ast of
+        MaybeExpression _ ->
+            Just (to.maybeExpression str)
+
+        Expression ArrowPrefix _ ->
+            Just (to.arrowPrefixed str)
+
+        Expression ImportPrefix _ ->
+            Just (to.importPrefixed str)
+
+        Expression TypePrefix _ ->
+            Just (to.typePrefixed str)
+
+        Function name _ ->
+            Just (to.function name str)
+
+        NewLine ->
+            Nothing
+
+
 group : List IntermediateAst -> List (List IntermediateAst)
 group =
     List.Extra.groupWhileTransitively groupBy
@@ -148,3 +179,19 @@ groupBy x y =
 
         _ ->
             False
+
+
+toString : IntermediateAst -> String
+toString ast =
+    case ast of
+        MaybeExpression str ->
+            str
+
+        Expression _ str ->
+            str
+
+        Function _ str ->
+            str
+
+        NewLine ->
+            "\n"
