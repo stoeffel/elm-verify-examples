@@ -8,6 +8,7 @@ module VerifyExamples.IntermediateAst
         )
 
 import List.Extra
+import Maybe.Util exposing (oneOf)
 import Regex exposing (HowMany(..), Regex)
 import String
 
@@ -125,21 +126,6 @@ expectationRegex =
 localFunctionRegex : Regex
 localFunctionRegex =
     Regex.regex "^\\s{4}(\\w+\\s:\\s.*)"
-
-
-oneOf : List (a -> Maybe b) -> a -> Maybe b
-oneOf fs str =
-    case fs of
-        [] ->
-            Nothing
-
-        f :: rest ->
-            case f str of
-                Just result ->
-                    Just result
-
-                Nothing ->
-                    oneOf rest str
 
 
 makeSyntaxRegex : Regex -> (String -> a) -> (String -> Maybe a)
