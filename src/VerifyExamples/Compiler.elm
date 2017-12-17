@@ -2,7 +2,7 @@ module VerifyExamples.Compiler exposing (compile)
 
 import Regex exposing (HowMany(..), regex)
 import String
-import String.Extra
+import String.Extra exposing (clean, ellipsis, replace, surround)
 import String.Util exposing (escape, indent, unlines)
 import VerifyExamples.Function exposing (Function)
 import VerifyExamples.Test exposing (Test)
@@ -104,32 +104,35 @@ spec { testName } test index =
     , ""
     , "spec" ++ toString index ++ " : Test.Test"
     , "spec" ++ toString index ++ " ="
-    , indent 1
-        ("Test.test \""
-            ++ "Example: "
-            ++ testName
-            ++ " -- "
-            ++ exampleName test
-            ++ "\" <|"
-        )
+    , indent 1 (testDefinition testName test)
     , indent 2 "\\() ->"
     , indent 3 "Expect.equal"
-    , indent 4 "("
     ]
-        ++ (List.map (indent 4) <| String.lines test.assertion)
-        ++ [ indent 4 ")"
-           , indent 4 "("
-           ]
-        ++ (List.map (indent 4) <| String.lines test.expectation)
-        ++ [ indent 4 ")"
-           ]
+        ++ List.map (indent 4) (specBody test)
+
+
+testDefinition : String -> Test -> String
+testDefinition testName test =
+    [ "Test.test \"", "Example: ", testName, " -- ", exampleName test, "\" <|" ]
+        |> String.join ""
 
 
 exampleName : Test -> String
-exampleName test =
-    (test.assertion ++ " --> " ++ test.expectation)
-        |> String.Extra.replace "\n" " "
-        |> String.Extra.clean
-        |> String.Extra.ellipsis 40
-        |> String.Extra.surround "`"
+exampleName { assertion, expectation } =
+    (assertion ++ " --> " ++ expectation)
+        |> replace "\n" " "
+        |> clean
+        |> ellipsis 40
+        |> surround "`"
         |> escape
+
+
+specBody : Test -> List String
+specBody { assertion, expectation } =
+    List.concat
+        [ [ "(" ]
+        , String.lines assertion
+        , [ ")", "(" ]
+        , String.lines expectation
+        , [ ")" ]
+        ]
