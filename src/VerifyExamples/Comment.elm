@@ -11,8 +11,8 @@ type alias Comment =
 
 parse : String -> List Comment
 parse =
-    List.filterMap (toComment << .submatches)
-        << Regex.find All commentRegex
+    Regex.find All commentRegex
+        >> List.filterMap (toComment << .submatches)
 
 
 toComment : List (Maybe String) -> Maybe Comment
@@ -27,4 +27,15 @@ toComment matches =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex "({-[^]*?-})\x0D?\n([^\x0D\n(\\s:)(\\s=))]*)\\s[:=]"
+    Regex.regex <|
+        String.join ""
+            [ "({-[^]*?-})" -- anything between comments
+            , newline
+            , "([^\\s(" ++ newline ++ ")]*)" -- anything that is not a space or newline
+            , "\\s[:=]" -- until ` :` or ` =`
+            ]
+
+
+newline : String
+newline =
+    "\x0D?\n"
