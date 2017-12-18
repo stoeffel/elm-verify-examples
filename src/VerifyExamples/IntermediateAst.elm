@@ -28,17 +28,17 @@ type Prefix
 
 fromString : String -> List IntermediateAst
 fromString =
-    List.filterMap toIntermediateAst << commentLines
+    commentLines >> List.filterMap toIntermediateAst
 
 
 commentLines : String -> List String
 commentLines =
-    List.concatMap splitOneLiners << String.lines
+    String.lines >> List.concatMap splitOneLiners
 
 
 splitOneLiners : String -> List String
 splitOneLiners =
-    String.lines << breakIntoTwoLines
+    breakIntoTwoLines >> String.lines
 
 
 breakIntoTwoLines : String -> String
@@ -63,8 +63,7 @@ toIntermediateAst =
 
 toFunctionExpression : String -> IntermediateAst
 toFunctionExpression str =
-    str
-        |> firstSubmatch functionNameRegex
+    firstSubmatch functionNameRegex str
         |> Maybe.withDefault "no function name given!"
         |> flip Function str
 
@@ -120,7 +119,27 @@ type alias Converter a =
 
 convert : Converter a -> List IntermediateAst -> List a
 convert to =
-    group >> List.filterMap (convertGroup to)
+    List.Extra.groupWhileTransitively group
+        >> List.filterMap (convertGroup to)
+
+
+group : IntermediateAst -> IntermediateAst -> Bool
+group x y =
+    case ( x, y ) of
+        ( _, NewLine ) ->
+            False
+
+        ( NewLine, MaybeExpression _ ) ->
+            False
+
+        ( _, MaybeExpression _ ) ->
+            True
+
+        ( Expression ArrowPrefix _, Expression ArrowPrefix _ ) ->
+            True
+
+        _ ->
+            False
 
 
 convertGroup : Converter a -> List IntermediateAst -> Maybe a
@@ -155,30 +174,6 @@ convertWithString to ast str =
 
         NewLine ->
             Nothing
-
-
-group : List IntermediateAst -> List (List IntermediateAst)
-group =
-    List.Extra.groupWhileTransitively groupBy
-
-
-groupBy : IntermediateAst -> IntermediateAst -> Bool
-groupBy x y =
-    case ( x, y ) of
-        ( _, NewLine ) ->
-            False
-
-        ( NewLine, MaybeExpression _ ) ->
-            False
-
-        ( _, MaybeExpression _ ) ->
-            True
-
-        ( Expression ArrowPrefix _, Expression ArrowPrefix _ ) ->
-            True
-
-        _ ->
-            False
 
 
 toString : IntermediateAst -> String
