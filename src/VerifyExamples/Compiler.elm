@@ -1,6 +1,5 @@
 module VerifyExamples.Compiler exposing (compile)
 
-import Regex exposing (HowMany(..), regex)
 import String
 import String.Extra exposing (clean, ellipsis, replace, surround)
 import String.Util exposing (escape, indent, unlines)
