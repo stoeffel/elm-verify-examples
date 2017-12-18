@@ -95,7 +95,7 @@ bar a b =
 
 {-| reverses the list
 
-    import String exposing (join)
+    import String exposing (concat)
 
     rev
         [ 41
@@ -107,7 +107,7 @@ bar a b =
 
     rev [1, 2, 3]
         |> List.map toString
-        |> join ""
+        |> concat
     --> "321"
 
 -}

@@ -28,7 +28,7 @@ toComment matches =
 commentRegex : Regex
 commentRegex =
     Regex.regex <|
-        String.join ""
+        String.concat
             [ "({-[^]*?-})" -- anything between comments
             , newline
             , "([^\\s(" ++ newline ++ ")]*)" -- anything that is not a space or newline

@@ -112,8 +112,8 @@ spec { testName } test index =
 
 testDefinition : String -> Test -> String
 testDefinition testName test =
-    [ "Test.test \"", "Example: ", testName, " -- ", exampleName test, "\" <|" ]
-        |> String.join ""
+    String.concat
+        [ "Test.test \"", "Example: ", testName, " -- ", exampleName test, "\" <|" ]
 
 
 exampleName : Test -> String

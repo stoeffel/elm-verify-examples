@@ -17,6 +17,5 @@ escape =
 
 indent : Int -> String -> String
 indent count str =
-    List.repeat (count * 4) " "
-        ++ [ str ]
-        |> String.join ""
+    String.concat
+        (List.repeat (count * 4) " " ++ [ str ])

@@ -99,7 +99,7 @@ You can write examples on multiple lines.
 
     rev [1, 2, 3]
         |> List.map toString
-        |> String.join ""
+        |> String.concat
     --> "321"
 -}
 rev : List a -> List a
