@@ -4,10 +4,6 @@ module Mock exposing (..)
 
 @docs add, sum, bar, rev, IsItCool, coolFunc
 
-    -- These imports are only used in verify-examples
-    import Dict exposing (Dict, fromList)
-    import String exposing (join)
-
 -}
 
 import Dict exposing (Dict, fromList)
@@ -26,22 +22,6 @@ add =
     (+)
 
 
-{-|
-
-    inc $ inc 1 --> 3
-
-    add : Int -> Int -> Int
-    add = (+)
-
-    inc : Int -> Int
-    inc x = add 1 x
-
--}
-($) : (a -> b) -> a -> b
-($) f x =
-    f x
-
-
 {-| Cool or not
 -}
 type IsItCool
@@ -52,6 +32,7 @@ type IsItCool
 {-| This is my cool function.
 
     -- This is how you use it in a view.
+
 
     view : Html msg
     view =
@@ -114,6 +95,8 @@ bar a b =
 
 {-| reverses the list
 
+    import String exposing (concat)
+
     rev
         [ 41
         , 1
@@ -124,7 +107,7 @@ bar a b =
 
     rev [1, 2, 3]
         |> List.map toString
-        |> join ""
+        |> concat
     --> "321"
 
 -}
@@ -143,3 +126,43 @@ rev =
 quux : Int -> Int -> Int
 quux n m =
     n + m
+
+
+{-| with a custom type in the example
+
+    type Foo
+        = A
+        | B
+
+    customType B 1
+    --> (B, 1)
+
+-}
+customType : a -> Int -> ( a, Int )
+customType n m =
+    ( n, m )
+
+
+{-| with a custom type alias in the example
+
+    customTypeAlias defaultUser "?"
+    --> "?Luke"
+
+    type alias User =
+        { id: Int -- ID
+        , name: String
+        }
+
+    defaultUser : User
+    defaultUser =
+        { id = 1
+        , name = "Luke"
+        }
+
+    customTypeAlias defaultUser "_"
+    --> "_Luke"
+
+-}
+customTypeAlias : { a | name : String } -> String -> String
+customTypeAlias { name } prefix =
+    prefix ++ name

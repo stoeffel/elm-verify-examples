@@ -138,7 +138,31 @@ function generate(model, allTestsGenerated) {
   });
 
   var writtenTests = 0;
-  app.ports.writeFile.subscribe(function(data) {
+  app.ports.writeFiles.subscribe(function(data) {
+    serial(data, writeFile(testsDocPath), function() {
+        writtenTests = writtenTests + 1;
+        if (writtenTests === config.tests.length && allTestsGenerated) {
+          allTestsGenerated();
+        }
+    });
+  });
+}
+
+function serial(xs, f, done) {
+  var run = function(x, rest) {
+    f(x, function() {
+      if (rest.length > 0) {
+        run(rest[0], rest.slice(1));
+      } else {
+        done();
+      }
+    });
+  };
+  run(xs[0], xs.slice(1));
+}
+
+function writeFile(testsDocPath) {
+  return function (data, done) {
     var test = data[1];
     var parts = data[0].split(".");
     var modulePath = [];
@@ -173,13 +197,10 @@ function generate(model, allTestsGenerated) {
             return;
           }
 
-          writtenTests = writtenTests + 1;
-          if (writtenTests === config.tests.length && allTestsGenerated) {
-            allTestsGenerated();
-          }
+          done();
       });
     });
-  });
+  };
 }
 
 function elmPathToModule(pathName){

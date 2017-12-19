@@ -1,7 +1,7 @@
 #! /bin/bash -ex
-TEST_COUNT=16
+TEST_COUNT=18
 
-elm-make src/VerifyExamples.elm --output bin/elm.js
+elm-make src/VerifyExamples.elm --output bin/elm.js --warn
 pushd example
 ../bin/cli.js
 elm-test 2>&1 | tee ../result.json

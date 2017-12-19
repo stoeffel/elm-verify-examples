@@ -1,41 +1,13 @@
-module VerifyExamples.Ast exposing (..)
+module VerifyExamples.Ast
+    exposing
+        ( Ast(..)
+        , fromIntermediateAst
+        , group
+        , isTest
+        , toString
+        )
 
-
-type alias TestSuite =
-    { imports : List String
-    , tests : List Test
-    , functionToTest : Maybe String
-    , helperFunctions : List Function
-    }
-
-
-type alias Test =
-    { assertion : String
-    , expectation : String
-    }
-
-
-type alias Function =
-    { isUsed : Bool
-    , name : String
-    , value : String
-    }
-
-
-type IntermediateAst
-    = MaybeExpression String
-    | Expression Prefix String
-    | Func Name String
-    | NewLine
-
-
-type alias Name =
-    String
-
-
-type Prefix
-    = ArrowPrefix
-    | ImportPrefix
+import VerifyExamples.IntermediateAst as IAst exposing (IntermediateAst)
 
 
 type Ast
@@ -43,25 +15,25 @@ type Ast
     | Expectation String
     | Import String
     | LocalFunction String String
+    | Type String
 
 
-isImport : Ast -> Bool
-isImport x =
-    case x of
-        Import _ ->
-            True
-
-        _ ->
-            False
-
-
-isAssertion : Ast -> Bool
-isAssertion x =
+isTest : Ast -> Bool
+isTest x =
     case x of
         Assertion _ ->
             True
 
-        _ ->
+        Expectation _ ->
+            True
+
+        Import _ ->
+            False
+
+        LocalFunction _ _ ->
+            False
+
+        Type _ ->
             False
 
 
@@ -75,18 +47,38 @@ isExpectiation x =
             False
 
 
-isLocalFunction : Ast -> Bool
-isLocalFunction x =
-    case x of
-        LocalFunction _ _ ->
-            True
-
-        _ ->
-            False
+group : List Ast -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+group ast =
+    groupHelp ast { localFunctions = [], imports = [], types = [] }
 
 
-astToString : Ast -> String
-astToString ast =
+groupHelp :
+    List Ast
+    -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+    -> { localFunctions : List Ast, imports : List Ast, types : List Ast }
+groupHelp ast acc =
+    case ast of
+        [] ->
+            acc
+
+        (Assertion _) :: rest ->
+            groupHelp rest acc
+
+        (Expectation str) :: rest ->
+            groupHelp rest acc
+
+        (Import str) :: rest ->
+            groupHelp rest { acc | imports = acc.imports ++ [ Import str ] }
+
+        (Type str) :: rest ->
+            groupHelp rest { acc | types = acc.types ++ [ Type str ] }
+
+        (LocalFunction name str) :: rest ->
+            groupHelp rest { acc | localFunctions = acc.localFunctions ++ [ LocalFunction name str ] }
+
+
+toString : Ast -> String
+toString ast =
     case ast of
         Assertion str ->
             str
@@ -97,41 +89,19 @@ astToString ast =
         Import str ->
             str
 
+        Type str ->
+            str
+
         LocalFunction _ str ->
             str
 
 
-intermediateToString : IntermediateAst -> String
-intermediateToString ast =
-    case ast of
-        MaybeExpression str ->
-            str
-
-        Expression _ str ->
-            str
-
-        Func _ str ->
-            str
-
-        NewLine ->
-            "\n"
-
-
-astToFunction : List Test -> Ast -> Maybe Function
-astToFunction rest ast =
-    case ast of
-        LocalFunction name value ->
-            { name = name
-            , value = value
-            , isUsed =
-                List.any
-                    (\{ assertion, expectation } ->
-                        String.contains name assertion
-                            || String.contains name expectation
-                    )
-                    rest
-            }
-                |> Just
-
-        _ ->
-            Nothing
+fromIntermediateAst : List IntermediateAst -> List Ast
+fromIntermediateAst =
+    IAst.convert
+        { maybeExpression = Assertion
+        , arrowPrefixed = Expectation
+        , importPrefixed = Import
+        , typePrefixed = Type
+        , function = LocalFunction
+        }

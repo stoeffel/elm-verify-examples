@@ -99,7 +99,7 @@ You can write examples on multiple lines.
 
     rev [1, 2, 3]
         |> List.map toString
-        |> String.join ""
+        |> String.concat
     --> "321"
 -}
 rev : List a -> List a
@@ -136,6 +136,50 @@ You can use intermediate definitions in your example.
     List.Extra.filterNot isEven [1,2,3,4] --> [1,3]
 -}
 filterNot : (a -> Bool) -> List a -> List a
+```
+
+### Types in Examples
+
+You can define union types and type aliases in your examples.
+
+```elm
+{-| With a union type in the example.
+    type Animal
+        = Dog
+        | Cat
+
+    double Dog
+    --> (Dog, Dog)
+-}
+double : a -> (a, a)
+double a =
+    (a, a)
+```
+
+```elm
+{-| With a type alias in the example.
+
+    customTypeAlias defaultUser "?"
+    --> "?Luke"
+
+    type alias User =
+        { id: Int -- ID
+        , name: String
+        }
+
+    defaultUser : User
+    defaultUser =
+        { id = 1
+        , name = "Luke"
+        }
+
+    customTypeAlias defaultUser "_"
+    --> "_Luke"
+
+-}
+customTypeAlias : { a | name : String } -> String -> String
+customTypeAlias { name } prefix =
+    prefix ++ name
 ```
 
 Verify Examples
