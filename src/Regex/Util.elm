@@ -1,11 +1,16 @@
-module Regex.Util exposing (firstSubmatch)
+module Regex.Util exposing (firstSubmatch, submatches)
 
 import Regex exposing (HowMany(..), Regex)
 
 
-firstSubmatch : Regex -> (String -> Maybe String)
-firstSubmatch regex str =
+submatches : Regex -> (String -> List String)
+submatches regex str =
     Regex.find (AtMost 1) regex str
         |> List.concatMap .submatches
         |> List.filterMap identity
+
+
+firstSubmatch : Regex -> (String -> Maybe String)
+firstSubmatch regex str =
+    submatches regex str
         |> List.head

@@ -33,7 +33,7 @@ compile moduleName suite =
                 , suite.tests
                     |> List.indexedMap compileTest
                     |> List.concat
-                    |> addTodoIfEmpty
+                    |> addTodoIfEmpty moduleName
                 ]
                 |> unlines
           )
@@ -104,41 +104,46 @@ spec test index =
     , ""
     , "spec" ++ toString index ++ " : Test.Test"
     , "spec" ++ toString index ++ " ="
-    , indent 1 (testDefinition test)
+    , indent 1 (testDefinition test index)
     , indent 2 "\\() ->"
     , indent 3 "Expect.equal"
     ]
         ++ List.map (indent 4) (specBody test)
 
 
-addTodoIfEmpty : List String -> List String
-addTodoIfEmpty tests =
+addTodoIfEmpty : String -> List String -> List String
+addTodoIfEmpty moduleName tests =
     case tests of
         [] ->
-            todo
+            todo moduleName
 
         _ ->
             tests
 
 
-todo : List String
-todo =
+todo : String -> List String
+todo moduleName =
     [ ""
     , ""
     , "spec : Test.Test"
     , "spec ="
-    , indent 1 "Test.todo \"add a doc test\""
+    , indent 1 <|
+        "Test.todo \"module "
+            ++ moduleName
+            ++ ": No examples to verify yet!\""
     ]
 
 
-testDefinition : Test -> String
-testDefinition test =
+testDefinition : Test -> Int -> String
+testDefinition test index =
     String.concat
         [ "Test.test \""
         , test.functionToTest
             |> Maybe.map ((++) "#")
             |> Maybe.withDefault "Module Doc"
-        , " Example: "
+        , " Example"
+        , toString index
+        , ": "
         , exampleName test
         , "\" <|"
         ]

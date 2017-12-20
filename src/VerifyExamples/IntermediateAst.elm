@@ -8,7 +8,7 @@ module VerifyExamples.IntermediateAst
 import List.Extra
 import Maybe.Util exposing (oneOf)
 import Regex exposing (HowMany(..), Regex)
-import Regex.Util exposing (firstSubmatch)
+import Regex.Util exposing (firstSubmatch, submatches)
 import String
 import String.Util exposing (unlines)
 
@@ -33,7 +33,28 @@ fromString =
 
 commentLines : String -> List String
 commentLines =
-    String.lines >> List.concatMap splitOneLiners
+    String.lines
+        >> List.concatMap splitOneLiners
+        >> spreadLines
+
+
+spreadLines : List String -> List String
+spreadLines lines =
+    case lines of
+        [] ->
+            []
+
+        x :: [] ->
+            [ x ]
+
+        x :: y :: rest ->
+            if
+                (Regex.contains arrowRegex x && Regex.contains assertionRegex y)
+                    && not (Regex.contains expectationRegex x && Regex.contains expectationRegex y)
+            then
+                [ x, "" ] ++ spreadLines (y :: rest)
+            else
+                x :: spreadLines (y :: rest)
 
 
 splitOneLiners : String -> List String
