@@ -6,18 +6,18 @@ import VerifyExamples.Ast as Ast exposing (Ast)
 type alias Test =
     { assertion : String
     , expectation : String
-    , functionToTest : String
+    , functionToTest : Maybe String
     }
 
 
-testsFromAst : String -> List Ast -> List Test
+testsFromAst : Maybe String -> List Ast -> List Test
 testsFromAst functionToTest =
     List.filter Ast.isTest
         >> toTests functionToTest []
         >> List.reverse
 
 
-toTests : String -> List Test -> List Ast -> List Test
+toTests : Maybe String -> List Test -> List Ast -> List Test
 toTests functionToTest acc xs =
     case xs of
         (Ast.Assertion x) :: (Ast.Expectation y) :: rest ->

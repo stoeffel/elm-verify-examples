@@ -13,7 +13,7 @@ type alias TestSuite =
     }
 
 
-fromAst : String -> List Ast -> TestSuite
+fromAst : Maybe String -> List Ast -> TestSuite
 fromAst fnName ast =
     let
         { imports, types, localFunctions } =
