@@ -6,23 +6,25 @@ import VerifyExamples.Ast as Ast exposing (Ast)
 type alias Test =
     { assertion : String
     , expectation : String
+    , functionToTest : String
     }
 
 
-testsFromAst : List Ast -> List Test
-testsFromAst =
+testsFromAst : String -> List Ast -> List Test
+testsFromAst functionToTest =
     List.filter Ast.isTest
-        >> toTests []
+        >> toTests functionToTest []
         >> List.reverse
 
 
-toTests : List Test -> List Ast -> List Test
-toTests acc xs =
+toTests : String -> List Test -> List Ast -> List Test
+toTests functionToTest acc xs =
     case xs of
         (Ast.Assertion x) :: (Ast.Expectation y) :: rest ->
-            toTests
+            toTests functionToTest
                 ({ assertion = x
                  , expectation = y
+                 , functionToTest = functionToTest
                  }
                     :: acc
                 )
@@ -30,7 +32,7 @@ toTests acc xs =
 
         -- drop items until a valid sequence of items is found
         _ :: rest ->
-            toTests acc rest
+            toTests functionToTest acc rest
 
         [] ->
             acc

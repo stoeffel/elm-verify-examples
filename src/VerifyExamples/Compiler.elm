@@ -11,7 +11,6 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 type alias Info =
     { imports : List String
     , types : List String
-    , functionToTest : String
     , helperFunctions : List Function
     , moduleName : String
     , testName : String
@@ -24,7 +23,6 @@ compile moduleName suite =
         info =
             { imports = suite.imports
             , types = suite.types
-            , functionToTest = suite.functionToTest
             , helperFunctions = suite.helperFunctions
             , moduleName = moduleName
             , testName = moduleName
@@ -42,25 +40,31 @@ compile moduleName suite =
           )
         ]
     else
-        List.indexedMap (compileTestPerFunction << withExtendedTestName info) suite.tests
+        List.indexedMap
+            (\index ->
+                withExtendedTestName info index
+                    >> compileTestPerFunction
+            )
+            suite.tests
 
 
-withExtendedTestName : Info -> Int -> ( Int, Info )
-withExtendedTestName info index =
+withExtendedTestName : Info -> Int -> Test -> ( Int, Test, Info )
+withExtendedTestName info index test =
     ( index
+    , test
     , { info
         | testName =
             info.moduleName
                 ++ ".Function_"
-                ++ info.functionToTest
+                ++ test.functionToTest
                 ++ "_Example"
                 ++ toString index
       }
     )
 
 
-compileTestPerFunction : ( Int, Info ) -> Test -> ( String, String )
-compileTestPerFunction ( index, info ) test =
+compileTestPerFunction : ( Int, Test, Info ) -> ( String, String )
+compileTestPerFunction ( index, test, info ) =
     ( info.testName
     , unlines <|
         List.concat
@@ -113,7 +117,14 @@ spec { testName } test index =
 testDefinition : String -> Test -> String
 testDefinition testName test =
     String.concat
-        [ "Test.test \"", "Example: ", testName, " -- ", exampleName test, "\" <|" ]
+        [ "Test.test \"#"
+        , test.functionToTest
+        , " Example: "
+        , testName
+        , " "
+        , exampleName test
+        , "\" <|"
+        ]
 
 
 exampleName : Test -> String

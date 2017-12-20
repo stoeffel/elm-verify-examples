@@ -18,8 +18,8 @@ parse =
 toComment : List (Maybe String) -> Maybe Comment
 toComment matches =
     case matches of
-        (Just comment) :: (Just functionName) :: _ ->
-            Just { comment = comment, functionName = functionName }
+        (Just comment) :: _ :: functionName :: _ ->
+            Just { comment = comment, functionName = functionName |> Maybe.withDefault "Global_Comment" }
 
         _ ->
             Nothing
@@ -31,8 +31,10 @@ commentRegex =
         String.concat
             [ "({-[^]*?-})" -- anything between comments
             , newline
-            , "([^\\s(" ++ newline ++ ")]*)" -- anything that is not a space or newline
+            , "("
+            , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
             , "\\s[:=]" -- until ` :` or ` =`
+            , ")*" -- it's possible that we have examples in comment not attached to a function
             ]
 
 

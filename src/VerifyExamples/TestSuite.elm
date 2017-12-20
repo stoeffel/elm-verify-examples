@@ -9,7 +9,6 @@ type alias TestSuite =
     { imports : List String
     , types : List String
     , tests : List Test
-    , functionToTest : String
     , helperFunctions : List Function
     }
 
@@ -21,12 +20,11 @@ fromAst fnName ast =
             Ast.group ast
 
         tests =
-            Test.testsFromAst ast
+            Test.testsFromAst fnName ast
     in
     { imports = List.map Ast.toString imports
     , types = List.map Ast.toString types
     , tests = tests
-    , functionToTest = fnName
     , helperFunctions =
         localFunctions
             |> List.filterMap (Function.fromAst tests)
@@ -49,7 +47,6 @@ concat suite acc =
     { imports = suite.imports ++ acc.imports
     , types = suite.types ++ acc.types
     , tests = suite.tests ++ acc.tests
-    , functionToTest = suite.functionToTest
     , helperFunctions = suite.helperFunctions ++ acc.helperFunctions
     }
 
@@ -59,7 +56,6 @@ empty =
     { imports = []
     , types = []
     , tests = []
-    , functionToTest = ""
     , helperFunctions = []
     }
 
