@@ -33,6 +33,7 @@ compile moduleName suite =
                 , suite.tests
                     |> List.indexedMap compileTest
                     |> List.concat
+                    |> addTodoIfEmpty
                 ]
                 |> unlines
           )
@@ -108,6 +109,26 @@ spec test index =
     , indent 3 "Expect.equal"
     ]
         ++ List.map (indent 4) (specBody test)
+
+
+addTodoIfEmpty : List String -> List String
+addTodoIfEmpty tests =
+    case tests of
+        [] ->
+            todo
+
+        _ ->
+            tests
+
+
+todo : List String
+todo =
+    [ ""
+    , ""
+    , "spec : Test.Test"
+    , "spec ="
+    , indent 1 "Test.todo \"add a doc test\""
+    ]
 
 
 testDefinition : Test -> String
