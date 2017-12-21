@@ -41,7 +41,7 @@ running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
 
 running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
-  var tests = argv.run;
+  var tests = [argv.run].concat(argv._);
 
   verifyExamplesConfig.tests = tests;
 
@@ -92,11 +92,9 @@ function init(argv){
 
 function run(model, allTestsGenerated){
   var config = model.config;
-  var tests = config.tests.split(' ');
-  config.tests = tests.filter(
+  config.tests = config.tests.filter(
     function(v){ return v.endsWith('.elm'); }
   ).map(elmPathToModule);
-
 
   model.config = config;
   generate(model, allTestsGenerated);
