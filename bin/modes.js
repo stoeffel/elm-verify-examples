@@ -4,6 +4,7 @@ var mkdirp = require("mkdirp");
 var fs = require("fs");
 var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
+var rimraf = require('rimraf')
 
 
 
@@ -108,6 +109,7 @@ function generate(model, allTestsGenerated) {
     "tests"
   );
   var testsDocPath = path.join(model.output, "Doc");
+  rimraf.sync(testsDocPath);
 
   if (config.tests.length === 0){
     if (model.showWarnings) {
