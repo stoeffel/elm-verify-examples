@@ -35,26 +35,6 @@ commentLines : String -> List String
 commentLines =
     String.lines
         >> List.concatMap splitOneLiners
-        >> spreadLines
-
-
-spreadLines : List String -> List String
-spreadLines lines =
-    case lines of
-        [] ->
-            []
-
-        x :: [] ->
-            [ x ]
-
-        x :: y :: rest ->
-            if
-                (Regex.contains arrowRegex x && Regex.contains assertionRegex y)
-                    && not (Regex.contains expectationRegex x && Regex.contains expectationRegex y)
-            then
-                [ x, "" ] ++ spreadLines (y :: rest)
-            else
-                x :: spreadLines (y :: rest)
 
 
 splitOneLiners : String -> List String
@@ -153,10 +133,13 @@ group x y =
         ( NewLine, MaybeExpression _ ) ->
             False
 
-        ( _, MaybeExpression _ ) ->
+        ( Expression ArrowPrefix _, Expression ArrowPrefix _ ) ->
             True
 
-        ( Expression ArrowPrefix _, Expression ArrowPrefix _ ) ->
+        ( Expression ArrowPrefix _, _ ) ->
+            False
+
+        ( _, MaybeExpression _ ) ->
             True
 
         _ ->
