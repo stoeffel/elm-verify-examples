@@ -40,15 +40,14 @@ running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
 };
 
 running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
-  var files = argv.run;
+  var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
+  var tests = argv.run;
 
-  var config = {
-    files: files
-  };
+  verifyExamplesConfig.tests = tests;
 
   return {
     runningMode: RUNNING_MODE.RUN,
-    config: config,
+    config: verifyExamplesConfig,
     run: running_mode_runners[RUNNING_MODE.RUN],
     showWarnings: options.showWarnings,
     output: options.output,
@@ -91,15 +90,16 @@ function init(argv){
   return model;
 }
 
-function run(model){
+function run(model, allTestsGenerated){
   var config = model.config;
-  var files = config.files.split(' ');
-  files = files.filter(
+  var tests = config.tests.split(' ');
+  config.tests = tests.filter(
     function(v){ return v.endsWith('.elm'); }
   ).map(elmPathToModule);
 
 
-  console.log(files);
+  model.config = config;
+  generate(model, allTestsGenerated);
 }
 
 function generate(model, allTestsGenerated) {
@@ -206,7 +206,7 @@ function writeFile(testsDocPath) {
 }
 
 function elmPathToModule(pathName){
-  return pathName.substr(0, pathName.length - 4).replace("/", ".");
+  return pathName.substr(0, pathName.length - 4).replace(/\//g, ".");
 }
 
 function elmModuleToPath(moduleName){
