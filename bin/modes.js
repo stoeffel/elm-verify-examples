@@ -206,6 +206,9 @@ function writeFile(testsDocPath) {
 }
 
 function elmPathToModule(pathName){
+  if (pathName.startsWith("./")) {
+    pathName = pathName.substr(2);
+  }
   return pathName.substr(0, pathName.length - 4).replace(/\//g, ".");
 }
 
