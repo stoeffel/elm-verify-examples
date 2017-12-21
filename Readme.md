@@ -196,6 +196,11 @@ By default the first command creates the tests at `tests/Doc/`. If you want to h
 
 Also by default the first command looks for the config file at `tests/elm-verify-examples.json`. If you want it to load a specific config file use the `--config` argument (e.g. `elm-verify-examples --config my/custom/path/elm-verify-examples.json` will read the config from `my/custom/path/elm-verify-examples.json`).
 
+You can run elm-verify-examples for one or more modules explicitly. They don't have to be specified in `tests/elm-verify-examples.json`.
+```bash
+$ elm-verify-examples --run ./src/Foo.elm ./src/Foo/Bar.elm && elm-test
+```
+
 Examples
 --------
 
