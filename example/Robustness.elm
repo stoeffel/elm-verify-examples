@@ -15,10 +15,8 @@ module Robustness exposing (..)
     4 --> 6
     add 4
     3
-
---
---> 7
-add 5 3 -> 8BROKEN
+    --> 7
+    add 5 3 -> 8BROKEN
 
 -}
 add : Int -> Int -> Int
