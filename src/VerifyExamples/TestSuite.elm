@@ -16,17 +16,17 @@ type alias TestSuite =
 fromAst : Maybe String -> List Ast -> TestSuite
 fromAst fnName ast =
     let
-        { imports, types, localFunctions } =
+        { imports, types, functions, examples } =
             Ast.group ast
 
         tests =
-            Test.testsFromAst fnName ast
+            Test.fromExamples fnName examples
     in
     { imports = List.map Ast.toString imports
     , types = List.map Ast.toString types
     , tests = tests
     , helperFunctions =
-        localFunctions
+        functions
             |> List.filterMap (Function.fromAst tests)
             |> Function.onlyUsed
     }

@@ -14,7 +14,7 @@ type alias Function =
 fromAst : List Test -> Ast -> Maybe Function
 fromAst tests ast =
     case ast of
-        Ast.LocalFunction name value ->
+        Ast.Function name value ->
             Just
                 { name = name
                 , value = value

@@ -1,6 +1,5 @@
 module VerifyExamples.Parser exposing (parse)
 
-import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Comment as Comment exposing (Comment)
 import VerifyExamples.IntermediateAst as IntermediateAst exposing (IntermediateAst)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
@@ -19,11 +18,11 @@ toTestSuite comment =
         Comment.FunctionDoc { functionName, comment } ->
             comment
                 |> IntermediateAst.fromString
-                |> Ast.fromIntermediateAst
+                |> IntermediateAst.toAst
                 |> TestSuite.fromAst (Just functionName)
 
         Comment.ModuleDoc comment ->
             comment
                 |> IntermediateAst.fromString
-                |> Ast.fromIntermediateAst
+                |> IntermediateAst.toAst
                 |> TestSuite.fromAst Nothing

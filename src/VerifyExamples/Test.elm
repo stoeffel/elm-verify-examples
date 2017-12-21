@@ -1,6 +1,6 @@
-module VerifyExamples.Test exposing (Test, testsFromAst)
+module VerifyExamples.Test exposing (Test, fromExamples)
 
-import VerifyExamples.Ast as Ast exposing (Ast)
+import VerifyExamples.Ast as Ast
 
 
 type alias Test =
@@ -10,29 +10,12 @@ type alias Test =
     }
 
 
-testsFromAst : Maybe String -> List Ast -> List Test
-testsFromAst functionToTest =
-    List.filter Ast.isTest
-        >> toTests functionToTest []
-        >> List.reverse
-
-
-toTests : Maybe String -> List Test -> List Ast -> List Test
-toTests functionToTest acc xs =
-    case xs of
-        (Ast.Assertion x) :: (Ast.Expectation y) :: rest ->
-            toTests functionToTest
-                ({ assertion = x
-                 , expectation = y
-                 , functionToTest = functionToTest
-                 }
-                    :: acc
-                )
-                rest
-
-        -- drop items until a valid sequence of items is found
-        _ :: rest ->
-            toTests functionToTest acc rest
-
-        [] ->
-            acc
+fromExamples : Maybe String -> List Ast.Example -> List Test
+fromExamples functionToTest =
+    List.map
+        (\{ assertion, expectation } ->
+            { assertion = assertion
+            , expectation = expectation
+            , functionToTest = functionToTest
+            }
+        )
