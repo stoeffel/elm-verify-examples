@@ -10,17 +10,14 @@ var rimraf = require('rimraf')
 
 /* Running modes currently supported are either
    - generate, to generate tests as part of your suite
-   - run, to run a single file, provide the file name
 */
 var RUNNING_MODE = {
-  GENERATE: 0,
-  RUN: 1
+  GENERATE: 0
 };
 
 // runners are called via `.run` on a model
 var running_mode_runners = {};
 running_mode_runners[RUNNING_MODE.GENERATE] = generate;
-running_mode_runners[RUNNING_MODE.RUN] = run;
 
 
 // loaders are called by init
@@ -28,27 +25,12 @@ var running_mode_loaders = {};
 
 running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
+  config = forFiles(verifyExamplesConfig, options.forFiles);
 
   return {
     runningMode: RUNNING_MODE.GENERATE,
-    config: verifyExamplesConfig,
+    config: config,
     run: running_mode_runners[RUNNING_MODE.GENERATE],
-    showWarnings: options.showWarnings,
-    output: options.output,
-    configPath: options.configPath
-  };
-};
-
-running_mode_loaders[RUNNING_MODE.RUN] = function(argv, options){
-  var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
-  var tests = [argv.run].concat(argv._);
-
-  verifyExamplesConfig.tests = tests;
-
-  return {
-    runningMode: RUNNING_MODE.RUN,
-    config: verifyExamplesConfig,
-    run: running_mode_runners[RUNNING_MODE.RUN],
     showWarnings: options.showWarnings,
     output: options.output,
     configPath: options.configPath
@@ -64,7 +46,8 @@ function init(argv){
   var options = {
     showWarnings: true,
     output: "tests",
-    configPath: defaultConfigPath
+    configPath: defaultConfigPath,
+    forFiles: undefined
   };
 
   if (typeof argv.warn !== "undefined") {
@@ -79,25 +62,24 @@ function init(argv){
     options.configPath = argv.config;
   }
 
-  if (typeof argv.run === "undefined") {
-    if (options.showWarnings) console.log('Running in generate mode..');
-    model = running_mode_loaders[RUNNING_MODE.GENERATE](options);
-  } else {
-    if (options.showWarnings) console.log('Running in run mode..');
-    model = running_mode_loaders[RUNNING_MODE.RUN](argv, options);
+  if (typeof argv._ !== "undefined" && argv._.length > 0) {
+    options.forFiles = argv._;
   }
+
+  if (options.showWarnings) console.log('Running in generate mode..');
+  model = running_mode_loaders[RUNNING_MODE.GENERATE](options);
 
   return model;
 }
 
-function run(model, allTestsGenerated){
-  var config = model.config;
-  config.tests = config.tests.filter(
-    function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule);
+function forFiles(config, files){
+  if (typeof files !== "undefined") {
+    config.tests = files.filter(
+      function(v){ return v.endsWith('.elm'); }
+    ).map(elmPathToModule);
+  }
 
-  model.config = config;
-  generate(model, allTestsGenerated);
+  return config;
 }
 
 function generate(model, allTestsGenerated) {
