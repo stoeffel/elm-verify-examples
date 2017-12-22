@@ -1,6 +1,6 @@
 module VerifyExamples.Test exposing (Test, fromExamples)
 
-import VerifyExamples.Ast as Ast
+import VerifyExamples.GroupedAst as GroupedAst
 
 
 type alias Test =
@@ -10,7 +10,7 @@ type alias Test =
     }
 
 
-fromExamples : Maybe String -> List Ast.Example -> List Test
+fromExamples : Maybe String -> List GroupedAst.Example -> List Test
 fromExamples functionToTest =
     List.map
         (\{ assertion, expectation } ->

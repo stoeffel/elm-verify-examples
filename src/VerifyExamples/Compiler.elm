@@ -59,7 +59,7 @@ compileTestPerFunction info index test =
             , [ "" ]
             , info.helperFunctions
                 |> List.filter .isUsed
-                |> List.map .value
+                |> List.map .function
             , [ "" ]
             , spec test index
             ]

@@ -2,6 +2,7 @@ module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial)
 
 import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Function as Function exposing (Function)
+import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Test as Test exposing (Test)
 
 
@@ -17,17 +18,17 @@ fromAst : Maybe String -> List Ast -> TestSuite
 fromAst fnName ast =
     let
         { imports, types, functions, examples } =
-            Ast.group ast
+            GroupedAst.fromAst ast
 
         tests =
             Test.fromExamples fnName examples
     in
-    { imports = List.map Ast.toString imports
-    , types = List.map Ast.toString types
+    { imports = List.map GroupedAst.importToString imports
+    , types = List.map GroupedAst.typeToString types
     , tests = tests
     , helperFunctions =
         functions
-            |> List.filterMap (Function.fromAst tests)
+            |> List.map (GroupedAst.functionInfo >> Function.toFunction tests)
             |> Function.onlyUsed
     }
 
