@@ -189,7 +189,7 @@ Verify Examples
 You have to use elm-test in order to run them.
 
 ```bash
-$ elm-verify-examples && elm-test
+$ elm-verify-examples
 ```
 
 By default the first command creates the tests at `tests/Doc/`. If you want to have them at a custom location use the `--output` argument (e.g. `elm-verify-examples --output my/custom/path/` will create the tests at `my/custom/path/Doc/`).
@@ -198,7 +198,7 @@ Also by default the first command looks for the config file at `tests/elm-verify
 
 You can run elm-verify-examples for one or more modules explicitly. They don't have to be specified in `tests/elm-verify-examples.json`.
 ```bash
-$ elm-verify-examples ./src/Foo.elm ./src/Foo/Bar.elm && elm-test
+$ elm-verify-examples ./src/Foo.elm ./src/Foo/Bar.elm
 ```
 
 Examples
