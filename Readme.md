@@ -63,25 +63,6 @@ add =
     (+)
 ```
 
-:warning: **It's important that each example is separated by a newline.**
-
-```elm
-{-| This will break!
-
-    add 1 2 --> 3
-    add 1 3 --> 4
--}
-```
-
-```elm
-{-| This works!
-
-    add 1 2 --> 3
-
-    add 1 3 --> 4
--}
-```
-
 ### Multiline Examples
 
 You can write examples on multiple lines.
