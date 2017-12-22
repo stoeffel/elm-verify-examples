@@ -4,7 +4,7 @@ var mkdirp = require("mkdirp");
 var fs = require("fs");
 var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
-var rimraf = require('rimraf')
+var rimraf = require('rimraf');
 
 
 // loaders are called by init
