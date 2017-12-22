@@ -1,12 +1,11 @@
-module VerifyExamples.Comment exposing (Comment, parse)
+module VerifyExamples.Comment exposing (Comment(..), parse)
 
 import Regex exposing (HowMany(..), Regex)
 
 
-type alias Comment =
-    { comment : String
-    , functionName : String
-    }
+type Comment
+    = FunctionDoc { functionName : String, comment : String }
+    | ModuleDoc String
 
 
 parse : String -> List Comment
@@ -18,8 +17,11 @@ parse =
 toComment : List (Maybe String) -> Maybe Comment
 toComment matches =
     case matches of
-        (Just comment) :: (Just functionName) :: _ ->
-            Just { comment = comment, functionName = functionName }
+        (Just comment) :: _ :: Nothing :: _ ->
+            Just (ModuleDoc comment)
+
+        (Just comment) :: _ :: (Just functionName) :: _ ->
+            Just (FunctionDoc { functionName = functionName, comment = comment })
 
         _ ->
             Nothing
@@ -31,8 +33,10 @@ commentRegex =
         String.concat
             [ "({-[^]*?-})" -- anything between comments
             , newline
-            , "([^\\s(" ++ newline ++ ")]*)" -- anything that is not a space or newline
+            , "("
+            , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
             , "\\s[:=]" -- until ` :` or ` =`
+            , ")?" -- it's possible that we have examples in comment not attached to a function
             ]
 
 

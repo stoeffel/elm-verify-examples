@@ -1,37 +1,22 @@
-module VerifyExamples.Function exposing (Function, fromAst, onlyUsed)
+module VerifyExamples.Function exposing (Function, onlyUsed, toFunction)
 
-import VerifyExamples.Ast as Ast exposing (Ast)
+import VerifyExamples.GroupedAst as GroupedAst
 import VerifyExamples.Test exposing (Test)
 
 
 type alias Function =
     { name : String
-    , value : String
+    , function : String
     , isUsed : Bool
     }
 
 
-fromAst : List Test -> Ast -> Maybe Function
-fromAst tests ast =
-    case ast of
-        Ast.LocalFunction name value ->
-            Just
-                { name = name
-                , value = value
-                , isUsed = List.any (usedInTest name) tests
-                }
-
-        Ast.Assertion _ ->
-            Nothing
-
-        Ast.Expectation _ ->
-            Nothing
-
-        Ast.Import _ ->
-            Nothing
-
-        Ast.Type _ ->
-            Nothing
+toFunction : List Test -> GroupedAst.FunctionInfo -> Function
+toFunction tests { name, function } =
+    { name = name
+    , function = function
+    , isUsed = List.any (usedInTest name) tests
+    }
 
 
 usedInTest : String -> Test -> Bool
@@ -47,7 +32,7 @@ onlyUsed fns =
             List.partition .isUsed fns
 
         isUsedAfterAll f =
-            List.any (String.contains f.name << .value) used
+            List.any (String.contains f.name << .function) used
 
         ( fnsUsedAfterAll, notUsed ) =
             List.partition isUsedAfterAll probablyNotUsed

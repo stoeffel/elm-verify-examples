@@ -2,6 +2,15 @@ module Mock exposing (..)
 
 {-|
 
+    add 1 1 --> 2
+
+    type Foo
+        = A
+        | B
+
+    customType B 2
+    --> (B, 2)
+
 @docs add, sum, bar, rev, IsItCool, coolFunc
 
 -}

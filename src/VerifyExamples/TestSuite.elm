@@ -2,6 +2,7 @@ module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial)
 
 import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Function as Function exposing (Function)
+import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Test as Test exposing (Test)
 
 
@@ -9,27 +10,25 @@ type alias TestSuite =
     { imports : List String
     , types : List String
     , tests : List Test
-    , functionToTest : String
     , helperFunctions : List Function
     }
 
 
-fromAst : String -> List Ast -> TestSuite
+fromAst : Maybe String -> List Ast -> TestSuite
 fromAst fnName ast =
     let
-        { imports, types, localFunctions } =
-            Ast.group ast
+        { imports, types, functions, examples } =
+            GroupedAst.fromAst ast
 
         tests =
-            Test.testsFromAst ast
+            Test.fromExamples fnName examples
     in
-    { imports = List.map Ast.toString imports
-    , types = List.map Ast.toString types
+    { imports = List.map GroupedAst.importToString imports
+    , types = List.map GroupedAst.typeToString types
     , tests = tests
-    , functionToTest = fnName
     , helperFunctions =
-        localFunctions
-            |> List.filterMap (Function.fromAst tests)
+        functions
+            |> List.map (GroupedAst.functionInfo >> Function.toFunction tests)
             |> Function.onlyUsed
     }
 
@@ -49,7 +48,6 @@ concat suite acc =
     { imports = suite.imports ++ acc.imports
     , types = suite.types ++ acc.types
     , tests = suite.tests ++ acc.tests
-    , functionToTest = suite.functionToTest
     , helperFunctions = suite.helperFunctions ++ acc.helperFunctions
     }
 
@@ -59,7 +57,6 @@ empty =
     { imports = []
     , types = []
     , tests = []
-    , functionToTest = ""
     , helperFunctions = []
     }
 
