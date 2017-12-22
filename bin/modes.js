@@ -7,30 +7,14 @@ var helpers = require('./cli-helpers.js');
 var rimraf = require('rimraf')
 
 
-
-/* Running modes currently supported are either
-   - generate, to generate tests as part of your suite
-*/
-var RUNNING_MODE = {
-  GENERATE: 0
-};
-
-// runners are called via `.run` on a model
-var running_mode_runners = {};
-running_mode_runners[RUNNING_MODE.GENERATE] = generate;
-
-
 // loaders are called by init
-var running_mode_loaders = {};
-
-running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
+var model = function(options){
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
-  config = forFiles(verifyExamplesConfig, options.forFiles);
+  var config = forFiles(verifyExamplesConfig, options.forFiles);
 
   return {
-    runningMode: RUNNING_MODE.GENERATE,
     config: config,
-    run: running_mode_runners[RUNNING_MODE.GENERATE],
+    run: generate,
     showWarnings: options.showWarnings,
     output: options.output,
     configPath: options.configPath
@@ -40,7 +24,6 @@ running_mode_loaders[RUNNING_MODE.GENERATE] = function(options){
 
 // parse args
 function init(argv){
-  var model = null;
   var defaultConfigPath = path.join(process.cwd(), 'tests/elm-verify-examples.json');
 
   var options = {
@@ -67,19 +50,7 @@ function init(argv){
   }
 
   if (options.showWarnings) console.log('Running in generate mode..');
-  model = running_mode_loaders[RUNNING_MODE.GENERATE](options);
-
-  return model;
-}
-
-function forFiles(config, files){
-  if (typeof files !== "undefined") {
-    config.tests = files.filter(
-      function(v){ return v.endsWith('.elm'); }
-    ).map(elmPathToModule);
-  }
-
-  return config;
+  return model(options);
 }
 
 function generate(model, allTestsGenerated) {
@@ -128,6 +99,16 @@ function generate(model, allTestsGenerated) {
         }
     });
   });
+}
+
+function forFiles(config, files){
+  if (typeof files !== "undefined") {
+    config.tests = files.filter(
+      function(v){ return v.endsWith('.elm'); }
+    ).map(elmPathToModule);
+  }
+
+  return config;
 }
 
 function serial(xs, f, done) {
@@ -197,6 +178,5 @@ function elmModuleToPath(moduleName){
 }
 
 module.exports = {
-  RUNNING_MODE: RUNNING_MODE,
   init: init
 };
