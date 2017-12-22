@@ -198,7 +198,7 @@ Also by default the first command looks for the config file at `tests/elm-verify
 
 You can run elm-verify-examples for one or more modules explicitly. They don't have to be specified in `tests/elm-verify-examples.json`.
 ```bash
-$ elm-verify-examples --run ./src/Foo.elm ./src/Foo/Bar.elm && elm-test
+$ elm-verify-examples ./src/Foo.elm ./src/Foo/Bar.elm && elm-test
 ```
 
 Examples
