@@ -102,11 +102,13 @@ function generate(model, allTestsGenerated) {
 }
 
 function forFiles(config, files){
-  if (typeof files !== "undefined") {
-    config.tests = files.filter(
-      function(v){ return v.endsWith('.elm'); }
-    ).map(elmPathToModule);
+  if (typeof files === "undefined") {
+    return config;
   }
+
+  config.tests = files.filter(
+    function(v){ return v.endsWith('.elm'); }
+  ).map(elmPathToModule);
 
   return config;
 }
