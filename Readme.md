@@ -36,7 +36,7 @@ $ touch tests/elm-verify-examples.json
 }
 ```
 
-It's recommended to add `./tests/Doc` to your `.gitignore`.
+It's recommended to add `./tests/VerifyExamples` to your `.gitignore`.
 
 Writing Verified Examples
 ----------------
@@ -173,7 +173,7 @@ You have to use elm-test in order to run them.
 $ elm-verify-examples
 ```
 
-By default the first command creates the tests at `tests/Doc/`. If you want to have them at a custom location use the `--output` argument (e.g. `elm-verify-examples --output my/custom/path/` will create the tests at `my/custom/path/Doc/`).
+By default the first command creates the tests at `tests/VerifyExamples/`. If you want to have them at a custom location use the `--output` argument (e.g. `elm-verify-examples --output my/custom/path/` will create the tests at `my/custom/path/VerifyExamples/`).
 
 Also by default the first command looks for the config file at `tests/elm-verify-examples.json`. If you want it to load a specific config file use the `--config` argument (e.g. `elm-verify-examples --config my/custom/path/elm-verify-examples.json` will read the config from `my/custom/path/elm-verify-examples.json`).
 

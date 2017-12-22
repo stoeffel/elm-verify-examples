@@ -19,7 +19,7 @@ var model = function(options){
     output: options.output,
     configPath: options.configPath,
     cleanup: cleanup,
-    testsDocPath: path.join(options.output, "Doc")
+    testsDocPath: path.join(options.output, "VerifyExamples")
   };
 };
 
