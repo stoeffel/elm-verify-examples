@@ -17,7 +17,9 @@ var model = function(options){
     run: generate,
     showWarnings: options.showWarnings,
     output: options.output,
-    configPath: options.configPath
+    configPath: options.configPath,
+    cleanup: cleanup,
+    testsDocPath: path.join(options.output, "VerifyExamples")
   };
 };
 
@@ -59,8 +61,7 @@ function generate(model, allTestsGenerated) {
     process.cwd(),
     "tests"
   );
-  var testsDocPath = path.join(model.output, "Doc");
-  rimraf.sync(testsDocPath);
+  cleanup(model);
 
   if (config.tests.length === 0){
     if (model.showWarnings) {
@@ -92,13 +93,17 @@ function generate(model, allTestsGenerated) {
 
   var writtenTests = 0;
   app.ports.writeFiles.subscribe(function(data) {
-    serial(data, writeFile(testsDocPath), function() {
+    serial(data, writeFile(model.testsDocPath), function() {
         writtenTests = writtenTests + 1;
         if (writtenTests === config.tests.length && allTestsGenerated) {
           allTestsGenerated();
         }
     });
   });
+}
+
+function cleanup(model) {
+  rimraf.sync(model.testsDocPath);
 }
 
 function forFiles(config, files){
