@@ -157,7 +157,7 @@ function writeFile(testsDocPath) {
         return;
       }
       fs.writeFile(
-        path.join(testsDocModulePath, moduleName + "Spec.elm"),
+        path.join(testsDocModulePath, moduleName + ".elm"),
         test,
         "utf8",
         function(err) {

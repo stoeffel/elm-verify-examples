@@ -18,7 +18,6 @@ escape : String -> String
 escape =
     Regex.replace All escapedSlashRegex (\_ -> "\\\\")
         >> Regex.replace All escapedDoubleQuote (\_ -> "\\\"")
-        >> Regex.replace All spacesRegex (\_ -> " ")
 
 
 escapedSlashRegex : Regex
@@ -29,8 +28,3 @@ escapedSlashRegex =
 escapedDoubleQuote : Regex
 escapedDoubleQuote =
     regex "\\\""
-
-
-spacesRegex : Regex
-spacesRegex =
-    regex "\\s\\s+"
