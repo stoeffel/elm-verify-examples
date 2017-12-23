@@ -104,7 +104,7 @@ spec test index =
     , ""
     , "spec" ++ toString index ++ " : Test.Test"
     , "spec" ++ toString index ++ " ="
-    , indent 1 (testDefinition test index)
+    , indent 1 (testDefinition test)
     , indent 2 "\\() ->"
     , indent 3 "Expect.equal"
     ]
@@ -134,15 +134,13 @@ todo moduleName =
     ]
 
 
-testDefinition : Test -> Int -> String
-testDefinition test index =
+testDefinition : Test -> String
+testDefinition test =
     String.concat
         [ "Test.test \""
         , test.functionToTest
             |> Maybe.map ((++) "#")
             |> Maybe.withDefault "Module VerifyExamples"
-        , " Example"
-        , toString index
         , ": \\n"
         , exampleName test
         , "\" <|"
@@ -151,10 +149,9 @@ testDefinition test index =
 
 exampleName : Test -> String
 exampleName { assertion, expectation } =
-    [ [ "{-|" ]
+    [ [ "" ]
     , List.map (escape << indent 1) (String.lines assertion)
     , List.map (indent 1 << prefixArrow << escape) (String.lines expectation)
-    , [ "-}" ]
     ]
         |> List.concat
         |> String.join "\\n"
