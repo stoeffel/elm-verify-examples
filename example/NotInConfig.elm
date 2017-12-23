@@ -8,6 +8,8 @@ module NotInConfig exposing (..)
 
     hello --> "wolrd"
 
+    hello --> "world"
+
 -}
 hello : String
 hello =
