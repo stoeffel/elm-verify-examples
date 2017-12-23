@@ -5,6 +5,7 @@ var processTitle = "elm-verify-examples";
 process.title = processTitle;
 
 var argv = require('yargs').argv;
+var fs = require('fs');
 var init = require('./runner').init;
 var childProcess = require('child_process');
 var path = require('path');
@@ -14,11 +15,21 @@ var path = require('path');
 var cliModel = init(argv);
 
 cliModel.run(cliModel, function() {
-  var exit = childProcess.spawnSync(path.join(__dirname, '../node_modules/.bin/elm-test'),
+  var status = runElmTest();
+  cliModel.cleanup(cliModel);
+  process.exit(status);
+});
+
+function runElmTest(){
+  var elmTest = "elm-test";
+  var localElmTest = path.join(__dirname, '../node_modules/.bin/elm-test');
+  if (fs.existsSync(localElmTest)) {
+    elmTest = localElmTest;
+  }
+
+  return childProcess.spawnSync(elmTest,
     {
       cwd: process.cwd(),
       stdio: 'inherit'
-    });
-  cliModel.cleanup(cliModel);
-  process.exit(exit.status);
-});
+    }).status;
+}
