@@ -1,11 +1,12 @@
 #! /bin/bash -ex
-TEST_COUNT=32
+PASSED_COUNT=32
+FAILED_COUNT=1
 TODO_COUNT=1
 
 elm-make src/VerifyExamples.elm --output bin/elm.js --warn
 pushd example
-../bin/cli.js 2>&1 | tee ../result.json
+../bin/cli.js 2>&1 | tee ../output.txt
 popd
-cat result.json | grep "Passed:   ${TEST_COUNT}"
-cat result.json | grep "Failed:   0"
-cat result.json | grep "Todo:     ${TODO_COUNT}"
+cat output.txt | grep "Passed:   ${PASSED_COUNT}"
+cat output.txt | grep "Failed:   ${FAILED_COUNT}"
+cat output.txt | grep "Todo:     ${TODO_COUNT}"
