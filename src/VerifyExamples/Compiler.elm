@@ -141,20 +141,19 @@ testDefinition test =
         , test.functionToTest
             |> Maybe.map ((++) "#")
             |> Maybe.withDefault "Module VerifyExamples"
-        , ": \\n"
-        , exampleName test
+        , ": \\n\\n"
+        , exampleName test |> String.join "\\n"
         , "\" <|"
         ]
 
 
-exampleName : Test -> String
+exampleName : Test -> List String
 exampleName { assertion, expectation } =
-    [ [ "" ]
-    , List.map (escape << indent 1) (String.lines assertion)
-    , List.map (indent 1 << prefixArrow << escape) (String.lines expectation)
+    [ String.lines assertion
+    , String.lines expectation |> List.map prefixArrow
     ]
         |> List.concat
-        |> String.join "\\n"
+        |> List.map (indent 1 >> escape)
 
 
 prefixArrow : String -> String
