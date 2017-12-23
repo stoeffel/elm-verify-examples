@@ -143,7 +143,7 @@ testDefinition test index =
             |> Maybe.withDefault "Module VerifyExamples"
         , " Example"
         , toString index
-        , ": "
+        , ": \\n"
         , exampleName test
         , "\" <|"
         ]
@@ -151,12 +151,18 @@ testDefinition test index =
 
 exampleName : Test -> String
 exampleName { assertion, expectation } =
-    (assertion ++ " --> " ++ expectation)
-        |> replace "\n" " "
-        |> clean
-        |> ellipsis 40
-        |> surround "`"
-        |> escape
+    [ [ "{-|" ]
+    , List.map (escape << indent 1) (String.lines assertion)
+    , List.map (indent 1 << prefixArrow << escape) (String.lines expectation)
+    , [ "-}" ]
+    ]
+        |> List.concat
+        |> String.join "\\n"
+
+
+prefixArrow : String -> String
+prefixArrow =
+    (++) "--> "
 
 
 specBody : Test -> List String
