@@ -34,14 +34,14 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "elm-test": "^0.18.12",
-    "fs-extra": "^1.0.0",
+    "fs-extra": "^5.0.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.6.2",
-    "yargs": "^6.4.0"
+    "yargs": "^10.0.3"
   },
   "devDependencies": {
     "elm": "^0.18.0",
     "elm-test": "^0.18.12",
-    "xyz": "^1.1.0"
+    "xyz": "^2.1.0"
   }
 }
