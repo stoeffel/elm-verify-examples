@@ -1,6 +1,5 @@
 module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial)
 
-import VerifyExamples.Ast as Ast exposing (Ast)
 import VerifyExamples.Function as Function exposing (Function)
 import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Test as Test exposing (Test)
@@ -14,12 +13,9 @@ type alias TestSuite =
     }
 
 
-fromAst : Maybe String -> List Ast -> TestSuite
-fromAst fnName ast =
+fromAst : Maybe String -> GroupedAst -> TestSuite
+fromAst fnName { imports, types, functions, examples } =
     let
-        { imports, types, functions, examples } =
-            GroupedAst.fromAst ast
-
         tests =
             Test.fromExamples fnName examples
     in
