@@ -18,7 +18,7 @@ fromAst fnName { imports, types, functions, examples } =
     { imports = List.map GroupedAst.importToString imports
     , types = List.map GroupedAst.typeToString types
     , tests = Test.fromExamples fnName examples
-    , helperFunctions = Function.toFunctions functions examples
+    , helperFunctions = Function.toFunctions examples functions
     }
 
 
