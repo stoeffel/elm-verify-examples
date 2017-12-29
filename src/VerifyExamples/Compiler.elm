@@ -31,7 +31,7 @@ compile moduleName suite =
           , List.concat
                 [ moduleHeader info Nothing
                 , suite.tests
-                    |> List.indexedMap compileTest
+                    |> List.indexedMap spec
                     |> List.concat
                     |> addTodoIfEmpty moduleName
                 ]
@@ -61,14 +61,9 @@ compileTestPerFunction info index test =
                 |> List.filter .isUsed
                 |> List.map .function
             , [ "" ]
-            , spec test index
+            , spec index test
             ]
     )
-
-
-compileTest : Int -> Test -> List String
-compileTest index test =
-    spec test index
 
 
 moduleHeader : Info -> Maybe String -> List String
@@ -98,8 +93,8 @@ specModule moduleName functionToTest =
             moduleName
 
 
-spec : Test -> Int -> List String
-spec test index =
+spec : Int -> Test -> List String
+spec index test =
     [ ""
     , ""
     , "spec" ++ toString index ++ " : Test.Test"
