@@ -3,7 +3,7 @@ module VerifyExamples.Compiler exposing (compile)
 import String
 import String.Extra exposing (clean, ellipsis, replace, surround, toSentenceCase)
 import String.Util exposing (escape, indent, unlines)
-import VerifyExamples.Function exposing (Function)
+import VerifyExamples.Function as Function exposing (Function)
 import VerifyExamples.Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
@@ -58,8 +58,7 @@ compileTestPerFunction info index test =
             , info.types
             , [ "" ]
             , info.helperFunctions
-                |> List.filter .isUsed
-                |> List.map .function
+                |> List.map Function.toString
             , [ "" ]
             , spec index test
             ]

@@ -15,17 +15,10 @@ type alias TestSuite =
 
 fromAst : Maybe String -> GroupedAst -> TestSuite
 fromAst fnName { imports, types, functions, examples } =
-    let
-        tests =
-            Test.fromExamples fnName examples
-    in
     { imports = List.map GroupedAst.importToString imports
     , types = List.map GroupedAst.typeToString types
-    , tests = tests
-    , helperFunctions =
-        functions
-            |> List.map (GroupedAst.functionInfo >> Function.toFunction tests)
-            |> Function.onlyUsed
+    , tests = Test.fromExamples fnName examples
+    , helperFunctions = Function.toFunctions functions examples
     }
 
 
