@@ -4,6 +4,7 @@ import Json.Decode as Decode exposing (Value, decodeValue, field, list, string)
 import Platform
 import Task
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.ModuleName as ModuleName
 import VerifyExamples.Parser as Parser
 
 
@@ -62,7 +63,8 @@ update msg model =
             let
                 generatedTests =
                     Parser.parse fileText
-                        |> List.concatMap (Compiler.compile moduleName)
+                        |> List.concatMap (Compiler.compile <| ModuleName.fromString moduleName)
+                        |> List.map (Tuple.mapFirst ModuleName.toString)
             in
             ( model
             , writeFiles generatedTests
