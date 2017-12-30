@@ -16,7 +16,7 @@ var cliModel = init(argv);
 
 cliModel.run(cliModel, function() {
   var status = runElmTest();
-  cliModel.cleanup(cliModel);
+  if (status === 0) cliModel.cleanup(cliModel);
   process.exit(status);
 });
 
