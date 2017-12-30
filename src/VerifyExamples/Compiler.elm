@@ -11,27 +11,34 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 compile : ModuleName -> TestSuite -> List ( ModuleName, String )
 compile moduleName suite =
     if TestSuite.notSpecial suite then
-        [ ( moduleName
-          , unlines
-                [ moduleHeader suite moduleName
-                , imports suite moduleName
-                , suite.tests
-                    |> List.indexedMap spec
-                    |> todoIfEmpty moduleName
-                ]
-          )
-        ]
+        [ compileTestPerModule moduleName suite ]
     else
         List.indexedMap (compileTestPerFunction moduleName suite) suite.tests
 
 
+compileTestPerModule : ModuleName -> TestSuite -> ( ModuleName, String )
+compileTestPerModule moduleName suite =
+    ( moduleName
+    , unlines
+        [ moduleHeader suite moduleName
+        , imports suite moduleName
+        , suite.tests
+            |> List.indexedMap spec
+            |> todoIfEmpty moduleName
+        ]
+    )
+
+
 compileTestPerFunction : ModuleName -> TestSuite -> Int -> Test -> ( ModuleName, String )
 compileTestPerFunction moduleName suite index test =
-    ( ModuleName.extendName moduleName (Test.specName index test)
+    let
+        extendedModuleName =
+            Test.specName index test
+                |> ModuleName.extendName moduleName
+    in
+    ( extendedModuleName
     , unlines
-        [ Test.specName index test
-            |> ModuleName.extendName moduleName
-            |> moduleHeader suite
+        [ moduleHeader suite extendedModuleName
         , imports suite moduleName
         , unlines suite.types
         , ""
