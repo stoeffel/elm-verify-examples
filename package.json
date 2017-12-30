@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "prepublish": "npm run-script elm-make",
-    "test": "./run-tests.sh",
+    "test": "./run-tests.sh && npm run-script verify-own-docs",
+    "verify-own-docs": "./bin/cli.js",
     "elm-make": "elm-make src/VerifyExamples.elm --output bin/elm.js",
     "start": "npm run-script elm-make && cd example && ../bin/cli.js",
     "release-major": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major",
