@@ -1,4 +1,4 @@
-module String.Util exposing (escape, indent, unlines)
+module String.Util exposing (escape, indent, indentLines, unlines)
 
 import Regex exposing (HowMany(..), Regex, regex)
 
@@ -12,6 +12,13 @@ indent : Int -> String -> String
 indent count str =
     String.concat
         (List.repeat (count * 4) " " ++ [ str ])
+
+
+indentLines : Int -> String -> String
+indentLines count =
+    String.lines
+        >> List.map (indent count)
+        >> unlines
 
 
 escape : String -> String
