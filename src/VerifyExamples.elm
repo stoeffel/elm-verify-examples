@@ -1,18 +1,18 @@
 port module VerifyExamples exposing (..)
 
+import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Value, decodeValue, field, list, string)
 import Platform
-import Task
 import VerifyExamples.Compiler as Compiler
-import VerifyExamples.ModuleName as ModuleName
+import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
 
 
-main : Program Value Model Msg
+main : Program Value () Msg
 main =
     Platform.programWithFlags
-        { init = init
-        , update = update
+        { init = init >> (,) ()
+        , update = \msg _ -> ( (), update msg )
         , subscriptions = subscriptions
         }
 
@@ -21,27 +21,21 @@ main =
 -- MODEL
 
 
-type alias Model =
-    { root : String
-    , tests : List String
-    }
-
-
-init : Value -> ( Model, Cmd Msg )
+init : Value -> Cmd Msg
 init flags =
     case decodeValue decoder flags of
-        Ok model ->
-            model ! List.map (message << ReadTest) model.tests
+        Ok tests ->
+            tests
+                |> List.map (ReadTest >> Cmd.perform)
+                |> Cmd.batch
 
         Err err ->
             Debug.crash err
 
 
-decoder : Decode.Decoder Model
+decoder : Decode.Decoder (List String)
 decoder =
-    Decode.map2 Model
-        (field "root" string)
-        (field "tests" (list string))
+    field "tests" (list string)
 
 
 
@@ -50,25 +44,24 @@ decoder =
 
 type Msg
     = ReadTest String
-    | CompileModule ( String, String )
+    | CompileModule ( ModuleName, String )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Cmd Msg
+update msg =
     case msg of
         ReadTest test ->
-            model ! [ readFile test ]
+            readFile test
 
         CompileModule ( moduleName, fileText ) ->
-            let
-                generatedTests =
-                    Parser.parse fileText
-                        |> List.concatMap (Compiler.compile <| ModuleName.fromString moduleName)
-                        |> List.map (Tuple.mapFirst ModuleName.toString)
-            in
-            ( model
-            , writeFiles generatedTests
-            )
+            generateTests moduleName fileText
+                |> List.map (Tuple.mapFirst ModuleName.toString)
+                |> writeFiles
+
+
+generateTests : ModuleName -> String -> List ( ModuleName, String )
+generateTests moduleName =
+    Parser.parse >> List.concatMap (Compiler.compile moduleName)
 
 
 
@@ -88,15 +81,7 @@ port generateModuleVerifyExamples : (( String, String ) -> msg) -> Sub msg
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    generateModuleVerifyExamples CompileModule
-
-
-
--- UTILS
-
-
-message : msg -> Cmd msg
-message x =
-    Task.perform (\_ -> x) (Task.succeed ())
+subscriptions : () -> Sub Msg
+subscriptions _ =
+    generateModuleVerifyExamples
+        (CompileModule << Tuple.mapFirst ModuleName.fromString)
