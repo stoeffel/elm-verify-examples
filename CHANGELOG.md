@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## 2.0.0
+
 - We have a changelog now :tada:
 - Directly depending on `elm-test`. This means you can run `elm-verify-examples` without running `elm-test` afterwards. [#52](https://github.com/stoeffel/elm-verify-examples/pull/52)
 - Nicer test failures [#53](https://github.com/stoeffel/elm-verify-examples/pull/53)
