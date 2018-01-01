@@ -5,6 +5,7 @@ var fs = require("fs");
 var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
 var rimraf = require('rimraf');
+var childProcess = require('child_process');
 
 
 // loaders are called by init
@@ -17,8 +18,10 @@ var model = function(options){
     run: generate,
     showWarnings: options.showWarnings,
     output: options.output,
+    elmTestPath: options.elmTestPath,
     configPath: options.configPath,
     cleanup: cleanup,
+    runElmTest: runElmTest,
     testsDocPath: path.join(options.output, "VerifyExamples")
   };
 };
@@ -32,7 +35,8 @@ function init(argv){
     showWarnings: true,
     output: "tests",
     configPath: defaultConfigPath,
-    forFiles: undefined
+    forFiles: undefined,
+    elmTestPath: path.join(__dirname, '../node_modules/.bin/elm-test')
   };
 
   if (typeof argv.warn !== "undefined") {
@@ -45,6 +49,10 @@ function init(argv){
 
   if (typeof argv.config !== "undefined") {
     options.configPath = argv.config;
+  }
+
+  if (typeof argv.elmTest !== "undefined") {
+    options.elmTestPath = argv.elmTest;
   }
 
   if (typeof argv._ !== "undefined" && argv._.length > 0) {
@@ -100,6 +108,19 @@ function generate(model, allTestsGenerated) {
         }
     });
   });
+}
+
+function runElmTest(model){
+  var elmTest = "elm-test";
+  if (fs.existsSync(model.elmTestPath)) {
+    elmTest = model.elmTestPath;
+  }
+
+  return childProcess.spawnSync(elmTest,
+    {
+      cwd: process.cwd(),
+      stdio: 'inherit'
+    }).status;
 }
 
 function cleanup(model) {

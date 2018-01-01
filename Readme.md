@@ -182,6 +182,12 @@ You can run elm-verify-examples for one or more modules explicitly. They don't h
 $ elm-verify-examples ./src/Foo.elm ./src/Foo/Bar.elm
 ```
 
+You can pass a custom path to elm-test if necessary.
+```bash
+$ elm-verify-examples --elm-test=./node_modules/.bin/elm-test
+```
+It will use the elm-test installed with this package.
+
 Examples
 --------
 
