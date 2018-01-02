@@ -202,7 +202,6 @@ function elmPathToModule(root) {
       root
     );
     var relativePath = path.relative(path.resolve(testsPath), pathName);
-    console.log(relativePath, pathName, testsPath)
     if (relativePath.startsWith("./")) {
       relativePath = relativePath.substr(2);
     }
