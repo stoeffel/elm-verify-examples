@@ -134,7 +134,7 @@ function forFiles(config, files){
 
   config.tests = files.filter(
     function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule);
+  ).map(elmPathToModule(config.root));
 
   return config;
 }
@@ -194,11 +194,22 @@ function writeFile(testsDocPath) {
   };
 }
 
-function elmPathToModule(pathName){
-  if (pathName.startsWith("./")) {
-    pathName = pathName.substr(2);
-  }
-  return pathName.substr(0, pathName.length - 4).replace(/\//g, ".");
+function elmPathToModule(root) {
+  return function(pathName){
+    var testsPath = path.join(
+      process.cwd(),
+      "tests",
+      root
+    );
+    var relativePath = path.relative(path.resolve(testsPath), pathName);
+    console.log(relativePath, pathName, testsPath)
+    if (relativePath.startsWith("./")) {
+      relativePath = relativePath.substr(2);
+    }
+    return relativePath
+      .substr(0, relativePath.length - 4)
+      .replace(/\//g, ".");
+  };
 }
 
 function elmModuleToPath(moduleName){
