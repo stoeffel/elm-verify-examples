@@ -116,7 +116,7 @@ function runElmTest(model){
     elmTest = model.elmTestPath;
   }
 
-  return childProcess.spawnSync(elmTest,
+  return childProcess.spawnSync(elmTest, [model.testsDocPath],
     {
       cwd: process.cwd(),
       stdio: 'inherit'
