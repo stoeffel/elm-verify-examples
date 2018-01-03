@@ -11,6 +11,10 @@ var childProcess = require('child_process');
 // loaders are called by init
 var model = function(options){
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
+  verifyExamplesConfig.testsPath = path.join(
+    process.cwd(),
+    "tests"
+  );
   var config = forFiles(verifyExamplesConfig, options.forFiles);
 
   return {
@@ -65,10 +69,6 @@ function init(argv){
 
 function generate(model, allTestsGenerated) {
   var config = model.config;
-  var testsPath = path.join(
-    process.cwd(),
-    "tests"
-  );
   cleanup(model);
 
   if (config.tests.length === 0){
@@ -82,7 +82,7 @@ function generate(model, allTestsGenerated) {
 
   app.ports.readFile.subscribe(function(test) {
     var pathToModule = path.join(
-      testsPath,
+      config.testsPath,
       config.root,
       elmModuleToPath(test)
     );
@@ -115,6 +115,12 @@ function runElmTest(model){
   if (fs.existsSync(model.elmTestPath)) {
     elmTest = model.elmTestPath;
   }
+  if (typeof model.config.elmTest !== "undefined") {
+    var configuredPath = path.resolve(path.join(model.config.testsPath, model.config.elmTest));
+    if (fs.existsSync(configuredPath)) {
+      elmTest = configuredPath;
+    }
+  }
 
   return childProcess.spawnSync(elmTest, [model.testsDocPath],
     {
@@ -134,7 +140,7 @@ function forFiles(config, files){
 
   config.tests = files.filter(
     function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule(config.root));
+  ).map(elmPathToModule(config.root, config.testsPath));
 
   return config;
 }
@@ -194,14 +200,9 @@ function writeFile(testsDocPath) {
   };
 }
 
-function elmPathToModule(root) {
+function elmPathToModule(root, testsPath) {
   return function(pathName){
-    var testsPath = path.join(
-      process.cwd(),
-      "tests",
-      root
-    );
-    var relativePath = path.relative(path.resolve(testsPath), pathName);
+    var relativePath = path.relative(path.resolve(path.join(testsPath, root)), pathName);
     if (relativePath.startsWith("./")) {
       relativePath = relativePath.substr(2);
     }
