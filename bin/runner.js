@@ -9,77 +9,34 @@ var childProcess = require('child_process');
 
 
 // loaders are called by init
-var model = function(options){
-  var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
+var init = function(args){
+  var configJson = "elm-verify-examples.json";
+  var configPath = path.join(process.cwd(), args.output, configJson);
+  var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(configPath);
   verifyExamplesConfig.testsPath = path.join(
     process.cwd(),
-    options.output
+    args.output
   );
-  var config = forFiles(verifyExamplesConfig, options.forFiles);
+  var config = forFiles(verifyExamplesConfig, args._);
 
   return {
     config: config,
     run: generate,
-    showWarnings: options.showWarnings,
-    output: options.output,
-    elmTestPath: options.elmTestPath,
-    elmTestArgs: options.elmTestArgs,
-    configPath: options.configPath,
     cleanup: cleanup,
     runElmTest: runElmTest,
-    testsDocPath: path.join(options.output, "VerifyExamples")
+    args: args,
+    testsDocPath: path.join(args.output, "VerifyExamples")
   };
 };
 
 
-// parse args
-function init(argv){
-  var configJson = "elm-verify-examples.json";
-  var defaultConfigPath = path.join(process.cwd(), 'tests', configJson);
-
-  var options = {
-    showWarnings: true,
-    output: "tests",
-    configPath: defaultConfigPath,
-    forFiles: undefined,
-    elmTestPath: path.join(__dirname, '../node_modules/.bin/elm-test'),
-    elmTestArgs: []
-  };
-
-  if (typeof argv.warn !== "undefined") {
-    options.showWarnings = argv.warn;
-  }
-
-  if (typeof argv.output !== "undefined") {
-    options.output = argv.output;
-    options.configPath = path.join(process.cwd(), options.output, configJson);
-  }
-
-  if (typeof argv.config !== "undefined") {
-    options.configPath = argv.config;
-  }
-
-  if (typeof argv.elmTest !== "undefined") {
-    options.elmTestPath = argv.elmTest;
-  }
-  if (typeof argv.elmTestArgs !== "undefined") {
-    options.elmTestArgs = argv.elmTestArgs.split(" ");
-  }
-
-  if (typeof argv._ !== "undefined" && argv._.length > 0) {
-    options.forFiles = argv._;
-  }
-
-  if (options.showWarnings) console.log('Running in generate mode..');
-  return model(options);
-}
-
 function generate(model, allTestsGenerated) {
+  if (model.args.warn) console.log('Generate tests from examples...');
   var config = model.config;
   cleanup(model);
 
   if (config.tests.length === 0){
-    if (model.showWarnings) {
+    if (model.args.warn) {
       console.log('No tests listed! Modify your elm-verify-examples.json file to include modules');
     }
     return;
@@ -119,8 +76,8 @@ function generate(model, allTestsGenerated) {
 
 function runElmTest(model){
   var elmTest = "elm-test";
-  if (fs.existsSync(model.elmTestPath)) {
-    elmTest = model.elmTestPath;
+  if (fs.existsSync(model.args.elmTest)) {
+    elmTest = model.args.elmTest;
   }
   if (typeof model.config.elmTest !== "undefined") {
     var configuredPath = path.resolve(path.join(model.config.testsPath, model.config.elmTest));
@@ -129,8 +86,8 @@ function runElmTest(model){
     }
   }
 
-  model.elmTestArgs.unshift(model.testsDocPath);
-  return childProcess.spawnSync(elmTest, model.elmTestArgs,
+  model.args.elmTestArgs.unshift(model.testsDocPath);
+  return childProcess.spawnSync(elmTest, model.args.elmTestArgs,
     {
       cwd: process.cwd(),
       stdio: 'inherit'
@@ -142,7 +99,7 @@ function cleanup(model) {
 }
 
 function forFiles(config, files){
-  if (typeof files === "undefined") {
+  if (typeof files === "undefined" || files.length === 0) {
     return config;
   }
 
