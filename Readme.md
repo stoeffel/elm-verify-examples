@@ -186,6 +186,7 @@ You can pass a custom path to elm-test if necessary.
 ```bash
 $ elm-verify-examples --elm-test=./node_modules/.bin/elm-test
 $ # or add it to your elm-verify-examples.json `elmTest: "../node....`
+$ # you can also pass arguments to elm-test with --elm-test-args
 ```
 It will use the elm-test installed with this package.
 

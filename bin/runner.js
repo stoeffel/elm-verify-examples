@@ -23,6 +23,7 @@ var model = function(options){
     showWarnings: options.showWarnings,
     output: options.output,
     elmTestPath: options.elmTestPath,
+    elmTestArgs: options.elmTestArgs,
     configPath: options.configPath,
     cleanup: cleanup,
     runElmTest: runElmTest,
@@ -41,7 +42,8 @@ function init(argv){
     output: "tests",
     configPath: defaultConfigPath,
     forFiles: undefined,
-    elmTestPath: path.join(__dirname, '../node_modules/.bin/elm-test')
+    elmTestPath: path.join(__dirname, '../node_modules/.bin/elm-test'),
+    elmTestArgs: []
   };
 
   if (typeof argv.warn !== "undefined") {
@@ -59,6 +61,9 @@ function init(argv){
 
   if (typeof argv.elmTest !== "undefined") {
     options.elmTestPath = argv.elmTest;
+  }
+  if (typeof argv.elmTestArgs !== "undefined") {
+    options.elmTestArgs = argv.elmTestArgs.split(" ");
   }
 
   if (typeof argv._ !== "undefined" && argv._.length > 0) {
@@ -124,7 +129,8 @@ function runElmTest(model){
     }
   }
 
-  return childProcess.spawnSync(elmTest, [model.testsDocPath],
+  model.elmTestArgs.unshift(model.testsDocPath);
+  return childProcess.spawnSync(elmTest, model.elmTestArgs,
     {
       cwd: process.cwd(),
       stdio: 'inherit'
