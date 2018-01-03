@@ -1,7 +1,5 @@
 var path = require("path");
-var fs = require('fs');
 var fsExtra = require("fs-extra");
-var mkdirp = require("mkdirp");
 
 function loadVerifyExamplesConfig(configPath) {
   /* load the doc test config if we can find it
@@ -27,4 +25,4 @@ function loadVerifyExamplesConfig(configPath) {
 
 module.exports =  {
     loadVerifyExamplesConfig: loadVerifyExamplesConfig
-}
+};

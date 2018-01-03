@@ -13,7 +13,7 @@ var model = function(options){
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(options.configPath);
   verifyExamplesConfig.testsPath = path.join(
     process.cwd(),
-    "tests"
+    options.output
   );
   var config = forFiles(verifyExamplesConfig, options.forFiles);
 
@@ -33,7 +33,8 @@ var model = function(options){
 
 // parse args
 function init(argv){
-  var defaultConfigPath = path.join(process.cwd(), 'tests/elm-verify-examples.json');
+  var configJson = "elm-verify-examples.json";
+  var defaultConfigPath = path.join(process.cwd(), 'tests', configJson);
 
   var options = {
     showWarnings: true,
@@ -49,6 +50,7 @@ function init(argv){
 
   if (typeof argv.output !== "undefined") {
     options.output = argv.output;
+    options.configPath = path.join(process.cwd(), options.output, configJson);
   }
 
   if (typeof argv.config !== "undefined") {
