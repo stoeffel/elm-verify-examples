@@ -1,5 +1,6 @@
-module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial)
+module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial, testedFunctions)
 
+import List.Extra exposing (unique)
 import VerifyExamples.Function as Function exposing (Function)
 import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Test as Test exposing (Test)
@@ -53,3 +54,10 @@ empty =
 notSpecial : TestSuite -> Bool
 notSpecial { types, helperFunctions } =
     List.isEmpty types && List.isEmpty helperFunctions
+
+
+testedFunctions : TestSuite -> List String
+testedFunctions =
+    .tests
+        >> List.filterMap Test.functionName
+        >> unique

@@ -65,3 +65,9 @@ moo fn x =
 test : Int -> Int -> Bool
 test a b =
     a == b
+
+
+{-| -}
+dontCare : Bool
+dontCare =
+    False

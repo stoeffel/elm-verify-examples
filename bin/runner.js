@@ -6,6 +6,7 @@ var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
 var rimraf = require('rimraf');
 var childProcess = require('child_process');
+var chalk = require('chalk');
 
 
 // loaders are called by init
@@ -23,6 +24,8 @@ var init = function(args){
     config: config,
     run: generate,
     cleanup: cleanup,
+    warnModule: warnModule,
+    warnSummary: warnSummary,
     runElmTest: runElmTest,
     args: args,
     testsDocPath: path.join(args.output, "VerifyExamples")
@@ -37,29 +40,46 @@ function generate(model, allTestsGenerated) {
 
   if (config.tests.length === 0){
     if (model.args.warn) {
-      console.log('No tests listed! Modify your elm-verify-examples.json file to include modules');
+      warn('No tests listed! Modify your elm-verify-examples.json file to include modules');
+      if (model.args.failOnWarn) process.exit(1);
     }
     return;
   }
 
   var app = Elm.VerifyExamples.worker(config);
 
-  app.ports.readFile.subscribe(function(test) {
+  app.ports.readFile.subscribe(function(moduleName) {
     var pathToModule = path.join(
       config.testsPath,
       config.root,
-      elmModuleToPath(test)
+      elmModuleToPath(moduleName)
     );
     fs.readFile(
         pathToModule,
         "utf8",
-        function(err, data) {
+        function(err, fileText) {
       if (err) {
         console.error(err);
         process.exit(-1);
         return;
       }
-      app.ports.generateModuleVerifyExamples.send([test, data]);
+        app.ports.generateModuleVerifyExamples.send(
+          { moduleName: moduleName,
+            fileText: fileText,
+            ignoredWarnings: ignoredWarnings(config.ignoreWarnings, moduleName)
+          }
+        );
+    });
+  });
+
+  var warnings = [];
+  app.ports.warn.subscribe(function(args) {
+    var moduleName = args[0];
+    var warningsForModule = args[1];
+    if (warningsForModule.length === 0) return;
+    warnings.push({
+      moduleName: moduleName,
+      warnings: warningsForModule
     });
   });
 
@@ -68,10 +88,16 @@ function generate(model, allTestsGenerated) {
     serial(data, writeFile(model.testsDocPath), function() {
         writtenTests = writtenTests + 1;
         if (writtenTests === config.tests.length && allTestsGenerated) {
-          allTestsGenerated();
+          allTestsGenerated(warnings);
         }
     });
   });
+}
+
+function ignoredWarnings(ignores, moduleName) {
+  if (typeof ignores === "undefined") return [];
+  if (typeof ignores[moduleName] === "undefined") return [];
+  return ignores[moduleName];
 }
 
 function runElmTest(model){
@@ -97,6 +123,32 @@ function runElmTest(model){
 function cleanup(model) {
   rimraf.sync(model.testsDocPath);
 }
+
+function warnModule(model) {
+  return function(warnings) {
+    if (!model.args.warn || warnings.warnings.length === 0) return;
+    warn(chalk.underline("Warnings in module " + warnings.moduleName));
+    warn("\n");
+    warn(warnings.warnings.map(indent).join("\n"));
+    warn("\n");
+  };
+}
+
+function warnSummary(model, warnings) {
+  if (!model.args.warn) return;
+  var count = warnings.reduce(function(acc, warning) { return warning.warnings.length + acc; }, 0);
+  if (count > 0) {
+    warn(chalk.underline("EXAMPLES VERIFIED WITH WARNINGS"));
+    console.warn(chalk.dim("Warnings: ") + count);
+    warn("\n");
+  }
+
+  if (model.args.failOnWarn) process.exit(1);
+}
+
+
+function warn(str) { console.warn(chalk.yellow(str)); }
+function indent(str) { return "    " + str; }
 
 function forFiles(config, files){
   if (typeof files === "undefined" || files.length === 0) {

@@ -175,3 +175,20 @@ customType n m =
 customTypeAlias : { a | name : String } -> String -> String
 customTypeAlias { name } prefix =
     prefix ++ name
+
+
+{-| no examples :-(
+-}
+noExamples : Int
+noExamples =
+    1
+
+
+{-| no verified examples :-/
+
+    noVerifiedExamples 3
+
+-}
+noVerifiedExamples : Int -> Int
+noVerifiedExamples _ =
+    2

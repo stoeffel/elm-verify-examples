@@ -11,6 +11,8 @@ var argv = require('yargs')
   .alias("w", "warn")
   .describe("warn", "Display warnings.")
   .default("warn", true)
+  .describe("fail-on-warn", "Fail when there are warnings.")
+  .default("fail-on-warn", false)
   .alias("o", "output")
   .describe("output", "Change path to the generated tests.")
   .default("output", "tests")
@@ -28,8 +30,11 @@ var argv = require('yargs')
 // stateful things
 var cliModel = init(argv);
 
-cliModel.run(cliModel, function() {
+cliModel.run(cliModel, function(warnings) {
+  warnings.map(cliModel.warnModule(cliModel));
   var status = cliModel.runElmTest(cliModel);
   if (status === 0) cliModel.cleanup(cliModel);
+  cliModel.warnSummary(cliModel, warnings);
   process.exit(status);
 });
+

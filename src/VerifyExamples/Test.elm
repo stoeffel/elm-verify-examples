@@ -3,6 +3,7 @@ module VerifyExamples.Test
         ( Test
         , exampleDescription
         , fromExamples
+        , functionName
         , name
         , specBody
         , specName
@@ -30,6 +31,11 @@ fromExamples functionToTest =
                 , functionToTest = functionToTest
                 }
         )
+
+
+functionName : Test -> Maybe String
+functionName (Test { functionToTest }) =
+    functionToTest
 
 
 specName : Int -> Test -> String
