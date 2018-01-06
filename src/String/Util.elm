@@ -1,6 +1,7 @@
 module String.Util exposing (escape, indent, indentLines, unlines)
 
 import Regex exposing (HowMany(..), Regex, regex)
+import Regex.Util exposing (replaceAllWith)
 
 
 {-| Joins strings with a newline.
@@ -53,8 +54,8 @@ indentLines count =
 
 escape : String -> String
 escape =
-    Regex.replace All escapedSlashRegex (\_ -> "\\\\")
-        >> Regex.replace All escapedDoubleQuote (\_ -> "\\\"")
+    replaceAllWith escapedSlashRegex "\\\\"
+        >> replaceAllWith escapedDoubleQuote "\\\""
 
 
 escapedSlashRegex : Regex

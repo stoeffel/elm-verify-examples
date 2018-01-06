@@ -1,6 +1,6 @@
 module VerifyExamples.Function exposing (Function, toFunctions, toString)
 
-import VerifyExamples.GroupedAst as GroupedAst exposing (Example, FunctionInfo)
+import VerifyExamples.Ast.Grouped as GroupedAst exposing (Example, FunctionInfo)
 
 
 type Function

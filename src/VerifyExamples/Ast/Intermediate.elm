@@ -1,4 +1,4 @@
-module VerifyExamples.IntermediateAst
+module VerifyExamples.Ast.Intermediate
     exposing
         ( IntermediateAst
         , fromString

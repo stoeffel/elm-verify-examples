@@ -14,6 +14,11 @@
         "ignore": [
           "NoExampleForExposedDefinition"
         ]
+      },
+      {
+        "ignore": [
+          "NotEverythingExposed"
+        ]
       }
     ]
   }

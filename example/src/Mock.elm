@@ -1,4 +1,17 @@
-module Mock exposing (..)
+module Mock
+    exposing
+        ( IsItCool(..)
+        , add
+        , bar
+        , coolFunc
+        , customType
+        , customTypeAlias
+        , noExamples
+        , noVerifiedExamples
+        , quux
+        , rev
+        , sum
+        )
 
 {-|
 
@@ -10,8 +23,6 @@ module Mock exposing (..)
 
     customType B 2
     --> (B, 2)
-
-@docs add, sum, bar, rev, IsItCool, coolFunc
 
 -}
 

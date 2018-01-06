@@ -10,7 +10,7 @@ module VerifyExamples.Test
         )
 
 import String.Util exposing (unlines)
-import VerifyExamples.GroupedAst as GroupedAst
+import VerifyExamples.Ast.Grouped as GroupedAst
 
 
 type Test

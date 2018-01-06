@@ -74,7 +74,7 @@ generateTests { moduleName, fileText, ignoredWarnings } =
         parsed =
             Parser.parse fileText
     in
-    ( Warning.warnings moduleName ignoredWarnings parsed
+    ( Warning.warnings ignoredWarnings parsed
     , List.concatMap (Compiler.compile moduleName) parsed.testSuites
     )
 

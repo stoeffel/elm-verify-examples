@@ -1,9 +1,9 @@
 module VerifyExamples.Parser exposing (Parsed, parse)
 
+import VerifyExamples.Ast.Grouped as GroupedAst exposing (GroupedAst)
+import VerifyExamples.Ast.Intermediate as IntermediateAst exposing (IntermediateAst)
 import VerifyExamples.Comment as Comment exposing (Comment)
 import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
-import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
-import VerifyExamples.IntermediateAst as IntermediateAst exposing (IntermediateAst)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 

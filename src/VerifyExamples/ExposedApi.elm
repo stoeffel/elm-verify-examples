@@ -2,16 +2,18 @@ module VerifyExamples.ExposedApi
     exposing
         ( ExposedApi
         , definitions
+        , everythingExposed
         , filter
         , parse
         )
 
 import Regex exposing (HowMany(..), Regex)
-import Regex.Util exposing (firstSubmatch, newline)
+import Regex.Util exposing (firstSubmatch, newline, replaceAllWith)
 
 
 type ExposedApi
     = Explicitly (List String)
+    | All
     | None
 
 
@@ -27,13 +29,18 @@ toExposedDefinition : List String -> String -> ExposedApi
 toExposedDefinition functions match =
     case match of
         ".." ->
-            Explicitly functions
+            All
 
         definitions ->
             definitions
                 |> String.split ","
-                |> List.map String.trim
+                |> List.map (replaceAllWith typeConstructors "" << String.trim)
                 |> Explicitly
+
+
+typeConstructors : Regex
+typeConstructors =
+    Regex.regex "\\([^]*?\\)"
 
 
 moduleExposing : Regex
@@ -43,7 +50,7 @@ moduleExposing =
             [ "module"
             , "[^]*?exposing"
             , "[^]*?\\("
-            , "([^]*?)\\)"
+            , "([^]*?)(\\)\\nimport|\\)\\n\\n)"
             ]
 
 
@@ -53,6 +60,9 @@ filter f api =
         Explicitly definitions ->
             List.filter f definitions
                 |> Explicitly
+
+        All ->
+            All
 
         None ->
             None
@@ -64,5 +74,21 @@ definitions api =
         Explicitly definitions ->
             definitions
 
+        All ->
+            []
+
         None ->
             []
+
+
+everythingExposed : ExposedApi -> Bool
+everythingExposed api =
+    case api of
+        Explicitly _ ->
+            False
+
+        All ->
+            True
+
+        None ->
+            False

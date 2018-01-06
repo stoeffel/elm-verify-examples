@@ -2,7 +2,7 @@ module VerifyExamples.TestSuite exposing (TestSuite, fromAst, group, notSpecial,
 
 import List.Extra exposing (unique)
 import VerifyExamples.Function as Function exposing (Function)
-import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
+import VerifyExamples.Ast.Grouped as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Test as Test exposing (Test)
 
 

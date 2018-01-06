@@ -1,4 +1,4 @@
-module Regex.Util exposing (firstSubmatch, newline, submatches)
+module Regex.Util exposing (firstSubmatch, newline, replaceAllWith, submatches)
 
 import Regex exposing (HowMany(..), Regex)
 
@@ -19,3 +19,8 @@ firstSubmatch regex str =
 newline : String
 newline =
     "\x0D?\n"
+
+
+replaceAllWith : Regex -> String -> String -> String
+replaceAllWith regex with =
+    Regex.replace Regex.All regex (always with)
