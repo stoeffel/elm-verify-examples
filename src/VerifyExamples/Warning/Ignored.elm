@@ -1,29 +1,29 @@
-module VerifyExamples.IgnoredWarnings exposing (IgnoredWarnings, decode, only)
+module VerifyExamples.Warning.Ignored exposing (Ignored, decode, only)
 
 import Json.Decode exposing (Decoder, field, list, map, map2, oneOf, string)
 import Json.Util exposing (exact)
-import VerifyExamples.Warning as Warning exposing (Warning(..))
+import VerifyExamples.Warning.Type exposing (Type(..))
 
 
-type alias IgnoredWarnings =
+type alias Ignored =
     { name : String
-    , ignore : List Warning
+    , ignore : List Type
     }
 
 
-decode : Decoder (List IgnoredWarnings)
+decode : Decoder (List Ignored)
 decode =
     list ignoredWarnings
 
 
-ignoredWarnings : Decoder IgnoredWarnings
+ignoredWarnings : Decoder Ignored
 ignoredWarnings =
-    map2 IgnoredWarnings
+    map2 Ignored
         (field "name" string)
         (field "ignore" (list warning))
 
 
-warning : Decoder Warning
+warning : Decoder Type
 warning =
     oneOf
         [ exact string "NoExampleForExposedDefinition"
@@ -31,7 +31,7 @@ warning =
         ]
 
 
-only : Warning -> List IgnoredWarnings -> List String
+only : Type -> List Ignored -> List String
 only warning =
     List.filter (.ignore >> List.member warning)
         >> List.map .name

@@ -4,10 +4,10 @@ import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
 import Platform
 import VerifyExamples.Compiler as Compiler
-import VerifyExamples.IgnoredWarnings as IgnoredWarnings exposing (IgnoredWarnings)
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
-import VerifyExamples.Warnings as Warnings exposing (Warnings)
+import VerifyExamples.Warning as Warning exposing (Warning)
+import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
 
 main : Program Value () Msg
@@ -63,18 +63,18 @@ update msg =
                             |> List.map (Tuple.mapFirst ModuleName.toString)
                             |> writeFiles
                         , warnings
-                            |> List.map Warnings.toString
+                            |> List.map Warning.toString
                             |> curry warn (ModuleName.toString info.moduleName)
                         ]
 
 
-generateTests : CompileInfo -> ( List Warnings, List ( ModuleName, String ) )
+generateTests : CompileInfo -> ( List Warning, List ( ModuleName, String ) )
 generateTests { moduleName, fileText, ignoredWarnings } =
     let
         parsed =
             Parser.parse fileText
     in
-    ( Warnings.warnings moduleName ignoredWarnings parsed
+    ( Warning.warnings moduleName ignoredWarnings parsed
     , List.concatMap (Compiler.compile moduleName) parsed.testSuites
     )
 
@@ -115,7 +115,7 @@ subscriptions _ =
 type alias CompileInfo =
     { moduleName : ModuleName
     , fileText : String
-    , ignoredWarnings : List IgnoredWarnings
+    , ignoredWarnings : List Ignored
     }
 
 
@@ -126,4 +126,4 @@ decodeCompileInfo =
             |> Decode.map ModuleName.fromString
         )
         (field "fileText" string)
-        (field "ignoredWarnings" IgnoredWarnings.decode)
+        (field "ignoredWarnings" Ignored.decode)
