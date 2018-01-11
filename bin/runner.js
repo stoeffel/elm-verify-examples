@@ -34,7 +34,7 @@ var init = function(args){
 
 
 function generate(model, allTestsGenerated) {
-  if (model.args.warn) console.log('Generate tests from examples...');
+  if (model.args.warn) console.warn('Generate tests from examples...');
   var config = model.config;
   cleanup(model);
 
