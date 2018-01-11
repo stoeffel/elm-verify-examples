@@ -4,7 +4,7 @@ var processTitle = "elm-verify-examples";
 
 process.title = processTitle;
 
-var init = require('./runner').init;
+var runner = require('./runner');
 var path = require('path');
 var argv = require('yargs')
   .usage('Usage: $0 [modulePaths] [options]')
@@ -27,14 +27,13 @@ var argv = require('yargs')
   .argv;
 
 
-// stateful things
-var cliModel = init(argv);
+var model = runner.init(argv);
 
-cliModel.run(cliModel, function(warnings) {
-  warnings.map(cliModel.warnModule(cliModel));
-  var status = cliModel.runElmTest(cliModel);
-  if (status === 0) cliModel.cleanup(cliModel);
-  cliModel.warnSummary(cliModel, warnings);
+runner.run(model, function(warnings) {
+  warnings.map(runner.warnModule(model));
+  var status = runner.runElmTest(model);
+  if (status === 0) runner.cleanup(model);
+  runner.warnSummary(model, warnings);
   process.exit(status);
 });
 

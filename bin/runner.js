@@ -20,38 +20,30 @@ var init = function(args){
   );
   var config = forFiles(verifyExamplesConfig, args._);
 
-  return {
-    config: config,
-    run: generate,
-    cleanup: cleanup,
-    warnModule: warnModule,
-    warnSummary: warnSummary,
-    runElmTest: runElmTest,
-    args: args,
+  return Object.assign(config, args, {
     testsDocPath: path.join(args.output, "VerifyExamples")
-  };
+  });
 };
 
 
 function generate(model, allTestsGenerated) {
-  if (model.args.warn) console.warn('Generate tests from examples...');
-  var config = model.config;
+  if (model.warn) console.warn('Generate tests from examples...');
   cleanup(model);
 
-  if (config.tests.length === 0){
-    if (model.args.warn) {
+  if (model.tests.length === 0){
+    if (model.warn) {
       warn('No tests listed! Modify your elm-verify-examples.json file to include modules');
-      if (model.args.failOnWarn) process.exit(1);
+      if (model.failOnWarn) process.exit(1);
     }
     return;
   }
 
-  var app = Elm.VerifyExamples.worker(config);
+  var app = Elm.VerifyExamples.worker(model);
 
   app.ports.readFile.subscribe(function(moduleName) {
     var pathToModule = path.join(
-      config.testsPath,
-      config.root,
+      model.testsPath,
+      model.root,
       elmModuleToPath(moduleName)
     );
     fs.readFile(
@@ -66,7 +58,7 @@ function generate(model, allTestsGenerated) {
         app.ports.generateModuleVerifyExamples.send(
           { moduleName: moduleName,
             fileText: fileText,
-            ignoredWarnings: ignoredWarnings(config.ignoreWarnings, moduleName)
+            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, moduleName)
           }
         );
     });
@@ -87,7 +79,7 @@ function generate(model, allTestsGenerated) {
   app.ports.writeFiles.subscribe(function(data) {
     serial(data, writeFile(model.testsDocPath), function() {
         writtenTests = writtenTests + 1;
-        if (writtenTests === config.tests.length && allTestsGenerated) {
+        if (writtenTests === model.tests.length && allTestsGenerated) {
           allTestsGenerated(warnings);
         }
     });
@@ -102,18 +94,18 @@ function ignoredWarnings(ignores, moduleName) {
 
 function runElmTest(model){
   var elmTest = "elm-test";
-  if (fs.existsSync(model.args.elmTest)) {
-    elmTest = model.args.elmTest;
+  if (fs.existsSync(model.elmTest)) {
+    elmTest = model.elmTest;
   }
-  if (typeof model.config.elmTest !== "undefined") {
-    var configuredPath = path.resolve(path.join(model.config.testsPath, model.config.elmTest));
+  if (typeof model.elmTest !== "undefined") {
+    var configuredPath = path.resolve(path.join(model.testsPath, model.elmTest));
     if (fs.existsSync(configuredPath)) {
       elmTest = configuredPath;
     }
   }
 
-  model.args.elmTestArgs.unshift(model.testsDocPath);
-  return childProcess.spawnSync(elmTest, model.args.elmTestArgs,
+  model.elmTestArgs.unshift(model.testsDocPath);
+  return childProcess.spawnSync(elmTest, model.elmTestArgs,
     {
       cwd: process.cwd(),
       stdio: 'inherit'
@@ -126,7 +118,7 @@ function cleanup(model) {
 
 function warnModule(model) {
   return function(warnings) {
-    if (!model.args.warn || warnings.warnings.length === 0) return;
+    if (!model.warn || warnings.warnings.length === 0) return;
     warn(chalk.underline("Warnings in module " + warnings.moduleName));
     warn("\n");
     warn(warnings.warnings.map(indent).join("\n"));
@@ -135,7 +127,7 @@ function warnModule(model) {
 }
 
 function warnSummary(model, warnings) {
-  if (!model.args.warn) return;
+  if (!model.warn) return;
   var count = warnings.reduce(function(acc, warning) { return warning.warnings.length + acc; }, 0);
   if (count > 0) {
     warn(chalk.underline("EXAMPLES VERIFIED WITH WARNINGS"));
@@ -143,23 +135,23 @@ function warnSummary(model, warnings) {
     warn("\n");
   }
 
-  if (model.args.failOnWarn) process.exit(1);
+  if (model.failOnWarn) process.exit(1);
 }
 
 
 function warn(str) { console.warn(chalk.yellow(str)); }
 function indent(str) { return "    " + str; }
 
-function forFiles(config, files){
+function forFiles(model, files){
   if (typeof files === "undefined" || files.length === 0) {
-    return config;
+    return model;
   }
 
-  config.tests = files.filter(
+  model.tests = files.filter(
     function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule(config.root, config.testsPath));
+  ).map(elmPathToModule(model.root, model.testsPath));
 
-  return config;
+  return model;
 }
 
 function serial(xs, f, done) {
@@ -234,5 +226,10 @@ function elmModuleToPath(moduleName){
 }
 
 module.exports = {
-  init: init
+  init: init,
+  run: generate,
+  cleanup: cleanup,
+  warnModule: warnModule,
+  warnSummary: warnSummary,
+  runElmTest: runElmTest
 };
