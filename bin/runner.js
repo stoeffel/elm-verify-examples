@@ -66,13 +66,8 @@ function generate(model, allTestsGenerated) {
 
   var warnings = [];
   app.ports.warn.subscribe(function(args) {
-    var moduleName = args[0];
-    var warningsForModule = args[1];
-    if (warningsForModule.length === 0) return;
-    warnings.push({
-      moduleName: moduleName,
-      warnings: warningsForModule
-    });
+    if (args.warnings.length === 0) return;
+    warnings.push(args);
   });
 
   var writtenTests = 0;
@@ -169,8 +164,8 @@ function serial(xs, f, done) {
 
 function writeFile(testsDocPath) {
   return function (data, done) {
-    var test = data[1];
-    var parts = data[0].split(".");
+    var test = data.content;
+    var parts = data.moduleName.split(".");
     var modulePath = [];
     var moduleName = ".";
 

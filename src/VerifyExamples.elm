@@ -4,6 +4,7 @@ import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
 import Platform
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Encoder as Encoder
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
 import VerifyExamples.Warning as Warning exposing (Warning)
@@ -60,11 +61,10 @@ update msg =
                 ( warnings, compiled ) ->
                     Cmd.batch
                         [ compiled
-                            |> List.map (Tuple.mapFirst ModuleName.toString)
+                            |> Encoder.files
                             |> writeFiles
-                        , warnings
-                            |> List.map Warning.toString
-                            |> curry warn (ModuleName.toString info.moduleName)
+                        , Encoder.warnings info.moduleName warnings
+                            |> warn
                         ]
 
 
@@ -86,13 +86,13 @@ generateTests { moduleName, fileText, ignoredWarnings } =
 port readFile : String -> Cmd msg
 
 
-port writeFiles : List ( String, String ) -> Cmd msg
+port writeFiles : Value -> Cmd msg
 
 
 port generateModuleVerifyExamples : (Value -> msg) -> Sub msg
 
 
-port warn : ( String, List String ) -> Cmd msg
+port warn : Value -> Cmd msg
 
 
 
