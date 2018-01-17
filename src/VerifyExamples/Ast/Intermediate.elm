@@ -111,47 +111,48 @@ localFunctionRegex =
 
 
 toAst : List IntermediateAst -> List Ast
-toAst =
-    List.Extra.groupWhileTransitively group
-        >> List.filterMap convertGroup
+toAst ast =
+    ast
+        |> List.Extra.groupWhileTransitively breaksGroup
+        |> List.filterMap intermediatesToAst
 
 
-group : IntermediateAst -> IntermediateAst -> Bool
-group x y =
+breaksGroup : IntermediateAst -> IntermediateAst -> Bool
+breaksGroup x y =
     case x of
         NewLine ->
             False
 
         ExpressionNotPrefixed _ ->
-            notPrefixed y
+            not (isPrefixed y)
 
         Function _ _ ->
-            notPrefixed y
+            not (isPrefixed y)
 
         Expression prefix _ ->
             case prefix of
                 ImportPrefix ->
-                    notPrefixed y
+                    not (isPrefixed y)
 
                 TypePrefix ->
-                    notPrefixed y
+                    not (isPrefixed y)
 
                 ArrowPrefix ->
-                    arrowPrefixed y
+                    isArrowPrefixed y
 
 
-notPrefixed : IntermediateAst -> Bool
-notPrefixed ast =
+isPrefixed : IntermediateAst -> Bool
+isPrefixed ast =
     case ast of
         ExpressionNotPrefixed _ ->
-            True
-
-        _ ->
             False
 
+        _ ->
+            True
 
-arrowPrefixed : IntermediateAst -> Bool
-arrowPrefixed ast =
+
+isArrowPrefixed : IntermediateAst -> Bool
+isArrowPrefixed ast =
     case ast of
         Expression ArrowPrefix _ ->
             True
@@ -160,20 +161,20 @@ arrowPrefixed ast =
             False
 
 
-convertGroup : List IntermediateAst -> Maybe Ast
-convertGroup ast =
+intermediatesToAst : List IntermediateAst -> Maybe Ast
+intermediatesToAst ast =
     case ast of
         first :: _ ->
             List.map toString ast
                 |> unlines
-                |> convertWithString first
+                |> intermediateToAst first
 
         [] ->
             Nothing
 
 
-convertWithString : IntermediateAst -> String -> Maybe Ast
-convertWithString ast str =
+intermediateToAst : IntermediateAst -> String -> Maybe Ast
+intermediateToAst ast str =
     case ast of
         ExpressionNotPrefixed _ ->
             Just (Ast.Assertion str)

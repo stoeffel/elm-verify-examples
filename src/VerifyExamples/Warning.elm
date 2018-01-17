@@ -41,8 +41,8 @@ testedFunctions testSuites =
 
 notEverythingExposed : ExposedApi -> Maybe Warning
 notEverythingExposed exposedApi =
-    if ExposedApi.everythingExposed exposedApi then
-        Warning NotEverythingExposed []
+    if ExposedApi.isEverythingExposed exposedApi then
+        Warning ExposingDotDot []
             |> Just
     else
         Nothing
@@ -61,7 +61,7 @@ toString (Warning type_ definitions) =
                 :: List.map ((++) "    - ") definitions
                 |> unlines
 
-        NotEverythingExposed ->
+        ExposingDotDot ->
             "It's recommended to be specific about your exports.\n"
                 :: [ "    Don't use `module ... exposing (..)`"
                    , "                                    ^^  "

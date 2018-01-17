@@ -28,8 +28,8 @@ warning =
     oneOf
         [ exact string "NoExampleForExposedDefinition"
             |> map (always NoExampleForExposedDefinition)
-        , exact string "NotEverythingExposed"
-            |> map (always NotEverythingExposed)
+        , exact string "ExposingDotDot"
+            |> map (always ExposingDotDot)
         ]
 
 

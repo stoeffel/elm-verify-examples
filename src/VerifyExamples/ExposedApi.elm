@@ -2,7 +2,7 @@ module VerifyExamples.ExposedApi
     exposing
         ( ExposedApi
         , definitions
-        , everythingExposed
+        , isEverythingExposed
         , parse
         , reject
         )
@@ -81,8 +81,8 @@ definitions api =
             []
 
 
-everythingExposed : ExposedApi -> Bool
-everythingExposed api =
+isEverythingExposed : ExposedApi -> Bool
+isEverythingExposed api =
     case api of
         Explicitly _ ->
             False
