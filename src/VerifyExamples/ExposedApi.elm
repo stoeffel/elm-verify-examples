@@ -3,8 +3,8 @@ module VerifyExamples.ExposedApi
         ( ExposedApi
         , definitions
         , everythingExposed
-        , filter
         , parse
+        , reject
         )
 
 import Regex exposing (HowMany(..), Regex)
@@ -54,11 +54,11 @@ moduleExposing =
             ]
 
 
-filter : (String -> Bool) -> ExposedApi -> ExposedApi
-filter f api =
+reject : (String -> Bool) -> ExposedApi -> ExposedApi
+reject f api =
     case api of
         Explicitly definitions ->
-            List.filter f definitions
+            List.filter (\def -> not (f def)) definitions
                 |> Explicitly
 
         All ->

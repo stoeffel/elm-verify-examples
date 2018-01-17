@@ -1,4 +1,4 @@
-module VerifyExamples.Warning.Ignored exposing (Ignored, IgnoredFunctions(..), decode, only)
+module VerifyExamples.Warning.Ignored exposing (Ignored, IgnoredFunctions(..), decode, isIgnored)
 
 import Json.Decode exposing (Decoder, field, list, map, map2, maybe, oneOf, string)
 import Json.Util exposing (exact)
@@ -39,8 +39,8 @@ type IgnoredFunctions
     | Subset (List String)
 
 
-only : Type -> List Ignored -> IgnoredFunctions
-only warning =
+isIgnored : Type -> List Ignored -> IgnoredFunctions
+isIgnored warning =
     List.filter (.ignore >> List.member warning)
         >> List.map .name
         >> Maybe.Extra.combine
