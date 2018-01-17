@@ -1,8 +1,7 @@
-module VerifyExamples.Warning.Ignored exposing (Ignored, IgnoredFunctions(..), decode, isIgnored)
+module VerifyExamples.Warning.Ignored exposing (Ignored, all, decode, subset)
 
 import Json.Decode exposing (Decoder, field, list, map, map2, maybe, oneOf, string)
 import Json.Util exposing (exact)
-import Maybe.Extra
 import VerifyExamples.Warning.Type exposing (Type(..))
 
 
@@ -34,15 +33,22 @@ warning =
         ]
 
 
-type IgnoredFunctions
-    = All
-    | Subset (List String)
+subset : Type -> List Ignored -> List String
+subset warning ignores =
+    ignores
+        |> List.filter (\{ ignore } -> List.member warning ignore)
+        |> List.filterMap (\ignored -> ignored.name)
 
 
-isIgnored : Type -> List Ignored -> IgnoredFunctions
-isIgnored warning =
-    List.filter (.ignore >> List.member warning)
-        >> List.map .name
-        >> Maybe.Extra.combine
-        >> Maybe.map Subset
-        >> Maybe.withDefault All
+all : Type -> List Ignored -> Bool
+all warning ignores =
+    case
+        ignores
+            |> List.filter (\{ ignore } -> List.member warning ignore)
+            |> List.filter (\ignored -> ignored.name == Nothing)
+    of
+        [] ->
+            False
+
+        _ ->
+            True
