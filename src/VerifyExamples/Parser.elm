@@ -26,7 +26,6 @@ parse value =
     , testSuites =
         comments
             |> List.map toTestSuite
-            |> TestSuite.group
     }
 
 
