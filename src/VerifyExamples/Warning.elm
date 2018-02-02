@@ -62,8 +62,9 @@ toString (Warning type_ definitions) =
                 |> unlines
 
         ExposingDotDot ->
-            "It's recommended to be specific about your exports.\n"
-                :: [ "    Don't use `module ... exposing (..)`"
-                   , "                                    ^^  "
-                   ]
+            [ "It's recommended to be specific about your exports."
+            , ""
+            , "    Don't use `module ... exposing (..)`"
+            , "                                    ^^  "
+            ]
                 |> unlines
