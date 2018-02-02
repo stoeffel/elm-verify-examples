@@ -10,7 +10,7 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 compile : ModuleName -> TestSuite -> List ( ModuleName, String )
 compile moduleName suite =
-    List.indexedMap (compileTestPerFunction moduleName suite) suite.tests
+    List.indexedMap (compileTest moduleName suite) suite.tests
 
 
 todoSpec : ModuleName -> ( ModuleName, String )
@@ -25,13 +25,19 @@ todoSpec moduleName =
         , "import Test"
         , "import Expect"
         , ""
-        , todo moduleName
+        , ""
+        , "spec : Test.Test"
+        , "spec ="
+        , indent 1 <|
+            "Test.todo \"module "
+                ++ ModuleName.toString moduleName
+                ++ ": No examples to verify yet!\""
         ]
     )
 
 
-compileTestPerFunction : ModuleName -> TestSuite -> Int -> Test -> ( ModuleName, String )
-compileTestPerFunction moduleName suite index test =
+compileTest : ModuleName -> TestSuite -> Int -> Test -> ( ModuleName, String )
+compileTest moduleName suite index test =
     let
         extendedModuleName =
             Test.specName index test
@@ -86,30 +92,6 @@ spec index test =
         , indent 2 "\\() ->"
         , indent 3 "Expect.equal"
         , indentLines 4 (Test.specBody test)
-        ]
-
-
-todoIfEmpty : ModuleName -> List String -> String
-todoIfEmpty moduleName tests =
-    case tests of
-        [] ->
-            todo moduleName
-
-        _ ->
-            unlines tests
-
-
-todo : ModuleName -> String
-todo moduleName =
-    unlines
-        [ ""
-        , ""
-        , "spec : Test.Test"
-        , "spec ="
-        , indent 1 <|
-            "Test.todo \"module "
-                ++ ModuleName.toString moduleName
-                ++ ": No examples to verify yet!\""
         ]
 
 
