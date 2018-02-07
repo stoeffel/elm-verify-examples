@@ -3,13 +3,14 @@ module VerifyExamples.Test
         ( Test
         , exampleDescription
         , fromExamples
+        , functionName
         , name
         , specBody
         , specName
         )
 
 import String.Util exposing (unlines)
-import VerifyExamples.GroupedAst as GroupedAst
+import VerifyExamples.Ast.Grouped as GroupedAst
 
 
 type Test
@@ -30,6 +31,11 @@ fromExamples functionToTest =
                 , functionToTest = functionToTest
                 }
         )
+
+
+functionName : Test -> Maybe String
+functionName (Test { functionToTest }) =
+    functionToTest
 
 
 specName : Int -> Test -> String

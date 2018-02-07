@@ -1,4 +1,4 @@
-module VerifyExamples.GroupedAst
+module VerifyExamples.Ast.Grouped
     exposing
         ( Example
         , Function(..)

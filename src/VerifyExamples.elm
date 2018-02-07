@@ -1,11 +1,14 @@
 port module VerifyExamples exposing (..)
 
 import Cmd.Util as Cmd
-import Json.Decode as Decode exposing (Value, decodeValue, field, list, string)
+import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
 import Platform
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Encoder as Encoder
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
+import VerifyExamples.Warning as Warning exposing (Warning)
+import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
 
 main : Program Value () Msg
@@ -33,7 +36,7 @@ init flags =
             Debug.crash err
 
 
-decoder : Decode.Decoder (List String)
+decoder : Decoder (List String)
 decoder =
     field "tests" (list string)
 
@@ -44,7 +47,7 @@ decoder =
 
 type Msg
     = ReadTest String
-    | CompileModule ( ModuleName, String )
+    | CompileModule CompileInfo
 
 
 update : Msg -> Cmd Msg
@@ -53,15 +56,27 @@ update msg =
         ReadTest test ->
             readFile test
 
-        CompileModule ( moduleName, fileText ) ->
-            generateTests moduleName fileText
-                |> List.map (Tuple.mapFirst ModuleName.toString)
-                |> writeFiles
+        CompileModule info ->
+            case generateTests info of
+                ( warnings, compiled ) ->
+                    Cmd.batch
+                        [ compiled
+                            |> Encoder.files
+                            |> writeFiles
+                        , Encoder.warnings info.moduleName warnings
+                            |> warn
+                        ]
 
 
-generateTests : ModuleName -> String -> List ( ModuleName, String )
-generateTests moduleName =
-    Parser.parse >> List.concatMap (Compiler.compile moduleName)
+generateTests : CompileInfo -> ( List Warning, List ( ModuleName, String ) )
+generateTests { moduleName, fileText, ignoredWarnings } =
+    let
+        parsed =
+            Parser.parse fileText
+    in
+    ( Warning.warnings ignoredWarnings parsed
+    , List.concatMap (Compiler.compile moduleName) parsed.testSuites
+    )
 
 
 
@@ -71,10 +86,13 @@ generateTests moduleName =
 port readFile : String -> Cmd msg
 
 
-port writeFiles : List ( String, String ) -> Cmd msg
+port writeFiles : Value -> Cmd msg
 
 
-port generateModuleVerifyExamples : (( String, String ) -> msg) -> Sub msg
+port generateModuleVerifyExamples : (Value -> msg) -> Sub msg
+
+
+port warn : Value -> Cmd msg
 
 
 
@@ -84,4 +102,28 @@ port generateModuleVerifyExamples : (( String, String ) -> msg) -> Sub msg
 subscriptions : () -> Sub Msg
 subscriptions _ =
     generateModuleVerifyExamples
-        (CompileModule << Tuple.mapFirst ModuleName.fromString)
+        (\value ->
+            case decodeValue decodeCompileInfo value of
+                Ok info ->
+                    CompileModule info
+
+                Err err ->
+                    Debug.crash "TODO"
+        )
+
+
+type alias CompileInfo =
+    { moduleName : ModuleName
+    , fileText : String
+    , ignoredWarnings : List Ignored
+    }
+
+
+decodeCompileInfo : Decoder CompileInfo
+decodeCompileInfo =
+    Decode.map3 CompileInfo
+        (field "moduleName" string
+            |> Decode.map ModuleName.fromString
+        )
+        (field "fileText" string)
+        (field "ignoredWarnings" Ignored.decode)

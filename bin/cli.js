@@ -4,13 +4,15 @@ var processTitle = "elm-verify-examples";
 
 process.title = processTitle;
 
-var init = require('./runner').init;
+var runner = require('./runner');
 var path = require('path');
 var argv = require('yargs')
   .usage('Usage: $0 [modulePaths] [options]')
   .alias("w", "warn")
   .describe("warn", "Display warnings.")
-  .default("warn", true)
+  .default("warn", false)
+  .describe("fail-on-warn", "Fail when there are warnings.")
+  .default("fail-on-warn", false)
   .alias("o", "output")
   .describe("output", "Change path to the generated tests.")
   .default("output", "tests")
@@ -25,11 +27,13 @@ var argv = require('yargs')
   .argv;
 
 
-// stateful things
-var cliModel = init(argv);
+var model = runner.init(argv);
 
-cliModel.run(cliModel, function() {
-  var status = cliModel.runElmTest(cliModel);
-  if (status === 0) cliModel.cleanup(cliModel);
+runner.run(model, function(warnings) {
+  warnings.map(runner.warnModule(model));
+  var status = runner.runElmTest(model);
+  if (status === 0) runner.cleanup(model);
+  runner.warnSummary(model, warnings);
   process.exit(status);
 });
+

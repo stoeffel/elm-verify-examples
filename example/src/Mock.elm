@@ -1,4 +1,17 @@
-module Mock exposing (..)
+module Mock
+    exposing
+        ( IsItCool(..)
+        , add
+        , bar
+        , coolFunc
+        , customType
+        , customTypeAlias
+        , noExamples
+        , noVerifiedExamples
+        , quux
+        , rev
+        , sum
+        )
 
 {-|
 
@@ -10,8 +23,6 @@ module Mock exposing (..)
 
     customType B 2
     --> (B, 2)
-
-@docs add, sum, bar, rev, IsItCool, coolFunc
 
 -}
 
@@ -175,3 +186,20 @@ customType n m =
 customTypeAlias : { a | name : String } -> String -> String
 customTypeAlias { name } prefix =
     prefix ++ name
+
+
+{-| no examples :-(
+-}
+noExamples : Int
+noExamples =
+    1
+
+
+{-| no verified examples :-/
+
+    noVerifiedExamples 3
+
+-}
+noVerifiedExamples : Int -> Int
+noVerifiedExamples _ =
+    2

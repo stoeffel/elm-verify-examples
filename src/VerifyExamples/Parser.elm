@@ -1,16 +1,33 @@
-module VerifyExamples.Parser exposing (parse)
+module VerifyExamples.Parser exposing (Parsed, parse)
 
+import VerifyExamples.Ast.Grouped as GroupedAst exposing (GroupedAst)
+import VerifyExamples.Ast.Intermediate as IntermediateAst exposing (IntermediateAst)
 import VerifyExamples.Comment as Comment exposing (Comment)
-import VerifyExamples.GroupedAst as GroupedAst exposing (GroupedAst)
-import VerifyExamples.IntermediateAst as IntermediateAst exposing (IntermediateAst)
+import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
-parse : String -> List TestSuite
-parse =
-    Comment.parse
-        >> List.map toTestSuite
-        >> TestSuite.group
+type alias Parsed =
+    { exposedApi : ExposedApi
+    , testSuites : List TestSuite
+    }
+
+
+parse : String -> Parsed
+parse value =
+    let
+        comments =
+            value
+                |> Comment.parse
+    in
+    { exposedApi =
+        ExposedApi.parse value <|
+            List.filterMap Comment.function comments
+    , testSuites =
+        comments
+            |> List.map toTestSuite
+            |> TestSuite.group
+    }
 
 
 toTestSuite : Comment -> TestSuite

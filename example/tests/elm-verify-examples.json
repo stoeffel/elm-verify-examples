@@ -6,5 +6,20 @@
     "Robustness",
     "Failing",
     "Todo"
-  ]
+  ],
+  "ignoreWarnings": {
+    "Mock.Foo.Bar.Moo": [
+      {
+        "name": "dontCare",
+        "ignore": [
+          "NoExampleForExposedDefinition"
+        ]
+      },
+      {
+        "ignore": [
+          "ExposingDotDot"
+        ]
+      }
+    ]
+  }
 }

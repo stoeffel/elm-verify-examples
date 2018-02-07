@@ -34,6 +34,7 @@
   "author": "schtoeffel",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "chalk": "^2.3.0",
     "elm-test": "^0.18.12",
     "fs-extra": "^5.0.0",
     "mkdirp": "^0.5.1",

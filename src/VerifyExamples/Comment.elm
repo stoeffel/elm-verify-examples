@@ -1,6 +1,7 @@
-module VerifyExamples.Comment exposing (Comment(..), parse)
+module VerifyExamples.Comment exposing (Comment(..), function, parse)
 
 import Regex exposing (HowMany(..), Regex)
+import Regex.Util exposing (newline)
 
 
 type Comment
@@ -40,6 +41,11 @@ commentRegex =
             ]
 
 
-newline : String
-newline =
-    "\x0D?\n"
+function : Comment -> Maybe String
+function comment =
+    case comment of
+        FunctionDoc { functionName } ->
+            Just functionName
+
+        ModuleDoc _ ->
+            Nothing

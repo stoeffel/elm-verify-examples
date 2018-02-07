@@ -6,6 +6,7 @@ var Elm = require("./elm.js");
 var helpers = require('./cli-helpers.js');
 var rimraf = require('rimraf');
 var childProcess = require('child_process');
+var chalk = require('chalk');
 
 
 // loaders are called by init
@@ -19,75 +20,87 @@ var init = function(args){
   );
   var config = forFiles(verifyExamplesConfig, args._);
 
-  return {
-    config: config,
-    run: generate,
-    cleanup: cleanup,
-    runElmTest: runElmTest,
-    args: args,
+  return Object.assign(config, args, {
     testsDocPath: path.join(args.output, "VerifyExamples")
-  };
+  });
 };
 
 
 function generate(model, allTestsGenerated) {
-  if (model.args.warn) console.log('Generate tests from examples...');
-  var config = model.config;
+  if (model.warn) console.warn('Generate tests from examples...');
   cleanup(model);
 
-  if (config.tests.length === 0){
-    if (model.args.warn) {
-      console.log('No tests listed! Modify your elm-verify-examples.json file to include modules');
+  if (model.tests.length === 0){
+    if (model.warn) {
+      warn('No tests listed! Modify your elm-verify-examples.json file to include modules');
+      if (model.failOnWarn) process.exit(1);
     }
     return;
   }
 
-  var app = Elm.VerifyExamples.worker(config);
+  var app = Elm.VerifyExamples.worker(model);
 
-  app.ports.readFile.subscribe(function(test) {
+  app.ports.readFile.subscribe(function(moduleName) {
     var pathToModule = path.join(
-      config.testsPath,
-      config.root,
-      elmModuleToPath(test)
+      model.testsPath,
+      model.root,
+      elmModuleToPath(moduleName)
     );
     fs.readFile(
         pathToModule,
         "utf8",
-        function(err, data) {
+        function(err, fileText) {
       if (err) {
         console.error(err);
         process.exit(-1);
         return;
       }
-      app.ports.generateModuleVerifyExamples.send([test, data]);
+        app.ports.generateModuleVerifyExamples.send(
+          { moduleName: moduleName,
+            fileText: fileText,
+            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, moduleName)
+          }
+        );
     });
+  });
+
+  var warnings = [];
+  app.ports.warn.subscribe(function(args) {
+    if (args.warnings.length === 0) return;
+    warnings.push(args);
   });
 
   var writtenTests = 0;
   app.ports.writeFiles.subscribe(function(data) {
     serial(data, writeFile(model.testsDocPath), function() {
         writtenTests = writtenTests + 1;
-        if (writtenTests === config.tests.length && allTestsGenerated) {
-          allTestsGenerated();
+        if (writtenTests === model.tests.length && allTestsGenerated) {
+          allTestsGenerated(warnings);
         }
     });
   });
 }
 
+function ignoredWarnings(ignores, moduleName) {
+  if (typeof ignores === "undefined") return [];
+  if (typeof ignores[moduleName] === "undefined") return [];
+  return ignores[moduleName];
+}
+
 function runElmTest(model){
   var elmTest = "elm-test";
-  if (fs.existsSync(model.args.elmTest)) {
-    elmTest = model.args.elmTest;
+  if (fs.existsSync(model.elmTest)) {
+    elmTest = model.elmTest;
   }
-  if (typeof model.config.elmTest !== "undefined") {
-    var configuredPath = path.resolve(path.join(model.config.testsPath, model.config.elmTest));
+  if (typeof model.elmTest !== "undefined") {
+    var configuredPath = path.resolve(path.join(model.testsPath, model.elmTest));
     if (fs.existsSync(configuredPath)) {
       elmTest = configuredPath;
     }
   }
 
-  model.args.elmTestArgs.unshift(model.testsDocPath);
-  return childProcess.spawnSync(elmTest, model.args.elmTestArgs,
+  model.elmTestArgs.unshift(model.testsDocPath);
+  return childProcess.spawnSync(elmTest, model.elmTestArgs,
     {
       cwd: process.cwd(),
       stdio: 'inherit'
@@ -98,16 +111,42 @@ function cleanup(model) {
   rimraf.sync(model.testsDocPath);
 }
 
-function forFiles(config, files){
-  if (typeof files === "undefined" || files.length === 0) {
-    return config;
+function warnModule(model) {
+  return function(warnings) {
+    if (!model.warn || warnings.warnings.length === 0) return;
+    warn(chalk.underline("Warnings in module " + warnings.moduleName));
+    warn("\n");
+    warn(warnings.warnings.map(indent).join("\n"));
+    warn("\n");
+  };
+}
+
+function warnSummary(model, warnings) {
+  if (!model.warn) return;
+  var count = warnings.reduce(function(acc, warning) { return warning.warnings.length + acc; }, 0);
+  if (count > 0) {
+    warn(chalk.underline("EXAMPLES VERIFIED WITH WARNINGS"));
+    console.warn(chalk.dim("Warnings: ") + count);
+    warn("\n");
   }
 
-  config.tests = files.filter(
-    function(v){ return v.endsWith('.elm'); }
-  ).map(elmPathToModule(config.root, config.testsPath));
+  if (model.failOnWarn) process.exit(1);
+}
 
-  return config;
+
+function warn(str) { console.warn(chalk.yellow(str)); }
+function indent(str) { return "    " + str; }
+
+function forFiles(model, files){
+  if (typeof files === "undefined" || files.length === 0) {
+    return model;
+  }
+
+  model.tests = files.filter(
+    function(v){ return v.endsWith('.elm'); }
+  ).map(elmPathToModule(model.root, model.testsPath));
+
+  return model;
 }
 
 function serial(xs, f, done) {
@@ -125,8 +164,8 @@ function serial(xs, f, done) {
 
 function writeFile(testsDocPath) {
   return function (data, done) {
-    var test = data[1];
-    var parts = data[0].split(".");
+    var test = data.content;
+    var parts = data.moduleName.split(".");
     var modulePath = [];
     var moduleName = ".";
 
@@ -182,5 +221,10 @@ function elmModuleToPath(moduleName){
 }
 
 module.exports = {
-  init: init
+  init: init,
+  run: generate,
+  cleanup: cleanup,
+  warnModule: warnModule,
+  warnSummary: warnSummary,
+  runElmTest: runElmTest
 };
