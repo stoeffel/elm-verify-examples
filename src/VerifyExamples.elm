@@ -73,9 +73,17 @@ generateTests { moduleName, fileText, ignoredWarnings } =
     let
         parsed =
             Parser.parse fileText
+
+        toGenerate =
+            List.concatMap (Compiler.compile moduleName) parsed.testSuites
     in
     ( Warning.warnings ignoredWarnings parsed
-    , List.concatMap (Compiler.compile moduleName) parsed.testSuites
+    , case toGenerate of
+        [] ->
+            [ Compiler.todoSpec moduleName ]
+
+        _ ->
+            toGenerate
     )
 
 

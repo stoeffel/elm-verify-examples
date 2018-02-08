@@ -5,7 +5,8 @@
     "Mock.Foo.Bar.Moo",
     "Robustness",
     "Failing",
-    "Todo"
+    "Todo",
+    "FalseTodo"
   ],
   "ignoreWarnings": {
     "Mock.Foo.Bar.Moo": [
