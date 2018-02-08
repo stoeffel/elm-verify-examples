@@ -20,7 +20,7 @@ var init = function(args){
   );
   var config = forFiles(verifyExamplesConfig, args._);
 
-  return Object.assign(config, args, {
+  return Object.assign(args, config, {
     testsDocPath: path.join(args.output, "VerifyExamples")
   });
 };
