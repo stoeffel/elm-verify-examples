@@ -1,4 +1,4 @@
-module VerifyExamples.Compiler exposing (compile, todoSpec)
+module VerifyExamples.Compiler exposing (compile, compileMarkdown, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)

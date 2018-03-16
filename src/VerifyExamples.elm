@@ -48,7 +48,7 @@ decoder =
 type Msg
     = ReadTest String
     | CompileModule CompileInfo
-    | CompileMarkdown ()
+    | CompileMarkdown MarkdownCompileInfo
 
 
 update : Msg -> Cmd Msg
@@ -71,7 +71,16 @@ update msg =
                 ]
 
         CompileMarkdown info ->
-            Cmd.none
+            {-
+               TODO: report warnings for markdown files too.
+
+               Right now the JS side assume all warnings come with a module name
+               Or maybe we don't care about warnings for markdown at all?
+            -}
+            info.fileText
+                |> Parser.parseMarkdown
+                |> testFilesFromMarkdown info
+                |> generateTests
 
 
 generateTests : List ( ModuleName, String ) -> Cmd Msg
@@ -93,6 +102,11 @@ testFiles { moduleName, fileText, ignoredWarnings } parsed =
 
         _ ->
             toGenerate
+
+
+testFilesFromMarkdown : MarkdownCompileInfo -> Parsed -> List ( ModuleName, String )
+testFilesFromMarkdown { fileName, fileText, ignoredWarnings } parsed =
+    List.concatMap (Compiler.compileMarkdown fileName) parsed.testSuites
 
 
 reportWarnings : CompileInfo -> Parsed -> Cmd msg
@@ -132,7 +146,7 @@ subscriptions _ =
         [ generateModuleVerifyExamples
             (runDecoder decodeCompileInfo >> CompileModule)
         , generateMarkdownVerifyExamples
-            (runDecoder (Decode.succeed ()) >> CompileMarkdown)
+            (runDecoder decodeMarkdownCompileInfo >> CompileMarkdown)
         ]
 
 
@@ -153,11 +167,42 @@ type alias CompileInfo =
     }
 
 
+
+{- TODO: Maybe this is better...
+
+   type CompileInfo =
+     { source: Source
+     , fileText: String
+     , ignoredWarnings: List Ignored
+     }
+
+   type Source
+     = Elm String
+     = Markdown String
+
+-}
+
+
+type alias MarkdownCompileInfo =
+    { fileName : String
+    , fileText : String
+    , ignoredWarnings : List Ignored
+    }
+
+
 decodeCompileInfo : Decoder CompileInfo
 decodeCompileInfo =
     Decode.map3 CompileInfo
         (field "moduleName" string
             |> Decode.map ModuleName.fromString
         )
+        (field "fileText" string)
+        (field "ignoredWarnings" Ignored.decode)
+
+
+decodeMarkdownCompileInfo : Decoder MarkdownCompileInfo
+decodeMarkdownCompileInfo =
+    Decode.map3 MarkdownCompileInfo
+        (field "fileName" string)
         (field "fileText" string)
         (field "ignoredWarnings" Ignored.decode)
