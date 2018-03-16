@@ -44,7 +44,7 @@ function generate(model, allTestsGenerated) {
     if (inputName.endsWith(".md")) {
       readSource(inputName, function(fileText) {
         app.ports.generateMarkdownVerifyExamples.send(
-          { fileName: inputName,
+          { fileName: cleanMarkdownPath(inputName),
             fileText: fileText,
             ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName)
           }
@@ -236,6 +236,14 @@ function readSource(filePath, onSuccess) {
       }
       onSuccess(fileText);
     });
+}
+
+function cleanMarkdownPath(pathName) {
+  var relativePath = path.relative(path.resolve(), pathName)
+  if (relativePath.startsWith("./")) {
+    relativePath = relativePath.substr(2);
+  }
+  return relativePath;
 }
 
 module.exports = {

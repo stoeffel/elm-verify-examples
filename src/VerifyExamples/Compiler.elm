@@ -3,6 +3,7 @@ module VerifyExamples.Compiler exposing (compile, todoSpec)
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
 import VerifyExamples.Function as Function exposing (Function)
+import VerifyExamples.Markdown as Markdown
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
@@ -10,9 +11,38 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 compile : ModuleName -> TestSuite -> List ( ModuleName, String )
 compile moduleName suite =
-    suite
-        |> .tests
-        |> List.indexedMap (compileTest moduleName (addSourceImport moduleName suite))
+    List.indexedMap
+        (\index test ->
+            let
+                testModuleName =
+                    elmTestModuleName moduleName index test
+            in
+            ( testModuleName
+            , compileTest testModuleName (addSourceImport moduleName suite) index test
+            )
+        )
+        suite.tests
+
+
+compileMarkdown : String -> TestSuite -> List ( ModuleName, String )
+compileMarkdown filePath suite =
+    List.indexedMap
+        (\index test ->
+            let
+                testModuleName =
+                    Markdown.testModuleName index filePath
+            in
+            ( testModuleName
+            , compileTest testModuleName suite index test
+            )
+        )
+        suite.tests
+
+
+elmTestModuleName : ModuleName -> Int -> Test -> ModuleName
+elmTestModuleName moduleName index test =
+    Test.specName index test
+        |> ModuleName.extendName moduleName
 
 
 addSourceImport : ModuleName -> TestSuite -> TestSuite
@@ -48,16 +78,10 @@ todoSpec moduleName =
     )
 
 
-compileTest : ModuleName -> TestSuite -> Int -> Test -> ( ModuleName, String )
-compileTest moduleName suite index test =
-    let
-        extendedModuleName =
-            Test.specName index test
-                |> ModuleName.extendName moduleName
-    in
-    ( extendedModuleName
-    , unlines
-        [ moduleHeader suite extendedModuleName
+compileTest : ModuleName -> TestSuite -> Int -> Test -> String
+compileTest testModuleName suite index test =
+    unlines
+        [ moduleHeader suite testModuleName
         , imports suite
         , unlines suite.types
         , ""
@@ -67,7 +91,6 @@ compileTest moduleName suite index test =
         , ""
         , spec index test
         ]
-    )
 
 
 moduleHeader : TestSuite -> ModuleName -> String
