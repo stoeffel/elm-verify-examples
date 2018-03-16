@@ -15,16 +15,11 @@ type alias Parsed =
 
 parse : String -> Parsed
 parse value =
-    let
-        comments =
-            value
-                |> Comment.parse
-    in
     { exposedApi =
-        ExposedApi.parse value <|
-            List.filterMap Comment.function comments
+        ExposedApi.parse value
     , testSuites =
-        comments
+        value
+            |> Comment.parse
             |> List.map toTestSuite
     }
 

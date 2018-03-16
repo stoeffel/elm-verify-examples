@@ -17,16 +17,16 @@ type ExposedApi
     | None
 
 
-parse : String -> List String -> ExposedApi
-parse value functions =
+parse : String -> ExposedApi
+parse value =
     value
         |> firstSubmatch moduleExposing
-        |> Maybe.map (toExposedDefinition functions)
+        |> Maybe.map toExposedDefinition
         |> Maybe.withDefault None
 
 
-toExposedDefinition : List String -> String -> ExposedApi
-toExposedDefinition functions match =
+toExposedDefinition : String -> ExposedApi
+toExposedDefinition match =
     case match of
         ".." ->
             All
