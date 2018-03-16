@@ -10,7 +10,19 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 compile : ModuleName -> TestSuite -> List ( ModuleName, String )
 compile moduleName suite =
-    List.indexedMap (compileTest moduleName suite) suite.tests
+    suite
+        |> .tests
+        |> List.indexedMap (compileTest moduleName (addSourceImport moduleName suite))
+
+
+addSourceImport : ModuleName -> TestSuite -> TestSuite
+addSourceImport moduleName testSuite =
+    -- TODO: the test suite for elm files should be generated with this import already
+    let
+        sourceImport =
+            "import " ++ ModuleName.toString moduleName ++ " exposing (..)"
+    in
+    { testSuite | imports = sourceImport :: testSuite.imports }
 
 
 todoSpec : ModuleName -> ( ModuleName, String )
@@ -46,7 +58,7 @@ compileTest moduleName suite index test =
     ( extendedModuleName
     , unlines
         [ moduleHeader suite extendedModuleName
-        , imports suite moduleName
+        , imports suite
         , unlines suite.types
         , ""
         , suite.helperFunctions
@@ -69,12 +81,11 @@ moduleHeader { imports } moduleName =
         ]
 
 
-imports : TestSuite -> ModuleName -> String
-imports { imports } moduleName =
+imports : TestSuite -> String
+imports { imports } =
     unlines
         [ "import Test"
         , "import Expect"
-        , "import " ++ ModuleName.toString moduleName ++ " exposing(..)"
         , ""
         , unlines imports
         , ""
