@@ -40,28 +40,32 @@ function generate(model, allTestsGenerated) {
 
   var app = Elm.VerifyExamples.worker(model);
 
-  app.ports.readFile.subscribe(function(moduleName) {
-    var pathToModule = path.join(
-      model.testsPath,
-      model.root,
-      elmModuleToPath(moduleName)
-    );
-    fs.readFile(
-        pathToModule,
-        "utf8",
-        function(err, fileText) {
-      if (err) {
-        console.error(err);
-        process.exit(-1);
-        return;
-      }
-        app.ports.generateModuleVerifyExamples.send(
-          { moduleName: moduleName,
+  app.ports.readFile.subscribe(function(inputName) {
+    if (inputName.endsWith(".md")) {
+      readSource(inputName, function(fileText) {
+        app.ports.generateMarkdownVerifyExamples.send(
+          { fileName: inputName,
             fileText: fileText,
-            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, moduleName)
+            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName)
           }
         );
-    });
+      });
+    } else {
+      var pathToModule = path.join(
+        model.testsPath,
+        model.root,
+        elmModuleToPath(inputName)
+      );
+
+      readSource(pathToModule, function(fileText) {
+        app.ports.generateModuleVerifyExamples.send(
+          { moduleName: inputName,
+            fileText: fileText,
+            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName)
+          }
+        );
+      });
+    }
   });
 
   var warnings = [];
@@ -218,6 +222,20 @@ function elmPathToModule(root, testsPath) {
 
 function elmModuleToPath(moduleName){
   return moduleName.replace(/\./g, "/") + ".elm";
+}
+
+function readSource(filePath, onSuccess) {
+  fs.readFile(
+    filePath,
+    "utf8",
+    function(err, fileText) {
+      if (err) {
+        console.error(err);
+        process.exit(-1);
+        return;
+      }
+      onSuccess(fileText);
+    });
 }
 
 module.exports = {

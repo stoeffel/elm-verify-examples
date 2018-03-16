@@ -48,6 +48,7 @@ decoder =
 type Msg
     = ReadTest String
     | CompileModule CompileInfo
+    | CompileMarkdown ()
 
 
 update : Msg -> Cmd Msg
@@ -66,6 +67,9 @@ update msg =
                         , Encoder.warnings info.moduleName warnings
                             |> warn
                         ]
+
+        CompileMarkdown info ->
+            Cmd.none
 
 
 generateTests : CompileInfo -> ( List Warning, List ( ModuleName, String ) )
@@ -100,6 +104,9 @@ port writeFiles : Value -> Cmd msg
 port generateModuleVerifyExamples : (Value -> msg) -> Sub msg
 
 
+port generateMarkdownVerifyExamples : (Value -> msg) -> Sub msg
+
+
 port warn : Value -> Cmd msg
 
 
@@ -109,15 +116,22 @@ port warn : Value -> Cmd msg
 
 subscriptions : () -> Sub Msg
 subscriptions _ =
-    generateModuleVerifyExamples
-        (\value ->
-            case decodeValue decodeCompileInfo value of
-                Ok info ->
-                    CompileModule info
+    Sub.batch
+        [ generateModuleVerifyExamples
+            (runDecoder decodeCompileInfo >> CompileModule)
+        , generateMarkdownVerifyExamples
+            (runDecoder (Decode.succeed ()) >> CompileMarkdown)
+        ]
 
-                Err err ->
-                    Debug.crash "TODO"
-        )
+
+runDecoder : Decoder a -> Value -> a
+runDecoder decoder value =
+    case decodeValue decoder value of
+        Ok info ->
+            info
+
+        Err err ->
+            Debug.crash "TODO"
 
 
 type alias CompileInfo =
