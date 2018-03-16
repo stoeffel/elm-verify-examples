@@ -6,7 +6,7 @@ import Platform
 import VerifyExamples.Compiler as Compiler
 import VerifyExamples.Encoder as Encoder
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
-import VerifyExamples.Parser as Parser
+import VerifyExamples.Parser as Parser exposing (Parsed)
 import VerifyExamples.Warning as Warning exposing (Warning)
 import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
@@ -58,37 +58,49 @@ update msg =
             readFile test
 
         CompileModule info ->
-            case generateTests info of
-                ( warnings, compiled ) ->
-                    Cmd.batch
-                        [ compiled
-                            |> Encoder.files
-                            |> writeFiles
-                        , Encoder.warnings info.moduleName warnings
-                            |> warn
-                        ]
+            let
+                parsed =
+                    Parser.parse info.fileText
+            in
+            Cmd.batch
+                [ parsed
+                    |> testFiles info
+                    |> generateTests
+                , parsed
+                    |> reportWarnings info
+                ]
 
         CompileMarkdown info ->
             Cmd.none
 
 
-generateTests : CompileInfo -> ( List Warning, List ( ModuleName, String ) )
-generateTests { moduleName, fileText, ignoredWarnings } =
-    let
-        parsed =
-            Parser.parse fileText
+generateTests : List ( ModuleName, String ) -> Cmd Msg
+generateTests tests =
+    tests
+        |> Encoder.files
+        |> writeFiles
 
+
+testFiles : CompileInfo -> Parsed -> List ( ModuleName, String )
+testFiles { moduleName, fileText, ignoredWarnings } parsed =
+    let
         toGenerate =
             List.concatMap (Compiler.compile moduleName) parsed.testSuites
     in
-    ( Warning.warnings ignoredWarnings parsed
-    , case toGenerate of
+    case toGenerate of
         [] ->
             [ Compiler.todoSpec moduleName ]
 
         _ ->
             toGenerate
-    )
+
+
+reportWarnings : CompileInfo -> Parsed -> Cmd msg
+reportWarnings { moduleName, ignoredWarnings } parsed =
+    parsed
+        |> Warning.warnings ignoredWarnings
+        |> Encoder.warnings moduleName
+        |> warn
 
 
 
