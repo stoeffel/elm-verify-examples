@@ -6,7 +6,8 @@
     "Robustness",
     "Failing",
     "Todo",
-    "FalseTodo"
+    "FalseTodo",
+    "./README.md"
   ],
   "ignoreWarnings": {
     "Mock.Foo.Bar.Moo": [
