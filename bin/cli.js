@@ -23,6 +23,9 @@ var argv = require('yargs')
     if (typeof arg === "string") return arg.split(" ");
     return [];
   })
+  .describe("keep-examples", "Keep generated example tests once suite finishes.")
+  .boolean("keep-examples")
+  .default("keep-examples", false)
   .default("elm-test-args", [])
   .argv;
 
@@ -32,7 +35,7 @@ var model = runner.init(argv);
 runner.run(model, function(warnings) {
   warnings.map(runner.warnModule(model));
   var status = runner.runElmTest(model);
-  if (status === 0) runner.cleanup(model);
+  if (status === 0 && !model.keepExamples) runner.cleanup(model);
   runner.warnSummary(model, warnings);
   process.exit(status);
 });
