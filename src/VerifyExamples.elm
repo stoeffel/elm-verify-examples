@@ -59,17 +59,15 @@ update msg =
             readFile test
 
         CompileModule source ->
-            let
-                parsed =
-                    Elm.parse source.fileText
-            in
-            Cmd.batch
-                [ parsed
-                    |> compileElm source
-                    |> generateTests
-                , parsed
-                    |> reportWarnings source
-                ]
+            source.fileText
+                |> Elm.parse
+                |> compileElm source
+                |> (\( warnings, tests ) ->
+                        Cmd.batch
+                            [ generateTests tests
+                            , reportWarnings source.moduleName warnings
+                            ]
+                   )
 
         CompileMarkdown source ->
             source.fileText
@@ -85,22 +83,25 @@ generateTests tests =
         |> writeFiles
 
 
-compileElm : ElmSource -> Elm.Parsed -> List ( ModuleName, String )
+compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List ( ModuleName, String ) )
 compileElm { moduleName, fileText, ignoredWarnings } parsed =
     case parsed.testSuites of
         [] ->
-            [ Compiler.todoSpec moduleName ]
+            ( []
+            , [ Compiler.todoSpec moduleName ]
+            )
 
         _ ->
-            List.concatMap
+            ( Warning.warnings ignoredWarnings parsed
+            , List.concatMap
                 (Elm.compile moduleName)
                 parsed.testSuites
+            )
 
 
-reportWarnings : ElmSource -> Elm.Parsed -> Cmd msg
-reportWarnings { moduleName, ignoredWarnings } parsed =
-    parsed
-        |> Warning.warnings ignoredWarnings
+reportWarnings : ModuleName -> List Warning -> Cmd msg
+reportWarnings moduleName warnings =
+    warnings
         |> Encoder.warnings moduleName
         |> warn
 
