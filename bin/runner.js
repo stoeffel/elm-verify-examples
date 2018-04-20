@@ -45,8 +45,7 @@ function generate(model, allTestsGenerated) {
       readSource(inputName, function(fileText) {
         app.ports.generateMarkdownVerifyExamples.send(
           { fileName: cleanMarkdownPath(inputName),
-            fileText: fileText,
-            ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName)
+            fileText: fileText
           }
         );
       });

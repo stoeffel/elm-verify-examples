@@ -48,8 +48,8 @@ decoder =
 
 type Msg
     = ReadTest String
-    | CompileModule CompileInfo
-    | CompileMarkdown MarkdownCompileInfo
+    | CompileModule ElmSource
+    | CompileMarkdown MarkdownSource
 
 
 update : Msg -> Cmd Msg
@@ -58,23 +58,23 @@ update msg =
         ReadTest test ->
             readFile test
 
-        CompileModule info ->
+        CompileModule source ->
             let
                 parsed =
-                    Elm.parse info.fileText
+                    Elm.parse source.fileText
             in
             Cmd.batch
                 [ parsed
-                    |> testFiles info
+                    |> compileElm source
                     |> generateTests
                 , parsed
-                    |> reportWarnings info
+                    |> reportWarnings source
                 ]
 
-        CompileMarkdown info ->
-            info.fileText
+        CompileMarkdown source ->
+            source.fileText
                 |> Markdown.parse
-                |> testFilesFromMarkdown info
+                |> compileMarkdown source
                 |> generateTests
 
 
@@ -85,8 +85,8 @@ generateTests tests =
         |> writeFiles
 
 
-testFiles : CompileInfo -> Elm.Parsed -> List ( ModuleName, String )
-testFiles { moduleName, fileText, ignoredWarnings } parsed =
+compileElm : ElmSource -> Elm.Parsed -> List ( ModuleName, String )
+compileElm { moduleName, fileText, ignoredWarnings } parsed =
     case parsed.testSuites of
         [] ->
             [ Compiler.todoSpec moduleName ]
@@ -97,7 +97,7 @@ testFiles { moduleName, fileText, ignoredWarnings } parsed =
                 parsed.testSuites
 
 
-reportWarnings : CompileInfo -> Elm.Parsed -> Cmd msg
+reportWarnings : ElmSource -> Elm.Parsed -> Cmd msg
 reportWarnings { moduleName, ignoredWarnings } parsed =
     parsed
         |> Warning.warnings ignoredWarnings
@@ -105,9 +105,11 @@ reportWarnings { moduleName, ignoredWarnings } parsed =
         |> warn
 
 
-testFilesFromMarkdown : MarkdownCompileInfo -> Markdown.Parsed -> List ( ModuleName, String )
-testFilesFromMarkdown { fileName, fileText, ignoredWarnings } parsed =
-    List.concatMap (Markdown.compile fileName) parsed.testSuites
+compileMarkdown : MarkdownSource -> Markdown.Parsed -> List ( ModuleName, String )
+compileMarkdown { fileName } parsed =
+    List.concatMap
+        (Markdown.compile fileName)
+        parsed.testSuites
 
 
 
@@ -137,9 +139,9 @@ subscriptions : () -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ generateModuleVerifyExamples
-            (runDecoder decodeCompileInfo >> CompileModule)
+            (runDecoder decodeElmSource >> CompileModule)
         , generateMarkdownVerifyExamples
-            (runDecoder decodeMarkdownCompileInfo >> CompileMarkdown)
+            (runDecoder decodeMarkdownSource >> CompileMarkdown)
         ]
 
 
@@ -153,39 +155,22 @@ runDecoder decoder value =
             Debug.crash "TODO"
 
 
-type alias CompileInfo =
+type alias ElmSource =
     { moduleName : ModuleName
     , fileText : String
     , ignoredWarnings : List Ignored
     }
 
 
-
-{- TODO: Maybe this is better...
-
-   type CompileInfo =
-     { source: Source
-     , fileText: String
-     , ignoredWarnings: List Ignored
-     }
-
-   type Source
-     = Elm String
-     = Markdown String
-
--}
-
-
-type alias MarkdownCompileInfo =
+type alias MarkdownSource =
     { fileName : String
     , fileText : String
-    , ignoredWarnings : List Ignored
     }
 
 
-decodeCompileInfo : Decoder CompileInfo
-decodeCompileInfo =
-    Decode.map3 CompileInfo
+decodeElmSource : Decoder ElmSource
+decodeElmSource =
+    Decode.map3 ElmSource
         (field "moduleName" string
             |> Decode.map ModuleName.fromString
         )
@@ -193,9 +178,8 @@ decodeCompileInfo =
         (field "ignoredWarnings" Ignored.decode)
 
 
-decodeMarkdownCompileInfo : Decoder MarkdownCompileInfo
-decodeMarkdownCompileInfo =
-    Decode.map3 MarkdownCompileInfo
+decodeMarkdownSource : Decoder MarkdownSource
+decodeMarkdownSource =
+    Decode.map2 MarkdownSource
         (field "fileName" string)
         (field "fileText" string)
-        (field "ignoredWarnings" Ignored.decode)
