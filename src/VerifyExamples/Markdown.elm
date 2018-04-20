@@ -22,7 +22,7 @@ parse fileText =
         |> Parsed
 
 
-compile : String -> TestSuite -> List ( ModuleName, String )
+compile : String -> TestSuite -> List Compiler.Result
 compile filePath suite =
     Compiler.compile
         { testModuleName = testModuleName filePath

@@ -76,14 +76,14 @@ update msg =
                 |> generateTests
 
 
-generateTests : List ( ModuleName, String ) -> Cmd Msg
+generateTests : List Compiler.Result -> Cmd Msg
 generateTests tests =
     tests
         |> Encoder.files
         |> writeFiles
 
 
-compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List ( ModuleName, String ) )
+compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List Compiler.Result )
 compileElm { moduleName, fileText, ignoredWarnings } parsed =
     case parsed.testSuites of
         [] ->
@@ -106,7 +106,7 @@ reportWarnings moduleName warnings =
         |> warn
 
 
-compileMarkdown : MarkdownSource -> Markdown.Parsed -> List ( ModuleName, String )
+compileMarkdown : MarkdownSource -> Markdown.Parsed -> List Compiler.Result
 compileMarkdown { fileName } parsed =
     List.concatMap
         (Markdown.compile fileName)

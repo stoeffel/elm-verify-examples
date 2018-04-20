@@ -26,7 +26,7 @@ parse fileText =
     }
 
 
-compile : ModuleName -> TestSuite -> List ( ModuleName, String )
+compile : ModuleName -> TestSuite -> List Compiler.Result
 compile moduleName testSuite =
     Compiler.compile
         { testModuleName = Nomenclature.testModuleName moduleName

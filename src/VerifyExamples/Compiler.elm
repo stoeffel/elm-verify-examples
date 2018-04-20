@@ -1,4 +1,4 @@
-module VerifyExamples.Compiler exposing (compile, todoSpec)
+module VerifyExamples.Compiler exposing (Result, compile, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
@@ -8,20 +8,24 @@ import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
+type alias Result =
+    ( ModuleName, String )
+
+
 type alias Nomenclature =
     { testModuleName : Int -> Test -> ModuleName
     , testName : Test -> String
     }
 
 
-compile : Nomenclature -> TestSuite -> List ( ModuleName, String )
+compile : Nomenclature -> TestSuite -> List Result
 compile nomenclature suite =
     List.indexedMap
         (compileTest nomenclature suite)
         suite.tests
 
 
-todoSpec : ModuleName -> ( ModuleName, String )
+todoSpec : ModuleName -> Result
 todoSpec moduleName =
     ( moduleName
     , unlines
@@ -44,7 +48,7 @@ todoSpec moduleName =
     )
 
 
-compileTest : Nomenclature -> TestSuite -> Int -> Test -> ( ModuleName, String )
+compileTest : Nomenclature -> TestSuite -> Int -> Test -> Result
 compileTest nomenclature suite index test =
     let
         testModuleName =
