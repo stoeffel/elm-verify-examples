@@ -1,4 +1,4 @@
-module VerifyExamples.Compiler exposing (compile, compileMarkdown, todoSpec)
+module VerifyExamples.Compiler exposing (compileElm, compileMarkdown, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
@@ -9,8 +9,8 @@ import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
-compile : ModuleName -> TestSuite -> List ( ModuleName, String )
-compile moduleName suite =
+compileElm : ModuleName -> TestSuite -> List ( ModuleName, String )
+compileElm moduleName suite =
     List.indexedMap
         (\index test ->
             let

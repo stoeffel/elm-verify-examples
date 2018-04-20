@@ -6,7 +6,6 @@ import Platform
 import VerifyExamples.Compiler as Compiler
 import VerifyExamples.Elm as Elm
 import VerifyExamples.Encoder as Encoder
-import VerifyExamples.ExposedApi as ExposedApi
 import VerifyExamples.Markdown as Markdown
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Warning as Warning exposing (Warning)
@@ -88,16 +87,14 @@ generateTests tests =
 
 testFiles : CompileInfo -> Elm.Parsed -> List ( ModuleName, String )
 testFiles { moduleName, fileText, ignoredWarnings } parsed =
-    let
-        toGenerate =
-            List.concatMap (Compiler.compile moduleName) parsed.testSuites
-    in
-    case toGenerate of
+    case parsed.testSuites of
         [] ->
             [ Compiler.todoSpec moduleName ]
 
         _ ->
-            toGenerate
+            List.concatMap
+                (Compiler.compileElm moduleName)
+                parsed.testSuites
 
 
 reportWarnings : CompileInfo -> Elm.Parsed -> Cmd msg
