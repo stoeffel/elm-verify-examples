@@ -9,7 +9,9 @@ import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
 type alias Nomenclature =
-    Int -> Test -> ModuleName
+    { testModuleName : Int -> Test -> ModuleName
+    , testName : Test -> String
+    }
 
 
 todoSpec : ModuleName -> ( ModuleName, String )
@@ -38,21 +40,21 @@ todoSpec moduleName =
 compileTestSuite : Nomenclature -> TestSuite -> List ( ModuleName, String )
 compileTestSuite nomenclature suite =
     List.indexedMap
-        (\index test ->
-            let
-                testModuleName =
-                    nomenclature index test
-            in
-            ( testModuleName
-            , compileTest testModuleName suite index test
-            )
-        )
+        (compileTest nomenclature suite)
         suite.tests
 
 
-compileTest : ModuleName -> TestSuite -> Int -> Test -> String
-compileTest testModuleName suite index test =
-    unlines
+compileTest : Nomenclature -> TestSuite -> Int -> Test -> ( ModuleName, String )
+compileTest nomenclature suite index test =
+    let
+        testModuleName =
+            nomenclature.testModuleName index test
+
+        testName =
+            nomenclature.testName test
+    in
+    ( testModuleName
+    , unlines
         [ moduleHeader suite testModuleName
         , imports suite
         , unlines suite.types
@@ -61,8 +63,9 @@ compileTest testModuleName suite index test =
             |> List.map Function.toString
             |> unlines
         , ""
-        , spec index test
+        , spec testName index test
         ]
+    )
 
 
 moduleHeader : TestSuite -> ModuleName -> String
@@ -87,25 +90,25 @@ imports { imports } =
         ]
 
 
-spec : Int -> Test -> String
-spec index test =
+spec : String -> Int -> Test -> String
+spec testName index test =
     unlines
         [ ""
         , ""
         , "spec" ++ toString index ++ " : Test.Test"
         , "spec" ++ toString index ++ " ="
-        , indent 1 (testDefinition test)
+        , indent 1 (testDefinition testName test)
         , indent 2 "\\() ->"
         , indent 3 "Expect.equal"
         , indentLines 4 (Test.specBody test)
         ]
 
 
-testDefinition : Test -> String
-testDefinition test =
+testDefinition : String -> Test -> String
+testDefinition testName test =
     String.concat
         [ "Test.test \""
-        , Test.name test
+        , testName
         , ": \\n\\n"
         , Test.exampleDescription test
             |> String.lines

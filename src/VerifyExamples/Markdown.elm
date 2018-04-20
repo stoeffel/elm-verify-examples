@@ -24,7 +24,11 @@ parse fileText =
 
 compile : String -> TestSuite -> List ( ModuleName, String )
 compile filePath suite =
-    Compiler.compileTestSuite (nomenclature filePath) suite
+    Compiler.compileTestSuite
+        { testModuleName = testModuleName filePath
+        , testName = \test -> "Documentation VerifyExamples"
+        }
+        suite
 
 
 toTestSuite : Snippet -> TestSuite
@@ -32,8 +36,8 @@ toTestSuite (Snippet snippet) =
     Parser.parse { snippet = snippet, functionName = Nothing }
 
 
-nomenclature : String -> Int -> Test -> ModuleName
-nomenclature filePath index _ =
+testModuleName : String -> Int -> Test -> ModuleName
+testModuleName filePath index _ =
     let
         filePathComponents =
             filePath

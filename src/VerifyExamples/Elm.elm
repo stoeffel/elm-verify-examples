@@ -1,11 +1,11 @@
 module VerifyExamples.Elm exposing (Parsed, compile, parse)
 
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Elm.Nomenclature as Nomenclature
 import VerifyExamples.Elm.Snippet as Snippet exposing (Snippet(..))
 import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
-import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite exposing (TestSuite)
 
 
@@ -29,7 +29,9 @@ parse fileText =
 compile : ModuleName -> TestSuite -> List ( ModuleName, String )
 compile moduleName testSuite =
     Compiler.compileTestSuite
-        (nomenclature moduleName)
+        { testModuleName = Nomenclature.testModuleName moduleName
+        , testName = Nomenclature.testName
+        }
         (addSourceImport moduleName testSuite)
 
 
@@ -40,12 +42,6 @@ addSourceImport moduleName testSuite =
             "import " ++ ModuleName.toString moduleName ++ " exposing (..)"
     in
     { testSuite | imports = sourceImport :: testSuite.imports }
-
-
-nomenclature : ModuleName -> Int -> Test -> ModuleName
-nomenclature moduleName index test =
-    Test.specName index test
-        |> ModuleName.extendName moduleName
 
 
 toTestSuite : Snippet -> TestSuite
