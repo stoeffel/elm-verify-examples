@@ -71,12 +71,6 @@ update msg =
                 ]
 
         CompileMarkdown info ->
-            {-
-               TODO: report warnings for markdown files too.
-
-               Right now the JS side assume all warnings come with a module name
-               Or maybe we don't care about warnings for markdown at all?
-            -}
             info.fileText
                 |> Parser.parseMarkdown
                 |> testFilesFromMarkdown info
