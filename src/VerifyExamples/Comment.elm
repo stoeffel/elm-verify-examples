@@ -1,7 +1,8 @@
 module VerifyExamples.Comment exposing (Comment(..), function, parse)
 
+import List.Extra
 import Regex exposing (HowMany(..), Regex)
-import Regex.Util exposing (newline)
+import Regex.Util exposing (newline, replaceLinesWith)
 import String.Extra
 import String.Util
 
@@ -33,15 +34,11 @@ toComment matches =
 cleanSnippet : String -> String
 cleanSnippet comment =
     comment
-        |> String.lines
-        |> List.filter (Regex.contains snippetLineRegex)
-        |> String.Util.unlines
+        -- replace non-blank lines that don't start with 4 spaces with a newline
+        -- doing this instead of deleting to avoid joining different code snippets in a comment
+        |> replaceLinesWith proseLineRegex ""
+        -- remove 4-space indentation
         |> String.Extra.unindent
-
-
-snippetLineRegex : Regex
-snippetLineRegex =
-    Regex.regex <| "(^\\s*$)|(\\s{4}(.*))"
 
 
 commentRegex : Regex
@@ -55,6 +52,11 @@ commentRegex =
             , "\\s[:=]" -- until ` :` or ` =`
             , ")?" -- it's possible that we have examples in comment not attached to a function
             ]
+
+
+proseLineRegex : Regex
+proseLineRegex =
+    Regex.regex "^\\s?\\s?\\s?[^\\s]"
 
 
 function : Comment -> Maybe String

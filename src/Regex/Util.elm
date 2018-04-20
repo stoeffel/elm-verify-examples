@@ -1,6 +1,8 @@
-module Regex.Util exposing (firstSubmatch, newline, replaceAllWith, submatches)
+module Regex.Util exposing (firstSubmatch, newline, replaceAllWith, replaceLinesWith, submatches)
 
+import List.Extra exposing (replaceIf)
 import Regex exposing (HowMany(..), Regex)
+import String.Extra exposing (unindent)
 
 
 submatches : Regex -> (String -> List String)
@@ -24,3 +26,13 @@ newline =
 replaceAllWith : Regex -> String -> String -> String
 replaceAllWith regex with =
     Regex.replace Regex.All regex (always with)
+
+
+{-| Replace all lines matching a regex. Unlike `replaceAllWith`, `^` and `$` will match the beginning and end of line instead of the whole input.
+-}
+replaceLinesWith : Regex -> String -> String -> String
+replaceLinesWith regex with =
+    String.lines
+        >> replaceIf (Regex.contains regex) with
+        >> String.join "\n"
+        >> unindent
