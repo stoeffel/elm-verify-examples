@@ -8,15 +8,15 @@ The funny thing is, this file illustrates how the tool can verify examples even 
 So this snippet would pass:
 
 ```elm
-    import Documented
+import Documented
 
-    Documented.two --> 2
+Documented.two --> 2
 ```
 
 But the following would cause a build error!
 
 ```elm
-    import Documented
+import Documented
 
-    Documented.two --> 3
+Documented.two --> 3
 ```

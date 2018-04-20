@@ -2,6 +2,8 @@ module VerifyExamples.Comment exposing (Comment(..), function, parse)
 
 import Regex exposing (HowMany(..), Regex)
 import Regex.Util exposing (newline)
+import String.Extra
+import String.Util
 
 
 type Comment
@@ -19,13 +21,27 @@ toComment : List (Maybe String) -> Maybe Comment
 toComment matches =
     case matches of
         (Just comment) :: _ :: Nothing :: _ ->
-            Just (ModuleDoc comment)
+            Just (ModuleDoc (cleanSnippet comment))
 
         (Just comment) :: _ :: (Just functionName) :: _ ->
-            Just (FunctionDoc { functionName = functionName, comment = comment })
+            Just (FunctionDoc { functionName = functionName, comment = cleanSnippet comment })
 
         _ ->
             Nothing
+
+
+cleanSnippet : String -> String
+cleanSnippet comment =
+    comment
+        |> String.lines
+        |> List.filter (Regex.contains snippetLineRegex)
+        |> String.Util.unlines
+        |> String.Extra.unindent
+
+
+snippetLineRegex : Regex
+snippetLineRegex =
+    Regex.regex <| "(^\\s*$)|(\\s{4}(.*))"
 
 
 commentRegex : Regex
