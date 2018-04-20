@@ -1,14 +1,28 @@
-module VerifyExamples.Markdown exposing (parseSnippets, testModuleName)
+module VerifyExamples.Markdown exposing (Parsed, parse, testModuleName)
 
 import Regex exposing (HowMany(..), Regex)
 import String.Util exposing (capitalizeFirst)
-import VerifyExamples.Markdown.Snippet as Snippet exposing (Snippet)
+import VerifyExamples.Markdown.Snippet as Snippet exposing (Snippet(..))
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
+import VerifyExamples.Parser as Parser
+import VerifyExamples.TestSuite exposing (TestSuite)
 
 
-parseSnippets : String -> List Snippet
-parseSnippets =
-    Snippet.parse
+type alias Parsed =
+    { testSuites : List TestSuite }
+
+
+parse : String -> Parsed
+parse fileText =
+    fileText
+        |> Snippet.parse
+        |> List.map toTestSuite
+        |> Parsed
+
+
+toTestSuite : Snippet -> TestSuite
+toTestSuite (Snippet snippet) =
+    Parser.parse { snippet = snippet, functionName = Nothing }
 
 
 testModuleName : Int -> String -> ModuleName

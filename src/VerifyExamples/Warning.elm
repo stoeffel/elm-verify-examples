@@ -3,8 +3,8 @@ module VerifyExamples.Warning exposing (Warning, toString, warnings)
 import Maybe.Extra
 import Maybe.Util
 import String.Util exposing (unlines)
+import VerifyExamples.Elm as Elm
 import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
-import VerifyExamples.Parser as Parser exposing (Parsed)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 import VerifyExamples.Warning.Type exposing (Type(..))
@@ -14,7 +14,7 @@ type Warning
     = Warning Type (List String)
 
 
-warnings : List Ignored -> Parsed -> List Warning
+warnings : List Ignored -> Elm.Parsed -> List Warning
 warnings ignored { exposedApi, testSuites } =
     [ notEverythingExposed exposedApi
     , Ignored.subset NoExampleForExposedDefinition ignored

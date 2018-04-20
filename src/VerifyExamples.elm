@@ -4,9 +4,11 @@ import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
 import Platform
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Elm as Elm
 import VerifyExamples.Encoder as Encoder
+import VerifyExamples.ExposedApi as ExposedApi
+import VerifyExamples.Markdown as Markdown
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
-import VerifyExamples.Parser as Parser exposing (Parsed)
 import VerifyExamples.Warning as Warning exposing (Warning)
 import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
@@ -60,7 +62,7 @@ update msg =
         CompileModule info ->
             let
                 parsed =
-                    Parser.parse info.fileText
+                    Elm.parse info.fileText
             in
             Cmd.batch
                 [ parsed
@@ -72,7 +74,7 @@ update msg =
 
         CompileMarkdown info ->
             info.fileText
-                |> Parser.parseMarkdown
+                |> Markdown.parse
                 |> testFilesFromMarkdown info
                 |> generateTests
 
@@ -84,7 +86,7 @@ generateTests tests =
         |> writeFiles
 
 
-testFiles : CompileInfo -> Parsed -> List ( ModuleName, String )
+testFiles : CompileInfo -> Elm.Parsed -> List ( ModuleName, String )
 testFiles { moduleName, fileText, ignoredWarnings } parsed =
     let
         toGenerate =
@@ -98,17 +100,17 @@ testFiles { moduleName, fileText, ignoredWarnings } parsed =
             toGenerate
 
 
-testFilesFromMarkdown : MarkdownCompileInfo -> Parsed -> List ( ModuleName, String )
-testFilesFromMarkdown { fileName, fileText, ignoredWarnings } parsed =
-    List.concatMap (Compiler.compileMarkdown fileName) parsed.testSuites
-
-
-reportWarnings : CompileInfo -> Parsed -> Cmd msg
+reportWarnings : CompileInfo -> Elm.Parsed -> Cmd msg
 reportWarnings { moduleName, ignoredWarnings } parsed =
     parsed
         |> Warning.warnings ignoredWarnings
         |> Encoder.warnings moduleName
         |> warn
+
+
+testFilesFromMarkdown : MarkdownCompileInfo -> Markdown.Parsed -> List ( ModuleName, String )
+testFilesFromMarkdown { fileName, fileText, ignoredWarnings } parsed =
+    List.concatMap (Compiler.compileMarkdown fileName) parsed.testSuites
 
 
 
