@@ -7,9 +7,9 @@ module VerifyExamples.Parser
 
 import VerifyExamples.Ast.Grouped as GroupedAst exposing (GroupedAst)
 import VerifyExamples.Ast.Intermediate as IntermediateAst exposing (IntermediateAst)
-import VerifyExamples.Comment as Comment exposing (Comment)
+import VerifyExamples.Elm.Snippet as ElmSnippet
 import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
-import VerifyExamples.Markdown as Markdown
+import VerifyExamples.Markdown.Snippet as MarkdownSnippet
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
@@ -26,9 +26,8 @@ parse value =
         ExposedApi.parse value
     , testSuites =
         value
-            -- TODO: move Elm parsing to Elm.parseComments ?
-            |> Comment.parse
-            |> List.map toTestSuite
+            |> ElmSnippet.parse
+            |> List.map elmSnippetToTestSuite
     }
 
 
@@ -38,24 +37,32 @@ parseMarkdown value =
         ExposedApi.parse value
     , testSuites =
         value
-            |> Markdown.parseComments
-            |> List.map toTestSuite
+            |> MarkdownSnippet.parse
+            |> List.map markdownSnippetToTestSuite
     }
 
 
-toTestSuite : Comment -> TestSuite
-toTestSuite comment =
-    case comment of
-        Comment.FunctionDoc { functionName, comment } ->
-            comment
-                |> IntermediateAst.fromString
-                |> IntermediateAst.toAst
-                |> GroupedAst.fromAst
-                |> TestSuite.fromAst (Just functionName)
+elmSnippetToTestSuite : ElmSnippet.Snippet -> TestSuite
+elmSnippetToTestSuite snippet =
+    case snippet of
+        ElmSnippet.FunctionDoc { functionName, snippet } ->
+            toTestSuite snippet (Just functionName)
 
-        Comment.ModuleDoc comment ->
-            comment
-                |> IntermediateAst.fromString
-                |> IntermediateAst.toAst
-                |> GroupedAst.fromAst
-                |> TestSuite.fromAst Nothing
+        ElmSnippet.ModuleDoc snippet ->
+            toTestSuite snippet Nothing
+
+
+markdownSnippetToTestSuite : MarkdownSnippet.Snippet -> TestSuite
+markdownSnippetToTestSuite snippet =
+    case snippet of
+        MarkdownSnippet.Snippet snippet ->
+            toTestSuite snippet Nothing
+
+
+toTestSuite : String -> Maybe String -> TestSuite
+toTestSuite snippet functionName =
+    snippet
+        |> IntermediateAst.fromString
+        |> IntermediateAst.toAst
+        |> GroupedAst.fromAst
+        |> TestSuite.fromAst functionName

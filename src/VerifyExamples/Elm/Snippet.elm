@@ -1,38 +1,36 @@
-module VerifyExamples.Comment exposing (Comment(..), function, parse)
+module VerifyExamples.Elm.Snippet exposing (Snippet(..), parse)
 
-import List.Extra
 import Regex exposing (HowMany(..), Regex)
 import Regex.Util exposing (newline, replaceLinesWith)
 import String.Extra
-import String.Util
 
 
-type Comment
-    = FunctionDoc { functionName : String, comment : String }
-    | ModuleDoc String
+type Snippet
+    = ModuleDoc String
+    | FunctionDoc { functionName : String, snippet : String }
 
 
-parse : String -> List Comment
+parse : String -> List Snippet
 parse =
     Regex.find All commentRegex
-        >> List.filterMap (toComment << .submatches)
+        >> List.filterMap (toSnippet << .submatches)
 
 
-toComment : List (Maybe String) -> Maybe Comment
-toComment matches =
+toSnippet : List (Maybe String) -> Maybe Snippet
+toSnippet matches =
     case matches of
         (Just comment) :: _ :: Nothing :: _ ->
-            Just (ModuleDoc (cleanSnippet comment))
+            Just (ModuleDoc (cleanComment comment))
 
         (Just comment) :: _ :: (Just functionName) :: _ ->
-            Just (FunctionDoc { functionName = functionName, comment = cleanSnippet comment })
+            Just (FunctionDoc { functionName = functionName, snippet = cleanComment comment })
 
         _ ->
             Nothing
 
 
-cleanSnippet : String -> String
-cleanSnippet comment =
+cleanComment : String -> String
+cleanComment comment =
     comment
         -- replace non-blank lines that don't start with 4 spaces with a newline
         -- doing this instead of deleting to avoid joining different code snippets in a comment
@@ -57,13 +55,3 @@ commentRegex =
 proseLineRegex : Regex
 proseLineRegex =
     Regex.regex "^\\s?\\s?\\s?[^\\s]"
-
-
-function : Comment -> Maybe String
-function comment =
-    case comment of
-        FunctionDoc { functionName } ->
-            Just functionName
-
-        ModuleDoc _ ->
-            Nothing
