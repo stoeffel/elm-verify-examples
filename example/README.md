@@ -3,9 +3,9 @@ Examples for elm-verify-examples
 
 This is an example project on which you can test `elm-verify-examples`.
 
-The funny thing is, this file illustrates how the tool can verify examples even inside your READMEs and other markdown files.
+Comments in this project's source files will be compiled into tests.
 
-So this snippet would pass:
+Besides that, code examples in this same markdown file will also be automatically verified. So this snippet will pass:
 
 ```elm
 import Documented
@@ -13,7 +13,7 @@ import Documented
 Documented.two --> 2
 ```
 
-But the following would cause a build error!
+But the following will case a test to fail!
 
 ```elm
 import Documented
