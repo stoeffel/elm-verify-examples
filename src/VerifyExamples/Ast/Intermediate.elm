@@ -10,7 +10,6 @@ import Maybe.Util exposing (oneOf)
 import Regex exposing (HowMany(..), Regex)
 import Regex.Util exposing (firstSubmatch, replaceAllWith, submatches)
 import String
-import String.Extra exposing (unindent)
 import String.Util exposing (unlines)
 import VerifyExamples.Ast as Ast exposing (Ast)
 

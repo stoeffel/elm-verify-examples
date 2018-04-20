@@ -1,9 +1,9 @@
 module VerifyExamples.Elm exposing (Parsed, compile, parse)
 
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Elm.ExposedApi as ExposedApi exposing (ExposedApi)
 import VerifyExamples.Elm.Nomenclature as Nomenclature
 import VerifyExamples.Elm.Snippet as Snippet exposing (Snippet(..))
-import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Parser as Parser
 import VerifyExamples.TestSuite exposing (TestSuite)

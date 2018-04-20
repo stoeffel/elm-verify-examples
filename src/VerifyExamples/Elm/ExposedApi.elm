@@ -1,4 +1,4 @@
-module VerifyExamples.ExposedApi
+module VerifyExamples.Elm.ExposedApi
     exposing
         ( ExposedApi
         , definitions

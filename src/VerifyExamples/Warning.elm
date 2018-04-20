@@ -4,7 +4,7 @@ import Maybe.Extra
 import Maybe.Util
 import String.Util exposing (unlines)
 import VerifyExamples.Elm as Elm
-import VerifyExamples.ExposedApi as ExposedApi exposing (ExposedApi)
+import VerifyExamples.Elm.ExposedApi as ExposedApi exposing (ExposedApi)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 import VerifyExamples.Warning.Type exposing (Type(..))
