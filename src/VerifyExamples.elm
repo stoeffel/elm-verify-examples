@@ -93,7 +93,7 @@ testFiles { moduleName, fileText, ignoredWarnings } parsed =
 
         _ ->
             List.concatMap
-                (Compiler.compileElm moduleName)
+                (Elm.compile moduleName)
                 parsed.testSuites
 
 
@@ -107,7 +107,7 @@ reportWarnings { moduleName, ignoredWarnings } parsed =
 
 testFilesFromMarkdown : MarkdownCompileInfo -> Markdown.Parsed -> List ( ModuleName, String )
 testFilesFromMarkdown { fileName, fileText, ignoredWarnings } parsed =
-    List.concatMap (Compiler.compileMarkdown fileName) parsed.testSuites
+    List.concatMap (Markdown.compile fileName) parsed.testSuites
 
 
 

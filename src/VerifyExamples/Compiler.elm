@@ -1,58 +1,15 @@
-module VerifyExamples.Compiler exposing (compileElm, compileMarkdown, todoSpec)
+module VerifyExamples.Compiler exposing (compileTestSuite, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
 import VerifyExamples.Function as Function exposing (Function)
-import VerifyExamples.Markdown as Markdown
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
-compileElm : ModuleName -> TestSuite -> List ( ModuleName, String )
-compileElm moduleName suite =
-    List.indexedMap
-        (\index test ->
-            let
-                testModuleName =
-                    elmTestModuleName moduleName index test
-            in
-            ( testModuleName
-            , compileTest testModuleName (addSourceImport moduleName suite) index test
-            )
-        )
-        suite.tests
-
-
-compileMarkdown : String -> TestSuite -> List ( ModuleName, String )
-compileMarkdown filePath suite =
-    List.indexedMap
-        (\index test ->
-            let
-                testModuleName =
-                    Markdown.testModuleName index filePath
-            in
-            ( testModuleName
-            , compileTest testModuleName suite index test
-            )
-        )
-        suite.tests
-
-
-elmTestModuleName : ModuleName -> Int -> Test -> ModuleName
-elmTestModuleName moduleName index test =
-    Test.specName index test
-        |> ModuleName.extendName moduleName
-
-
-addSourceImport : ModuleName -> TestSuite -> TestSuite
-addSourceImport moduleName testSuite =
-    -- TODO: the test suite for elm files should be generated with this import already
-    let
-        sourceImport =
-            "import " ++ ModuleName.toString moduleName ++ " exposing (..)"
-    in
-    { testSuite | imports = sourceImport :: testSuite.imports }
+type alias Nomenclature =
+    Int -> Test -> ModuleName
 
 
 todoSpec : ModuleName -> ( ModuleName, String )
@@ -76,6 +33,21 @@ todoSpec moduleName =
                 ++ ": No examples to verify yet!\""
         ]
     )
+
+
+compileTestSuite : Nomenclature -> TestSuite -> List ( ModuleName, String )
+compileTestSuite nomenclature suite =
+    List.indexedMap
+        (\index test ->
+            let
+                testModuleName =
+                    nomenclature index test
+            in
+            ( testModuleName
+            , compileTest testModuleName suite index test
+            )
+        )
+        suite.tests
 
 
 compileTest : ModuleName -> TestSuite -> Int -> Test -> String
