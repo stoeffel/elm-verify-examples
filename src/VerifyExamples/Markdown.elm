@@ -24,7 +24,7 @@ parse fileText =
 
 compile : String -> TestSuite -> List ( ModuleName, String )
 compile filePath suite =
-    Compiler.compileTestSuite
+    Compiler.compile
         { testModuleName = testModuleName filePath
         , testName = \test -> "Documentation VerifyExamples"
         }

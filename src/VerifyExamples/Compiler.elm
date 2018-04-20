@@ -1,4 +1,4 @@
-module VerifyExamples.Compiler exposing (compileTestSuite, todoSpec)
+module VerifyExamples.Compiler exposing (compile, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
@@ -12,6 +12,13 @@ type alias Nomenclature =
     { testModuleName : Int -> Test -> ModuleName
     , testName : Test -> String
     }
+
+
+compile : Nomenclature -> TestSuite -> List ( ModuleName, String )
+compile nomenclature suite =
+    List.indexedMap
+        (compileTest nomenclature suite)
+        suite.tests
 
 
 todoSpec : ModuleName -> ( ModuleName, String )
@@ -35,13 +42,6 @@ todoSpec moduleName =
                 ++ ": No examples to verify yet!\""
         ]
     )
-
-
-compileTestSuite : Nomenclature -> TestSuite -> List ( ModuleName, String )
-compileTestSuite nomenclature suite =
-    List.indexedMap
-        (compileTest nomenclature suite)
-        suite.tests
 
 
 compileTest : Nomenclature -> TestSuite -> Int -> Test -> ( ModuleName, String )
