@@ -42,7 +42,12 @@ function generate(model, allTestsGenerated) {
 
   app.ports.readFile.subscribe(function(inputName) {
     if (inputName.endsWith(".md")) {
-      readSource(inputName, function(fileText) {
+      var pathToFile = path.join(
+        model.testsPath,
+        model.root,
+        inputName
+      );
+      readSource(pathToFile, function(fileText) {
         app.ports.generateMarkdownVerifyExamples.send(
           { fileName: cleanMarkdownPath(inputName),
             fileText: fileText
