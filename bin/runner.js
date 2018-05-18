@@ -247,6 +247,11 @@ function cleanMarkdownPath(pathName) {
   if (relativePath.startsWith("./")) {
     relativePath = relativePath.substr(2);
   }
+   // TODO we want a better way to clean this path.
+  // I think we need to make this relative to the root and then remove use that without any dots.
+  if (relativePath.startsWith("../")) {
+    relativePath = relativePath.substr(3);
+  }
   return relativePath;
 }
 
