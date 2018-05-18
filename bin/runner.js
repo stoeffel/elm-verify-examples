@@ -41,7 +41,7 @@ function generate(model, allTestsGenerated) {
   var app = Elm.VerifyExamples.worker(model);
 
   app.ports.readFile.subscribe(function(inputName) {
-    if (inputName.endsWith(".md")) {
+    if (path.extname(inputName) === ".md") {
       var pathToFile = path.join(
         model.testsPath,
         model.root,
