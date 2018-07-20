@@ -48,7 +48,7 @@ breakIntoTwoLines a =
     if Regex.contains expectationRegex a then
         a
     else
-        replaceAllWith arrowRegex "\n    --> " a
+        replaceAllWith arrowRegex "\n--> " a
 
 
 toIntermediateAst : String -> Maybe IntermediateAst
@@ -82,12 +82,12 @@ newLineRegex =
 
 importRegex : Regex
 importRegex =
-    Regex.regex "^\\s{4}(import\\s.*)"
+    Regex.regex "^(import\\s.*)"
 
 
 typeRegex : Regex
 typeRegex =
-    Regex.regex "^\\s{4}(type\\s.*)"
+    Regex.regex "^(type\\s.*)"
 
 
 functionNameRegex : Regex
@@ -97,17 +97,17 @@ functionNameRegex =
 
 assertionRegex : Regex
 assertionRegex =
-    Regex.regex "^\\s{4}(.*)"
+    Regex.regex "^(.*)"
 
 
 expectationRegex : Regex
 expectationRegex =
-    Regex.regex "^\\s{4}\\-\\->\\s(.*)"
+    Regex.regex "^\\-\\->\\s(.*)"
 
 
 localFunctionRegex : Regex
 localFunctionRegex =
-    Regex.regex "^\\s{4}(\\w+\\s:\\s.*)"
+    Regex.regex "^(\\w+\\s:\\s.*)"
 
 
 toAst : List IntermediateAst -> List Ast

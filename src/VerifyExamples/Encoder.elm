@@ -2,17 +2,18 @@ module VerifyExamples.Encoder exposing (files, moduleName, warnings)
 
 import Json.Decode exposing (Value)
 import Json.Encode as Encode
+import VerifyExamples.Compiler as Compiler
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
 import VerifyExamples.Warning as Warning exposing (Warning)
 
 
-files : List ( ModuleName, String ) -> Value
+files : List Compiler.Result -> Value
 files modules =
     List.map encodeFile modules
         |> Encode.list
 
 
-encodeFile : ( ModuleName, String ) -> Value
+encodeFile : Compiler.Result -> Value
 encodeFile ( name, content ) =
     Encode.object
         [ ( "moduleName", moduleName name )

@@ -31,7 +31,8 @@ $ touch tests/elm-verify-examples.json
   "root": "../src",
   "tests": [
     "Mock",
-    "Mock.Foo.Bar.Moo"
+    "Mock.Foo.Bar.Moo",
+    "./README.md"
   ]
 }
 ```
@@ -162,6 +163,21 @@ customTypeAlias : { a | name : String } -> String -> String
 customTypeAlias { name } prefix =
     prefix ++ name
 ```
+
+### Examples in markdown files
+
+You can also verify code example in markdown files (such as your README). To do so, add the file's path to your `elm-verify-examples.json` file and write your example using the sames rules as above (no need for 4-space indentation here).
+
+````
+This is my README!
+It explains how the `Documented` module works:
+
+```elm
+import Documented
+
+Documented.two --> 2
+```
+````
 
 Verify Examples
 ----------------

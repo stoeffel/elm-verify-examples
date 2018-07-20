@@ -1,4 +1,4 @@
-module VerifyExamples.Compiler exposing (compile, todoSpec)
+module VerifyExamples.Compiler exposing (Result, compile, todoSpec)
 
 import String
 import String.Util exposing (escape, indent, indentLines, unlines)
@@ -8,12 +8,24 @@ import VerifyExamples.Test as Test exposing (Test)
 import VerifyExamples.TestSuite as TestSuite exposing (TestSuite)
 
 
-compile : ModuleName -> TestSuite -> List ( ModuleName, String )
-compile moduleName suite =
-    List.indexedMap (compileTest moduleName suite) suite.tests
+type alias Result =
+    ( ModuleName, String )
 
 
-todoSpec : ModuleName -> ( ModuleName, String )
+type alias Nomenclature =
+    { testModuleName : Int -> Test -> ModuleName
+    , testName : Test -> String
+    }
+
+
+compile : Nomenclature -> TestSuite -> List Result
+compile nomenclature suite =
+    List.indexedMap
+        (compileTest nomenclature suite)
+        suite.tests
+
+
+todoSpec : ModuleName -> Result
 todoSpec moduleName =
     ( moduleName
     , unlines
@@ -36,24 +48,26 @@ todoSpec moduleName =
     )
 
 
-compileTest : ModuleName -> TestSuite -> Int -> Test -> ( ModuleName, String )
-compileTest moduleName suite index test =
+compileTest : Nomenclature -> TestSuite -> Int -> Test -> Result
+compileTest nomenclature suite index test =
     let
-        extendedModuleName =
-            Test.specName index test
-                |> ModuleName.extendName moduleName
+        testModuleName =
+            nomenclature.testModuleName index test
+
+        testName =
+            nomenclature.testName test
     in
-    ( extendedModuleName
+    ( testModuleName
     , unlines
-        [ moduleHeader suite extendedModuleName
-        , imports suite moduleName
+        [ moduleHeader suite testModuleName
+        , imports suite
         , unlines suite.types
         , ""
         , suite.helperFunctions
             |> List.map Function.toString
             |> unlines
         , ""
-        , spec index test
+        , spec testName index test
         ]
     )
 
@@ -69,37 +83,36 @@ moduleHeader { imports } moduleName =
         ]
 
 
-imports : TestSuite -> ModuleName -> String
-imports { imports } moduleName =
+imports : TestSuite -> String
+imports { imports } =
     unlines
         [ "import Test"
         , "import Expect"
-        , "import " ++ ModuleName.toString moduleName ++ " exposing(..)"
         , ""
         , unlines imports
         , ""
         ]
 
 
-spec : Int -> Test -> String
-spec index test =
+spec : String -> Int -> Test -> String
+spec testName index test =
     unlines
         [ ""
         , ""
         , "spec" ++ toString index ++ " : Test.Test"
         , "spec" ++ toString index ++ " ="
-        , indent 1 (testDefinition test)
+        , indent 1 (testDefinition testName test)
         , indent 2 "\\() ->"
         , indent 3 "Expect.equal"
         , indentLines 4 (Test.specBody test)
         ]
 
 
-testDefinition : Test -> String
-testDefinition test =
+testDefinition : String -> Test -> String
+testDefinition testName test =
     String.concat
         [ "Test.test \""
-        , Test.name test
+        , testName
         , ": \\n\\n"
         , Test.exampleDescription test
             |> String.lines

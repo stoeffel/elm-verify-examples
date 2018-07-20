@@ -4,9 +4,7 @@ module VerifyExamples.Test
         , exampleDescription
         , fromExamples
         , functionName
-        , name
         , specBody
-        , specName
         )
 
 import String.Util exposing (unlines)
@@ -36,26 +34,6 @@ fromExamples functionToTest =
 functionName : Test -> Maybe String
 functionName (Test { functionToTest }) =
     functionToTest
-
-
-specName : Int -> Test -> String
-specName index (Test { functionToTest }) =
-    case functionToTest of
-        Just name ->
-            name ++ toString index
-
-        Nothing ->
-            "ModuleDoc" ++ toString index
-
-
-name : Test -> String
-name (Test { functionToTest }) =
-    case functionToTest of
-        Just name ->
-            "#" ++ name
-
-        Nothing ->
-            "Module VerifyExamples"
 
 
 exampleDescription : Test -> String

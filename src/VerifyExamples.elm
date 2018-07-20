@@ -4,9 +4,10 @@ import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
 import Platform
 import VerifyExamples.Compiler as Compiler
+import VerifyExamples.Elm as Elm
 import VerifyExamples.Encoder as Encoder
+import VerifyExamples.Markdown as Markdown
 import VerifyExamples.ModuleName as ModuleName exposing (ModuleName)
-import VerifyExamples.Parser as Parser
 import VerifyExamples.Warning as Warning exposing (Warning)
 import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
@@ -47,7 +48,8 @@ decoder =
 
 type Msg
     = ReadTest String
-    | CompileModule CompileInfo
+    | CompileModule ElmSource
+    | CompileMarkdown MarkdownSource
 
 
 update : Msg -> Cmd Msg
@@ -56,35 +58,59 @@ update msg =
         ReadTest test ->
             readFile test
 
-        CompileModule info ->
-            case generateTests info of
-                ( warnings, compiled ) ->
-                    Cmd.batch
-                        [ compiled
-                            |> Encoder.files
-                            |> writeFiles
-                        , Encoder.warnings info.moduleName warnings
-                            |> warn
-                        ]
+        CompileModule source ->
+            source.fileText
+                |> Elm.parse
+                |> compileElm source
+                |> (\( warnings, tests ) ->
+                        Cmd.batch
+                            [ generateTests tests
+                            , reportWarnings source.moduleName warnings
+                            ]
+                   )
+
+        CompileMarkdown source ->
+            source.fileText
+                |> Markdown.parse
+                |> compileMarkdown source
+                |> generateTests
 
 
-generateTests : CompileInfo -> ( List Warning, List ( ModuleName, String ) )
-generateTests { moduleName, fileText, ignoredWarnings } =
-    let
-        parsed =
-            Parser.parse fileText
+generateTests : List Compiler.Result -> Cmd Msg
+generateTests tests =
+    tests
+        |> Encoder.files
+        |> writeFiles
 
-        toGenerate =
-            List.concatMap (Compiler.compile moduleName) parsed.testSuites
-    in
-    ( Warning.warnings ignoredWarnings parsed
-    , case toGenerate of
+
+compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List Compiler.Result )
+compileElm { moduleName, fileText, ignoredWarnings } parsed =
+    case parsed.testSuites of
         [] ->
-            [ Compiler.todoSpec moduleName ]
+            ( []
+            , [ Compiler.todoSpec moduleName ]
+            )
 
         _ ->
-            toGenerate
-    )
+            ( Warning.warnings ignoredWarnings parsed
+            , List.concatMap
+                (Elm.compile moduleName)
+                parsed.testSuites
+            )
+
+
+reportWarnings : ModuleName -> List Warning -> Cmd msg
+reportWarnings moduleName warnings =
+    warnings
+        |> Encoder.warnings moduleName
+        |> warn
+
+
+compileMarkdown : MarkdownSource -> Markdown.Parsed -> List Compiler.Result
+compileMarkdown { fileName } parsed =
+    List.concatMap
+        (Markdown.compile fileName)
+        parsed.testSuites
 
 
 
@@ -100,6 +126,9 @@ port writeFiles : Value -> Cmd msg
 port generateModuleVerifyExamples : (Value -> msg) -> Sub msg
 
 
+port generateMarkdownVerifyExamples : (Value -> msg) -> Sub msg
+
+
 port warn : Value -> Cmd msg
 
 
@@ -109,29 +138,49 @@ port warn : Value -> Cmd msg
 
 subscriptions : () -> Sub Msg
 subscriptions _ =
-    generateModuleVerifyExamples
-        (\value ->
-            case decodeValue decodeCompileInfo value of
-                Ok info ->
-                    CompileModule info
-
-                Err err ->
-                    Debug.crash "TODO"
-        )
+    Sub.batch
+        [ generateModuleVerifyExamples
+            (runDecoder decodeElmSource >> CompileModule)
+        , generateMarkdownVerifyExamples
+            (runDecoder decodeMarkdownSource >> CompileMarkdown)
+        ]
 
 
-type alias CompileInfo =
+runDecoder : Decoder a -> Value -> a
+runDecoder decoder value =
+    case decodeValue decoder value of
+        Ok info ->
+            info
+
+        Err err ->
+            Debug.crash "TODO"
+
+
+type alias ElmSource =
     { moduleName : ModuleName
     , fileText : String
     , ignoredWarnings : List Ignored
     }
 
 
-decodeCompileInfo : Decoder CompileInfo
-decodeCompileInfo =
-    Decode.map3 CompileInfo
+type alias MarkdownSource =
+    { fileName : String
+    , fileText : String
+    }
+
+
+decodeElmSource : Decoder ElmSource
+decodeElmSource =
+    Decode.map3 ElmSource
         (field "moduleName" string
             |> Decode.map ModuleName.fromString
         )
         (field "fileText" string)
         (field "ignoredWarnings" Ignored.decode)
+
+
+decodeMarkdownSource : Decoder MarkdownSource
+decodeMarkdownSource =
+    Decode.map2 MarkdownSource
+        (field "fileName" string)
+        (field "fileText" string)
