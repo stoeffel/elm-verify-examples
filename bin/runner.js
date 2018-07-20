@@ -41,8 +41,13 @@ function generate(model, allTestsGenerated) {
   var app = Elm.VerifyExamples.worker(model);
 
   app.ports.readFile.subscribe(function(inputName) {
-    if (inputName.endsWith(".md")) {
-      readSource(inputName, function(fileText) {
+    if (path.extname(inputName) === ".md") {
+      var pathToFile = path.join(
+        model.testsPath,
+        model.root,
+        inputName
+      );
+      readSource(pathToFile, function(fileText) {
         app.ports.generateMarkdownVerifyExamples.send(
           { fileName: cleanMarkdownPath(inputName),
             fileText: fileText
@@ -241,6 +246,11 @@ function cleanMarkdownPath(pathName) {
   var relativePath = path.relative(path.resolve(), pathName)
   if (relativePath.startsWith("./")) {
     relativePath = relativePath.substr(2);
+  }
+   // TODO we want a better way to clean this path.
+  // I think we need to make this relative to the root and then remove use that without any dots.
+  if (relativePath.startsWith("../")) {
+    relativePath = relativePath.substr(3);
   }
   return relativePath;
 }
