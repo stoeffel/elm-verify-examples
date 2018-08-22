@@ -15,7 +15,7 @@
     "prepublish": "npm run-script elm-make",
     "test": "./run-tests.sh && npm run-script verify-own-docs",
     "verify-own-docs": "./bin/cli.js",
-    "elm-make": "elm-make src/VerifyExamples.elm --output bin/elm.js",
+    "elm-make": "elm make src/VerifyExamples.elm --output bin/elm.js",
     "start": "npm run-script elm-make && cd example && ../bin/cli.js",
     "release-major": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major",
     "release-minor": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment minor",
@@ -42,8 +42,8 @@
     "yargs": "^10.0.3"
   },
   "devDependencies": {
-    "elm": "^0.18.0",
-    "elm-test": "^0.18.12",
+    "elm": "^0.19.0",
+    "elm-test": "beta",
     "xyz": "^2.1.0"
   }
 }

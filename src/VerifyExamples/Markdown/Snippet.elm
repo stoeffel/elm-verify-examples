@@ -1,6 +1,6 @@
 module VerifyExamples.Markdown.Snippet exposing (Snippet(..), parse)
 
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (newline)
 
 
@@ -10,7 +10,7 @@ type Snippet
 
 parse : String -> List Snippet
 parse =
-    Regex.find All commentRegex
+    Regex.find commentRegex
         >> List.filterMap (toSnippet << .submatches)
 
 
@@ -26,11 +26,12 @@ toSnippet matches =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex <|
-        String.concat
-            [ "```elm"
-            , newline
-            , "([^]*?)"
-            , newline
-            , "```"
-            ]
+    String.concat
+        [ "```elm"
+        , newline
+        , "([^]*?)"
+        , newline
+        , "```"
+        ]
+        |> Regex.fromString
+        |> Maybe.withDefault Regex.never

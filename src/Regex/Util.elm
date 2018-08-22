@@ -1,4 +1,4 @@
-module Regex.Util exposing (firstSubmatch, newline, replaceAllWith, replaceLinesWith, submatches)
+module Regex.Util exposing (firstSubmatch, newline, replaceAllWith, replaceLinesWith, submatches, unindent)
 
 import Regex exposing (Regex)
 
@@ -18,7 +18,7 @@ firstSubmatch regex str =
 
 newline : String
 newline =
-    "\x0D?\n"
+    "\u{000D}?\n"
 
 
 replaceAllWith : Regex -> String -> String -> String
@@ -31,7 +31,7 @@ replaceAllWith regex with string =
 replaceLinesWith : Regex -> String -> String -> String
 replaceLinesWith regex with =
     String.lines
-        >> replaceIf (Regex.contains regex) with
+        >> List.map (replaceIf (Regex.contains regex) with)
         >> String.join "\n"
         >> unindent
 
@@ -51,6 +51,12 @@ leading spaces nor tabs and the rest of the lines will have the same
 amount of indentation removed.
 unindent " Hello\\n World " == "Hello\\n World"
 unindent "\\t\\tHello\\n\\t\\t\\t\\tWorld" == "Hello\\n\\t\\tWorld"
+
+Borrowed from <https://github.com/elm-community/string-extra/blob/1.5.0/src/String/Extra.elm>.
+
+This might be better in `String.Util`, but there's a circular dependency, so for
+now it's here.
+
 -}
 unindent : String -> String
 unindent multilineSting =

@@ -1,4 +1,4 @@
-module String.Util exposing (capitalizeFirst, escape, indent, indentLines, unlines)
+module String.Util exposing (capitalizeFirst, escape, indent, indentLines, unindent, unlines)
 
 import Char
 import Regex exposing (Regex)
@@ -86,3 +86,8 @@ capitalizeFirst str =
 
         _ ->
             str
+
+
+unindent : String -> String
+unindent =
+    Regex.Util.unindent

@@ -1,8 +1,8 @@
 module VerifyExamples.Elm.Snippet exposing (Snippet(..), parse)
 
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (newline, replaceLinesWith)
-import String.Extra
+import String.Util
 
 
 type Snippet
@@ -12,7 +12,7 @@ type Snippet
 
 parse : String -> List Snippet
 parse =
-    Regex.find All commentRegex
+    Regex.find commentRegex
         >> List.filterMap (toSnippet << .submatches)
 
 
@@ -36,22 +36,24 @@ cleanComment comment =
         -- doing this instead of deleting to avoid joining different code snippets in a comment
         |> replaceLinesWith proseLineRegex ""
         -- remove 4-space indentation
-        |> String.Extra.unindent
+        |> String.Util.unindent
 
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex <|
-        String.concat
-            [ "{-\\|?([^]*?)-}" -- anything between comments
-            , newline
-            , "("
-            , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
-            , "\\s[:=]" -- until ` :` or ` =`
-            , ")?" -- it's possible that we have examples in comment not attached to a function
-            ]
+    String.concat
+        [ "{-\\|?([^]*?)-}" -- anything between comments
+        , newline
+        , "("
+        , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
+        , "\\s[:=]" -- until ` :` or ` =`
+        , ")?" -- it's possible that we have examples in comment not attached to a function
+        ]
+        |> Regex.fromString
+        |> Maybe.withDefault Regex.never
 
 
 proseLineRegex : Regex
 proseLineRegex =
-    Regex.regex "^\\s?\\s?\\s?[^\\s]"
+    Regex.fromString "^\\s?\\s?\\s?[^\\s]"
+        |> Maybe.withDefault Regex.never

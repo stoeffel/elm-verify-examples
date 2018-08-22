@@ -1,4 +1,4 @@
-module VerifyExamples.ExposedApi exposing
+module VerifyExamples.Elm.ExposedApi exposing
     ( ExposedApi
     , definitions
     , isEverythingExposed

@@ -1,4 +1,4 @@
-port module VerifyExamples exposing (CompileInfo, Msg(..), decodeCompileInfo, decoder, generateModuleVerifyExamples, generateTests, init, main, readFile, subscriptions, update, warn, writeFiles)
+port module VerifyExamples exposing (Msg(..), decoder, generateModuleVerifyExamples, generateTests, init, main, readFile, subscriptions, update, warn, writeFiles)
 
 import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
@@ -147,13 +147,13 @@ subscriptions _ =
 
 
 runDecoder : Decoder a -> Value -> a
-runDecoder decoder value =
-    case decodeValue decoder value of
+runDecoder theDecoder value =
+    case decodeValue theDecoder value of
         Ok info ->
             info
 
         Err err ->
-            Debug.crash "TODO"
+            Debug.todo "TODO"
 
 
 type alias ElmSource =
