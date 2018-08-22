@@ -78,9 +78,14 @@ update msg =
 
 generateTests : List Compiler.Result -> Cmd Msg
 generateTests tests =
-    tests
-        |> Encoder.files
-        |> writeFiles
+    case tests of
+        [] ->
+            Cmd.none
+
+        _ ->
+            tests
+                |> Encoder.files
+                |> writeFiles
 
 
 compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List Compiler.Result )
