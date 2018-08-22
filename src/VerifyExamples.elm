@@ -1,4 +1,4 @@
-port module VerifyExamples exposing (..)
+port module VerifyExamples exposing (Msg(..), decoder, generateModuleVerifyExamples, generateTests, init, main, readFile, subscriptions, update, warn, writeFiles)
 
 import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
@@ -14,8 +14,8 @@ import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
 main : Program Value () Msg
 main =
-    Platform.programWithFlags
-        { init = init >> (,) ()
+    Platform.worker
+        { init = init >> Tuple.pair ()
         , update = \msg _ -> ( (), update msg )
         , subscriptions = subscriptions
         }
@@ -34,7 +34,7 @@ init flags =
                 |> Cmd.batch
 
         Err err ->
-            Debug.crash err
+            Debug.todo (Decode.errorToString err)
 
 
 decoder : Decoder (List String)
@@ -147,13 +147,13 @@ subscriptions _ =
 
 
 runDecoder : Decoder a -> Value -> a
-runDecoder decoder value =
-    case decodeValue decoder value of
+runDecoder theDecoder value =
+    case decodeValue theDecoder value of
         Ok info ->
             info
 
         Err err ->
-            Debug.crash "TODO"
+            Debug.todo "TODO"
 
 
 type alias ElmSource =

@@ -1,11 +1,10 @@
-module VerifyExamples.Test
-    exposing
-        ( Test
-        , exampleDescription
-        , fromExamples
-        , functionName
-        , specBody
-        )
+module VerifyExamples.Test exposing
+    ( Test
+    , exampleDescription
+    , fromExamples
+    , functionName
+    , specBody
+    )
 
 import String.Util exposing (unlines)
 import VerifyExamples.Ast.Grouped as GroupedAst

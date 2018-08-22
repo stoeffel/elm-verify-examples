@@ -9,10 +9,10 @@ testModuleName moduleName index test =
     ModuleName.extendName moduleName <|
         case Test.functionName test of
             Just name ->
-                name ++ toString index
+                name ++ String.fromInt index
 
             Nothing ->
-                "ModuleDoc" ++ toString index
+                "ModuleDoc" ++ String.fromInt index
 
 
 testName : Test -> String

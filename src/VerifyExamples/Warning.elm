@@ -1,6 +1,5 @@
 module VerifyExamples.Warning exposing (Warning, toString, warnings)
 
-import Maybe.Extra
 import Maybe.Util
 import String.Util exposing (unlines)
 import VerifyExamples.Elm as Elm
@@ -20,15 +19,15 @@ warnings ignored { exposedApi, testSuites } =
     , Ignored.subset NoExampleForExposedDefinition ignored
         |> noExamples exposedApi testSuites
     ]
-        |> Maybe.Extra.values
+        |> Maybe.Util.values
         |> List.filter (notIgnoredWarnings ignored)
 
 
 noExamples : ExposedApi -> List TestSuite -> List String -> Maybe Warning
 noExamples exposedApi testSuites ignoredDefinitions =
     exposedApi
-        |> ExposedApi.reject (flip List.member (testedFunctions testSuites))
-        |> ExposedApi.reject (flip List.member ignoredDefinitions)
+        |> ExposedApi.reject (\x -> List.member x (testedFunctions testSuites))
+        |> ExposedApi.reject (\x -> List.member x ignoredDefinitions)
         |> ExposedApi.definitions
         |> Maybe.Util.fromList
         |> Maybe.map (Warning NoExampleForExposedDefinition)

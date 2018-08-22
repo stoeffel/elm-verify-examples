@@ -1,7 +1,7 @@
-module String.Util exposing (capitalizeFirst, escape, indent, indentLines, unlines)
+module String.Util exposing (capitalizeFirst, escape, indent, indentLines, unindent, unlines)
 
 import Char
-import Regex exposing (HowMany(..), Regex, regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (replaceAllWith)
 
 
@@ -61,12 +61,14 @@ escape =
 
 escapedSlashRegex : Regex
 escapedSlashRegex =
-    regex "\\\\"
+    Regex.fromString "\\\\"
+        |> Maybe.withDefault Regex.never
 
 
 escapedDoubleQuote : Regex
 escapedDoubleQuote =
-    regex "\\\""
+    Regex.fromString "\\\""
+        |> Maybe.withDefault Regex.never
 
 
 {-| Capitalizes the first letter of a string.
@@ -84,3 +86,8 @@ capitalizeFirst str =
 
         _ ->
             str
+
+
+unindent : String -> String
+unindent =
+    Regex.Util.unindent
