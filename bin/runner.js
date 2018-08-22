@@ -36,6 +36,10 @@ function generate(model, allTestsGenerated) {
   }
 
   var app = Elm.Elm.VerifyExamples.init({ flags: model });
+  app.ports.reportError.subscribe(function(err) {
+    console.error(err);
+    process.exit(-1);
+  });
 
   app.ports.readFile.subscribe(function(inputName) {
     if (path.extname(inputName) === ".md") {

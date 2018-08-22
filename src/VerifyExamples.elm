@@ -2,6 +2,7 @@ port module VerifyExamples exposing (Msg(..), decoder, generateModuleVerifyExamp
 
 import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
+import Json.Encode as Encode
 import Platform
 import VerifyExamples.Compiler as Compiler
 import VerifyExamples.Elm as Elm
@@ -34,7 +35,9 @@ init flags =
                 |> Cmd.batch
 
         Err err ->
-            Debug.todo (Decode.errorToString err)
+            Decode.errorToString err
+                |> Encode.string
+                |> reportError
 
 
 decoder : Decoder (List String)
@@ -50,6 +53,7 @@ type Msg
     = ReadTest String
     | CompileModule ElmSource
     | CompileMarkdown MarkdownSource
+    | DecodingFailed Decode.Error
 
 
 update : Msg -> Cmd Msg
@@ -74,6 +78,11 @@ update msg =
                 |> Markdown.parse
                 |> compileMarkdown source
                 |> generateTests
+
+        DecodingFailed err ->
+            Decode.errorToString err
+                |> Encode.string
+                |> reportError
 
 
 generateTests : List Compiler.Result -> Cmd Msg
@@ -137,6 +146,9 @@ port generateMarkdownVerifyExamples : (Value -> msg) -> Sub msg
 port warn : Value -> Cmd msg
 
 
+port reportError : Value -> Cmd msg
+
+
 
 -- SUBSCRIPTIONS
 
@@ -145,20 +157,24 @@ subscriptions : () -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ generateModuleVerifyExamples
-            (runDecoder decodeElmSource >> CompileModule)
+            (\value ->
+                case decodeValue decodeElmSource value of
+                    Ok a ->
+                        CompileModule a
+
+                    Err err ->
+                        DecodingFailed err
+            )
         , generateMarkdownVerifyExamples
-            (runDecoder decodeMarkdownSource >> CompileMarkdown)
+            (\value ->
+                case decodeValue decodeMarkdownSource value of
+                    Ok a ->
+                        CompileMarkdown a
+
+                    Err err ->
+                        DecodingFailed err
+            )
         ]
-
-
-runDecoder : Decoder a -> Value -> a
-runDecoder theDecoder value =
-    case decodeValue theDecoder value of
-        Ok info ->
-            info
-
-        Err err ->
-            Debug.todo "TODO"
 
 
 type alias ElmSource =
