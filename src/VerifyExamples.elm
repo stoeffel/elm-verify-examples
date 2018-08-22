@@ -1,4 +1,4 @@
-port module VerifyExamples exposing (..)
+port module VerifyExamples exposing (CompileInfo, Msg(..), decodeCompileInfo, decoder, generateModuleVerifyExamples, generateTests, init, main, readFile, subscriptions, update, warn, writeFiles)
 
 import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
@@ -13,8 +13,8 @@ import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
 main : Program Value () Msg
 main =
-    Platform.programWithFlags
-        { init = init >> (,) ()
+    Platform.worker
+        { init = init >> Tuple.pair ()
         , update = \msg _ -> ( (), update msg )
         , subscriptions = subscriptions
         }
@@ -33,7 +33,7 @@ init flags =
                 |> Cmd.batch
 
         Err err ->
-            Debug.crash err
+            Debug.todo (Decode.errorToString err)
 
 
 decoder : Decoder (List String)
@@ -116,7 +116,7 @@ subscriptions _ =
                     CompileModule info
 
                 Err err ->
-                    Debug.crash "TODO"
+                    Debug.todo "TODO"
         )
 
 

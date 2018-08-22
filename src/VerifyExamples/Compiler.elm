@@ -46,7 +46,7 @@ compileTest moduleName suite index test =
     ( extendedModuleName
     , unlines
         [ moduleHeader suite extendedModuleName
-        , imports suite moduleName
+        , toImports suite moduleName
         , unlines suite.types
         , ""
         , suite.helperFunctions
@@ -69,8 +69,8 @@ moduleHeader { imports } moduleName =
         ]
 
 
-imports : TestSuite -> ModuleName -> String
-imports { imports } moduleName =
+toImports : TestSuite -> ModuleName -> String
+toImports { imports } moduleName =
     unlines
         [ "import Test"
         , "import Expect"
@@ -86,8 +86,8 @@ spec index test =
     unlines
         [ ""
         , ""
-        , "spec" ++ toString index ++ " : Test.Test"
-        , "spec" ++ toString index ++ " ="
+        , "spec" ++ String.fromInt index ++ " : Test.Test"
+        , "spec" ++ String.fromInt index ++ " ="
         , indent 1 (testDefinition test)
         , indent 2 "\\() ->"
         , indent 3 "Expect.equal"

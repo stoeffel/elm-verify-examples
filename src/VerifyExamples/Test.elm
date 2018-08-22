@@ -1,13 +1,12 @@
-module VerifyExamples.Test
-    exposing
-        ( Test
-        , exampleDescription
-        , fromExamples
-        , functionName
-        , name
-        , specBody
-        , specName
-        )
+module VerifyExamples.Test exposing
+    ( Test
+    , exampleDescription
+    , fromExamples
+    , functionName
+    , name
+    , specBody
+    , specName
+    )
 
 import String.Util exposing (unlines)
 import VerifyExamples.Ast.Grouped as GroupedAst
@@ -41,18 +40,18 @@ functionName (Test { functionToTest }) =
 specName : Int -> Test -> String
 specName index (Test { functionToTest }) =
     case functionToTest of
-        Just name ->
-            name ++ toString index
+        Just n ->
+            n ++ String.fromInt index
 
         Nothing ->
-            "ModuleDoc" ++ toString index
+            "ModuleDoc" ++ String.fromInt index
 
 
 name : Test -> String
 name (Test { functionToTest }) =
     case functionToTest of
-        Just name ->
-            "#" ++ name
+        Just n ->
+            "#" ++ n
 
         Nothing ->
             "Module VerifyExamples"

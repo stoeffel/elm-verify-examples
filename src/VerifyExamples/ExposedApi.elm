@@ -1,13 +1,12 @@
-module VerifyExamples.ExposedApi
-    exposing
-        ( ExposedApi
-        , definitions
-        , isEverythingExposed
-        , parse
-        , reject
-        )
+module VerifyExamples.ExposedApi exposing
+    ( ExposedApi
+    , definitions
+    , isEverythingExposed
+    , parse
+    , reject
+    )
 
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (firstSubmatch, newline, replaceAllWith)
 
 
@@ -31,8 +30,8 @@ toExposedDefinition functions match =
         ".." ->
             All
 
-        definitions ->
-            definitions
+        defs ->
+            defs
                 |> String.split ","
                 |> List.map (replaceAllWith typeConstructors "" << String.trim)
                 |> Explicitly
@@ -40,25 +39,27 @@ toExposedDefinition functions match =
 
 typeConstructors : Regex
 typeConstructors =
-    Regex.regex "\\([^]*?\\)"
+    Regex.fromString "\\([^]*?\\)"
+        |> Maybe.withDefault Regex.never
 
 
 moduleExposing : Regex
 moduleExposing =
-    Regex.regex <|
-        String.concat
-            [ "module"
-            , "[^]*?exposing"
-            , "[^]*?\\("
-            , "([^]*?)(\\)\\nimport|\\)\\n\\n)"
-            ]
+    String.concat
+        [ "module"
+        , "[^]*?exposing"
+        , "[^]*?\\("
+        , "([^]*?)(\\)\\nimport|\\)\\n\\n)"
+        ]
+        |> Regex.fromString
+        |> Maybe.withDefault Regex.never
 
 
 reject : (String -> Bool) -> ExposedApi -> ExposedApi
 reject f api =
     case api of
-        Explicitly definitions ->
-            List.filter (\def -> not (f def)) definitions
+        Explicitly defs ->
+            List.filter (\def -> not (f def)) defs
                 |> Explicitly
 
         All ->
@@ -71,8 +72,8 @@ reject f api =
 definitions : ExposedApi -> List String
 definitions api =
     case api of
-        Explicitly definitions ->
-            definitions
+        Explicitly defs ->
+            defs
 
         All ->
             []

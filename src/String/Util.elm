@@ -1,6 +1,6 @@
 module String.Util exposing (escape, indent, indentLines, unlines)
 
-import Regex exposing (HowMany(..), Regex, regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (replaceAllWith)
 
 
@@ -60,9 +60,11 @@ escape =
 
 escapedSlashRegex : Regex
 escapedSlashRegex =
-    regex "\\\\"
+    Regex.fromString "\\\\"
+        |> Maybe.withDefault Regex.never
 
 
 escapedDoubleQuote : Regex
 escapedDoubleQuote =
-    regex "\\\""
+    Regex.fromString "\\\""
+        |> Maybe.withDefault Regex.never

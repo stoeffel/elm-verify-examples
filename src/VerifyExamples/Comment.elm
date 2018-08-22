@@ -1,6 +1,6 @@
 module VerifyExamples.Comment exposing (Comment(..), function, parse)
 
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (newline)
 
 
@@ -11,7 +11,7 @@ type Comment
 
 parse : String -> List Comment
 parse =
-    Regex.find All commentRegex
+    Regex.find commentRegex
         >> List.filterMap (toComment << .submatches)
 
 
@@ -30,15 +30,16 @@ toComment matches =
 
 commentRegex : Regex
 commentRegex =
-    Regex.regex <|
-        String.concat
-            [ "({-[^]*?-})" -- anything between comments
-            , newline
-            , "("
-            , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
-            , "\\s[:=]" -- until ` :` or ` =`
-            , ")?" -- it's possible that we have examples in comment not attached to a function
-            ]
+    Maybe.withDefault Regex.never <|
+        Regex.fromString <|
+            String.concat
+                [ "({-[^]*?-})" -- anything between comments
+                , newline
+                , "("
+                , "([^\\s(" ++ newline ++ ")]+)" -- anything that is not a space or newline
+                , "\\s[:=]" -- until ` :` or ` =`
+                , ")?" -- it's possible that we have examples in comment not attached to a function
+                ]
 
 
 function : Comment -> Maybe String

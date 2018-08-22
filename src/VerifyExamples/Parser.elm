@@ -30,8 +30,8 @@ parse value =
 
 
 toTestSuite : Comment -> TestSuite
-toTestSuite comment =
-    case comment of
+toTestSuite c =
+    case c of
         Comment.FunctionDoc { functionName, comment } ->
             comment
                 |> IntermediateAst.fromString

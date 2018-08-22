@@ -8,8 +8,7 @@ import VerifyExamples.Warning as Warning exposing (Warning)
 
 files : List ( ModuleName, String ) -> Value
 files modules =
-    List.map encodeFile modules
-        |> Encode.list
+    Encode.list encodeFile modules
 
 
 encodeFile : ( ModuleName, String ) -> Value
@@ -21,13 +20,11 @@ encodeFile ( name, content ) =
 
 
 warnings : ModuleName -> List Warning -> Value
-warnings name warnings =
+warnings name warns =
     Encode.object
         [ ( "moduleName", moduleName name )
         , ( "warnings"
-          , warnings
-                |> List.map encodeWarning
-                |> Encode.list
+          , Encode.list encodeWarning warns
           )
         ]
 
