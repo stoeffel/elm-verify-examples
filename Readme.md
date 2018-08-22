@@ -1,5 +1,4 @@
-elm-verify-examples [![Build Status](https://travis-ci.org/stoeffel/elm-verify-examples.svg?branch=master)](https://travis-ci.org/stoeffel/elm-verify-examples)
-============
+# elm-verify-examples [![Build Status](https://travis-ci.org/stoeffel/elm-verify-examples.svg?branch=master)](https://travis-ci.org/stoeffel/elm-verify-examples)
 
 > Verify examples in your docs.
 
@@ -7,9 +6,7 @@ elm-verify-examples [![Build Status](https://travis-ci.org/stoeffel/elm-verify-e
 
 :warning: This is not a replacement for tests, this tool should be used for improving your documentation.
 
-
-Install
--------
+## Install
 
 ```bash
 $ npm i elm-test -g
@@ -17,8 +14,7 @@ $ npm i elm-verify-examples -g
 $ elm-test init
 ```
 
-Setup
------
+## Setup
 
 ```bash
 $ touch tests/elm-verify-examples.json
@@ -29,18 +25,13 @@ $ touch tests/elm-verify-examples.json
 ```json
 {
   "root": "../src",
-  "tests": [
-    "Mock",
-    "Mock.Foo.Bar.Moo",
-    "./README.md"
-  ]
+  "tests": ["Mock", "Mock.Foo.Bar.Moo", "./README.md"]
 }
 ```
 
 It's recommended to add `./tests/VerifyExamples` to your `.gitignore`.
 
-Writing Verified Examples
-----------------
+## Writing Verified Examples
 
 Verified examples look like normal code examples in doc-comments. \
 Code needs to be indented by 4 spaces.
@@ -59,6 +50,8 @@ You can specify the expected result of an expression, by adding a comment `-->` 
     add 3 3 --> 6
 
 -}
+
+
 add : Int -> Int -> Int
 add =
     (+)
@@ -83,12 +76,14 @@ You can write examples on multiple lines.
         |> List.map toString
         |> String.concat
     --> "321"
+
 -}
+
+
 rev : List a -> List a
 rev =
     List.reverse
 ```
-
 
 ### Imports
 
@@ -96,10 +91,12 @@ You can specify imports, if you want to use a module or a special test util.
 
 ```elm
 {-|
+
     import Dict
 
     myWeirdFunc (Dict.fromList [(1, "a"), (2, "b")]) [2, 1]
     --> "ba"
+
 -}
 ```
 
@@ -111,12 +108,16 @@ You can use intermediate definitions in your example.
 
 ```elm
 {-|
+
     isEven : Int -> Bool
     isEven n =
-        n % 2 == 0
+        remainderBy 2 n == 0
 
     List.Extra.filterNot isEven [1,2,3,4] --> [1,3]
+
 -}
+
+
 filterNot : (a -> Bool) -> List a -> List a
 ```
 
@@ -126,16 +127,19 @@ You can define union types and type aliases in your examples.
 
 ```elm
 {-| With a union type in the example.
-    type Animal
-        = Dog
-        | Cat
+type Animal
+= Dog
+| Cat
 
     double Dog
     --> (Dog, Dog)
+
 -}
-double : a -> (a, a)
+
+
+double : a -> ( a, a )
 double a =
-    (a, a)
+    ( a, a )
 ```
 
 ```elm
@@ -159,6 +163,8 @@ double a =
     --> "_Luke"
 
 -}
+
+
 customTypeAlias : { a | name : String } -> String -> String
 customTypeAlias { name } prefix =
     prefix ++ name
@@ -179,8 +185,7 @@ Documented.two --> 2
 ```
 ````
 
-Verify Examples
-----------------
+## Verify Examples
 
 `elm-verify-examples` converts your verify-examples into elm-tests, and runs them using `elm-test`.
 
@@ -191,20 +196,22 @@ $ elm-verify-examples
 By default, this command looks for the config file at `tests/elm-verify-examples.json`. If you want it to load a specific config file use the `--config` argument (e.g. `elm-verify-examples --config my/custom/path/elm-verify-examples.json` will read the config from `my/custom/path/elm-verify-examples.json`).
 
 You can run elm-verify-examples for one or more modules explicitly. They don't have to be specified in `tests/elm-verify-examples.json`.
+
 ```bash
 $ elm-verify-examples ./src/Foo.elm ./src/Foo/Bar.elm
 ```
 
 You can pass a custom path to elm-test if necessary.
+
 ```bash
 $ elm-verify-examples --elm-test=./node_modules/.bin/elm-test
 $ # or add it to your elm-verify-examples.json `elmTest: "../node....`
 $ # you can also pass arguments to elm-test with --elm-test-args
 ```
+
 It will use the elm-test installed with this package.
 
-Examples
---------
+## Examples
 
 You can run the examples using:
 

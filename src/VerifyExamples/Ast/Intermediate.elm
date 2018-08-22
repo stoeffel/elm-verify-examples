@@ -28,7 +28,16 @@ type Prefix
 
 fromString : String -> List IntermediateAst
 fromString =
-    commentLines >> List.filterMap toIntermediateAst
+    commentLines >> List.map atLeastASpace >> List.filterMap toIntermediateAst
+
+
+atLeastASpace : String -> String
+atLeastASpace str =
+    if str == "" then
+        " "
+
+    else
+        str
 
 
 commentLines : String -> List String
@@ -78,8 +87,7 @@ arrowRegex =
 
 newLineRegex : Regex
 newLineRegex =
-    Regex.fromString "(^\\s*$)"
-        |> Maybe.withDefault Regex.never
+    Regex.fromString "(^\\s*$)" |> Maybe.withDefault Regex.never
 
 
 importRegex : Regex
