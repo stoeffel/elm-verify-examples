@@ -35,7 +35,7 @@ function generate(model, allTestsGenerated) {
     return;
   }
 
-  var app = Elm.VerifyExamples.worker(model);
+  var app = Elm.Elm.VerifyExamples.init({ flags: model });
 
   app.ports.readFile.subscribe(function(inputName) {
     if (path.extname(inputName) === ".md") {

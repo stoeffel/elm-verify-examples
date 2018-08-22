@@ -35,7 +35,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "chalk": "^2.3.0",
-    "elm-test": "^0.18.12",
+    "elm-test": "beta",
     "fs-extra": "^5.0.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.6.2",
