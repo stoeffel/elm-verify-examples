@@ -1,17 +1,16 @@
-module Mock
-    exposing
-        ( IsItCool(..)
-        , add
-        , bar
-        , coolFunc
-        , customType
-        , customTypeAlias
-        , noExamples
-        , noVerifiedExamples
-        , quux
-        , rev
-        , sum
-        )
+module Mock exposing
+    ( IsItCool(..)
+    , add
+    , bar
+    , coolFunc
+    , customType
+    , customTypeAlias
+    , noExamples
+    , noVerifiedExamples
+    , quux
+    , rev
+    , sum
+    )
 
 {-|
 
@@ -32,8 +31,9 @@ import Dict exposing (Dict, fromList)
 {-| returns the sum of two int.
 
     add 41 1
-    --> 42
 
+
+    --> 42
     add 3 3 --> 6
 
 -}
@@ -126,7 +126,7 @@ bar a b =
     --> ]
 
     rev [1, 2, 3]
-        |> List.map toString
+        |> List.map String.fromInt
         |> concat
     --> "321"
 

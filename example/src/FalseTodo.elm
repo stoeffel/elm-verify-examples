@@ -1,4 +1,4 @@
-module FalseTodo exposing (..)
+module FalseTodo exposing (reject)
 
 {-| -}
 
@@ -7,7 +7,7 @@ module FalseTodo exposing (..)
 
     odds : Int -> Bool
     odds x =
-        x % 2 == 1
+        remainderBy 2 x == 1
 
     [1,2,3,4,5]
         |> reject odds

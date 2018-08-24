@@ -1,13 +1,12 @@
-module VerifyExamples.Ast.Intermediate
-    exposing
-        ( IntermediateAst
-        , fromString
-        , toAst
-        )
+module VerifyExamples.Ast.Intermediate exposing
+    ( IntermediateAst
+    , fromString
+    , toAst
+    )
 
 import List.Extra
 import Maybe.Util exposing (oneOf)
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import Regex.Util exposing (firstSubmatch, replaceAllWith, submatches)
 import String
 import String.Util exposing (unlines)
@@ -29,7 +28,19 @@ type Prefix
 
 fromString : String -> List IntermediateAst
 fromString =
-    commentLines >> List.filterMap toIntermediateAst
+    commentLines >> List.map atLeastASpace >> List.filterMap toIntermediateAst
+
+
+atLeastASpace : String -> String
+atLeastASpace str =
+    -- this is a hack that I should fix at somepoint.
+    -- the newline regex doesn't interpret `""` as a newline for some reason.
+    -- We want to move to elm/parser anyways so I think it's okay to keep this until then.
+    if str == "" then
+        " "
+
+    else
+        str
 
 
 commentLines : String -> List String
@@ -47,6 +58,7 @@ breakIntoTwoLines : String -> String
 breakIntoTwoLines a =
     if Regex.contains expectationRegex a then
         a
+
     else
         replaceAllWith arrowRegex "\n--> " a
 
@@ -67,53 +79,60 @@ toFunctionExpression : String -> IntermediateAst
 toFunctionExpression str =
     firstSubmatch functionNameRegex str
         |> Maybe.withDefault "no function name given!"
-        |> flip Function str
+        |> (\x -> Function x str)
 
 
 arrowRegex : Regex
 arrowRegex =
-    Regex.regex "\\s\\-\\->\\s"
+    Regex.fromString "\\s\\-\\->\\s"
+        |> Maybe.withDefault Regex.never
 
 
 newLineRegex : Regex
 newLineRegex =
-    Regex.regex "(^\\s*$)"
+    Regex.fromString "(^\\s*$)" |> Maybe.withDefault Regex.never
 
 
 importRegex : Regex
 importRegex =
-    Regex.regex "^(import\\s.*)"
+    Regex.fromString "^(import\\s.*)"
+        |> Maybe.withDefault Regex.never
 
 
 typeRegex : Regex
 typeRegex =
-    Regex.regex "^(type\\s.*)"
+    Regex.fromString "^(type\\s.*)"
+        |> Maybe.withDefault Regex.never
 
 
 functionNameRegex : Regex
 functionNameRegex =
-    Regex.regex "(\\w+)\\s:"
+    Regex.fromString "(\\w+)\\s:"
+        |> Maybe.withDefault Regex.never
 
 
 assertionRegex : Regex
 assertionRegex =
-    Regex.regex "^(.*)"
+    Regex.fromString "^(.*)"
+        |> Maybe.withDefault Regex.never
 
 
 expectationRegex : Regex
 expectationRegex =
-    Regex.regex "^\\-\\->\\s(.*)"
+    Regex.fromString "^\\-\\->\\s(.*)"
+        |> Maybe.withDefault Regex.never
 
 
 localFunctionRegex : Regex
 localFunctionRegex =
-    Regex.regex "^(\\w+\\s:\\s.*)"
+    Regex.fromString "^(\\w+\\s:\\s.*)"
+        |> Maybe.withDefault Regex.never
 
 
 toAst : List IntermediateAst -> List Ast
 toAst ast =
     ast
-        |> List.Extra.groupWhileTransitively breaksGroup
+        |> List.Extra.groupWhile breaksGroup
         |> List.filterMap intermediatesToAst
 
 
@@ -161,16 +180,11 @@ isArrowPrefixed ast =
             False
 
 
-intermediatesToAst : List IntermediateAst -> Maybe Ast
-intermediatesToAst ast =
-    case ast of
-        first :: _ ->
-            List.map toString ast
-                |> unlines
-                |> intermediateToAst first
-
-        [] ->
-            Nothing
+intermediatesToAst : ( IntermediateAst, List IntermediateAst ) -> Maybe Ast
+intermediatesToAst ( first, rest ) =
+    List.map toString (first :: rest)
+        |> unlines
+        |> intermediateToAst first
 
 
 intermediateToAst : IntermediateAst -> String -> Maybe Ast

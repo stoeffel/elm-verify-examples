@@ -20,11 +20,11 @@ ignoredWarnings : Decoder Ignored
 ignoredWarnings =
     map2 Ignored
         (maybe (field "name" string))
-        (field "ignore" (list warning))
+        (field "ignore" (list warningDecoder))
 
 
-warning : Decoder Type
-warning =
+warningDecoder : Decoder Type
+warningDecoder =
     oneOf
         [ exact string "NoExampleForExposedDefinition"
             |> map (always NoExampleForExposedDefinition)

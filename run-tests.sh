@@ -3,7 +3,7 @@ PASSED_COUNT=33
 FAILED_COUNT=2
 TODO_COUNT=1
 
-elm-make src/VerifyExamples.elm --output bin/elm.js --warn
+npx elm make src/VerifyExamples.elm --output bin/elm.js --optimize
 pushd example
 ../bin/cli.js 2>&1 | tee ../output.txt
 popd

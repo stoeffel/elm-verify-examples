@@ -45,8 +45,8 @@ addSourceImport moduleName testSuite =
 
 
 toTestSuite : Snippet -> TestSuite
-toTestSuite snippet =
-    case snippet of
+toTestSuite snip =
+    case snip of
         ModuleDoc snippet ->
             Parser.parse { snippet = snippet, functionName = Nothing }
 

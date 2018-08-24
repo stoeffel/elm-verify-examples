@@ -60,7 +60,7 @@ compileTest nomenclature suite index test =
     ( testModuleName
     , unlines
         [ moduleHeader suite testModuleName
-        , imports suite
+        , toImports suite
         , unlines suite.types
         , ""
         , suite.helperFunctions
@@ -83,8 +83,8 @@ moduleHeader { imports } moduleName =
         ]
 
 
-imports : TestSuite -> String
-imports { imports } =
+toImports : TestSuite -> String
+toImports { imports } =
     unlines
         [ "import Test"
         , "import Expect"
@@ -99,8 +99,8 @@ spec testName index test =
     unlines
         [ ""
         , ""
-        , "spec" ++ toString index ++ " : Test.Test"
-        , "spec" ++ toString index ++ " ="
+        , "spec" ++ String.fromInt index ++ " : Test.Test"
+        , "spec" ++ String.fromInt index ++ " ="
         , indent 1 (testDefinition testName test)
         , indent 2 "\\() ->"
         , indent 3 "Expect.equal"

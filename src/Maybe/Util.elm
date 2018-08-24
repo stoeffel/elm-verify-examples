@@ -1,4 +1,4 @@
-module Maybe.Util exposing (fromList, oneOf)
+module Maybe.Util exposing (fromList, oneOf, values)
 
 
 oneOf : List (a -> Maybe b) -> a -> Maybe b
@@ -24,3 +24,26 @@ fromList xs =
 
         _ ->
             Just xs
+
+
+
+-- from elm-community/maybe.extra
+
+
+{-| Convert a list of `Maybe a` to a list of `a` only for the values different
+from `Nothing`.
+values [ Just 1, Nothing, Just 2 ] == [1, 2]
+-}
+values : List (Maybe a) -> List a
+values =
+    List.foldr foldrValues []
+
+
+foldrValues : Maybe a -> List a -> List a
+foldrValues item list =
+    case item of
+        Nothing ->
+            list
+
+        Just v ->
+            v :: list

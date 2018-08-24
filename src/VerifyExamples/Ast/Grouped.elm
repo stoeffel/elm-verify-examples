@@ -72,7 +72,7 @@ group ast acc =
         (Ast.Assertion assertion) :: (Ast.Expectation expectation) :: rest ->
             { assertion = assertion, expectation = expectation }
                 :: acc.examples
-                |> flip setExamples acc
+                |> (\x -> setExamples x acc)
                 |> group rest
 
         (Ast.Assertion assertion) :: rest ->
@@ -84,19 +84,19 @@ group ast acc =
         (Ast.Import str) :: rest ->
             Import str
                 :: acc.imports
-                |> flip setImports acc
+                |> (\x -> setImports x acc)
                 |> group rest
 
         (Ast.Type str) :: rest ->
             Type str
                 :: acc.types
-                |> flip setTypes acc
+                |> (\x -> setTypes x acc)
                 |> group rest
 
         (Ast.Function name str) :: rest ->
             Function { name = name, function = str }
                 :: acc.functions
-                |> flip setFunctions acc
+                |> (\x -> setFunctions x acc)
                 |> group rest
 
 

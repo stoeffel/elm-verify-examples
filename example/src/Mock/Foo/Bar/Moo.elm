@@ -1,4 +1,4 @@
-module Mock.Foo.Bar.Moo exposing (..)
+module Mock.Foo.Bar.Moo exposing (foo, bar, moo, test)
 
 {-|
 
@@ -13,12 +13,9 @@ module Mock.Foo.Bar.Moo exposing (..)
 {-| does stuff
 
     foo "a" "b" "c"
+
+
     --> "bca"
-
-    --> 2
-
-    --> 2
-
     foo "a" "b" "!" --> "b!a"
 
 -}

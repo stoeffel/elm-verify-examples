@@ -1,6 +1,6 @@
 module VerifyExamples.Markdown exposing (Parsed, compile, parse)
 
-import Regex exposing (HowMany(..), Regex)
+import Regex exposing (Regex)
 import String.Util exposing (capitalizeFirst)
 import VerifyExamples.Compiler as Compiler
 import VerifyExamples.Markdown.Snippet as Snippet exposing (Snippet(..))
@@ -41,11 +41,11 @@ testModuleName filePath index _ =
     let
         filePathComponents =
             filePath
-                |> Regex.replace Regex.All (Regex.regex "\\.md$") (always "")
+                |> Regex.replace (Regex.fromString "\\.md$" |> Maybe.withDefault Regex.never) (always "")
                 |> String.split "/"
 
         addIndex components =
-            List.append components [ "Test" ++ toString index ]
+            List.append components [ "Test" ++ String.fromInt index ]
     in
     filePathComponents
         |> List.map capitalizeFirst

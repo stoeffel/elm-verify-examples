@@ -1,7 +1,8 @@
-port module VerifyExamples exposing (..)
+port module VerifyExamples exposing (Msg(..), decoder, generateModuleVerifyExamples, generateTests, init, main, readFile, subscriptions, update, warn, writeFiles)
 
 import Cmd.Util as Cmd
 import Json.Decode as Decode exposing (Decoder, Value, decodeValue, field, list, string)
+import Json.Encode as Encode
 import Platform
 import VerifyExamples.Compiler as Compiler
 import VerifyExamples.Elm as Elm
@@ -14,8 +15,8 @@ import VerifyExamples.Warning.Ignored as Ignored exposing (Ignored)
 
 main : Program Value () Msg
 main =
-    Platform.programWithFlags
-        { init = init >> (,) ()
+    Platform.worker
+        { init = init >> Tuple.pair ()
         , update = \msg _ -> ( (), update msg )
         , subscriptions = subscriptions
         }
@@ -34,7 +35,9 @@ init flags =
                 |> Cmd.batch
 
         Err err ->
-            Debug.crash err
+            Decode.errorToString err
+                |> Encode.string
+                |> reportError
 
 
 decoder : Decoder (List String)
@@ -50,6 +53,7 @@ type Msg
     = ReadTest String
     | CompileModule ElmSource
     | CompileMarkdown MarkdownSource
+    | DecodingFailed Decode.Error
 
 
 update : Msg -> Cmd Msg
@@ -75,12 +79,22 @@ update msg =
                 |> compileMarkdown source
                 |> generateTests
 
+        DecodingFailed err ->
+            Decode.errorToString err
+                |> Encode.string
+                |> reportError
+
 
 generateTests : List Compiler.Result -> Cmd Msg
 generateTests tests =
-    tests
-        |> Encoder.files
-        |> writeFiles
+    case tests of
+        [] ->
+            Cmd.none
+
+        _ ->
+            tests
+                |> Encoder.files
+                |> writeFiles
 
 
 compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List Compiler.Result )
@@ -132,6 +146,9 @@ port generateMarkdownVerifyExamples : (Value -> msg) -> Sub msg
 port warn : Value -> Cmd msg
 
 
+port reportError : Value -> Cmd msg
+
+
 
 -- SUBSCRIPTIONS
 
@@ -140,20 +157,24 @@ subscriptions : () -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ generateModuleVerifyExamples
-            (runDecoder decodeElmSource >> CompileModule)
+            (\value ->
+                case decodeValue decodeElmSource value of
+                    Ok a ->
+                        CompileModule a
+
+                    Err err ->
+                        DecodingFailed err
+            )
         , generateMarkdownVerifyExamples
-            (runDecoder decodeMarkdownSource >> CompileMarkdown)
+            (\value ->
+                case decodeValue decodeMarkdownSource value of
+                    Ok a ->
+                        CompileMarkdown a
+
+                    Err err ->
+                        DecodingFailed err
+            )
         ]
-
-
-runDecoder : Decoder a -> Value -> a
-runDecoder decoder value =
-    case decodeValue decoder value of
-        Ok info ->
-            info
-
-        Err err ->
-            Debug.crash "TODO"
 
 
 type alias ElmSource =
