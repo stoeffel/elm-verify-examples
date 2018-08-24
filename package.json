@@ -17,9 +17,9 @@
     "verify-own-docs": "./bin/cli.js",
     "build": "npx elm make src/VerifyExamples.elm --output bin/elm.js --optimize",
     "start": "npm run-script build && cd example && ../bin/cli.js",
-    "release-major": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major",
-    "release-minor": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment minor",
-    "release-patch": "xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment patch"
+    "release-major": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major",
+    "release-minor": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment minor",
+    "release-patch": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment patch"
   },
   "bin": {
     "elm-verify-examples": "bin/cli.js"
@@ -44,6 +44,6 @@
   "devDependencies": {
     "elm": "0.19.0-bugfix2",
     "elm-test": "beta",
-    "xyz": "^2.1.0"
+    "xyz": "2.1.0"
   }
 }
