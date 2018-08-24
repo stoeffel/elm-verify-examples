@@ -33,6 +33,9 @@ fromString =
 
 atLeastASpace : String -> String
 atLeastASpace str =
+    -- this is a hack that I should fix at somepoint.
+    -- the newline regex doesn't interpret `""` as a newline for some reason.
+    -- We want to move to elm/parser anyways so I think it's okay to keep this until then.
     if str == "" then
         " "
 
