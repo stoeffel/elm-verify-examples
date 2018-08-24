@@ -38,7 +38,7 @@ function generate(model, allTestsGenerated) {
   var app = Elm.Elm.VerifyExamples.init({ flags: model });
   app.ports.reportError.subscribe(function(err) {
     console.error(err);
-    process.exit(-1);
+    process.exit(1);
   });
 
   app.ports.readFile.subscribe(function(inputName) {
@@ -191,7 +191,7 @@ function writeFile(testsDocPath) {
     mkdirp(testsDocModulePath, function(err) {
       if (err) {
         console.error(err);
-        process.exit(-1);
+        process.exit(1);
         return;
       }
       fs.writeFile(
@@ -201,7 +201,7 @@ function writeFile(testsDocPath) {
         function(err) {
           if (err) {
             console.error(err);
-            process.exit(-1);
+            process.exit(1);
             return;
           }
 
@@ -233,7 +233,7 @@ function readSource(filePath, onSuccess) {
   fs.readFile(filePath, "utf8", function(err, fileText) {
     if (err) {
       console.error(err);
-      process.exit(-1);
+      process.exit(1);
       return;
     }
     onSuccess(fileText);
