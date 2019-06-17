@@ -39,6 +39,9 @@ runner.run(model, function(warnings) {
     if (status === 0) runner.cleanup(model);
     runner.warnSummary(model, warnings);
     process.exit(status);
+  } else {
+    runner.warnSummary(model, warnings);
+    process.exit(0);
   }
 });
 
