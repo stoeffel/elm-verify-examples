@@ -187,11 +187,19 @@ Documented.two --> 2
 
 ## Verify Examples
 
-`elm-verify-examples` converts your verify-examples into elm-tests, and runs them using `elm-test`.
+`elm-verify-examples` converts your verify-examples into elm-tests, and optionally runs them using `elm-test`. To only generate the test files in `tests/VerifyExamples/`:
 
 ```bash
 $ elm-verify-examples
 ```
+
+This is useful if you want to run your tests using different runner than `elm-test`, e.g. `elm-coverage`. If you also want to run the generated tests:
+
+```bash
+$ elm-verify-examples --run-tests
+```
+
+Note that this way the test files will be removed after they are ran.
 
 By default, this command looks for the config file at `tests/elm-verify-examples.json`. If you want it to load a specific config file use the `--config` argument (e.g. `elm-verify-examples --config my/custom/path/elm-verify-examples.json` will read the config from `my/custom/path/elm-verify-examples.json`).
 

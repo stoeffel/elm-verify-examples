@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Do not run tests by default, only generate [#65](https://github.com/stoeffel/elm-verify-examples/issues/65)
+- Add --run-tests (-r) option to run generated tests [#65](https://github.com/stoeffel/elm-verify-examples/issues/65)
+
+
 ## 2.0.0
 
 - We have a changelog now :tada:
