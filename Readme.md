@@ -196,7 +196,7 @@ $ elm-verify-examples
 This is useful if you want to run your tests using different runner than `elm-test`, e.g. `elm-coverage`. If you also want to run the generated tests:
 
 ```bash
-$ elm-verify-examples --run
+$ elm-verify-examples --run-tests
 ```
 
 Note that this way the test files will be removed after they are ran.

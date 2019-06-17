@@ -16,9 +16,9 @@ var argv = require('yargs')
   .alias("o", "output")
   .describe("output", "Change path to the generated tests.")
   .default("output", "tests")
-  .alias("r", "run")
-  .describe("run", "Run generated tests.")
-  .default("run", false)
+  .alias("r", "run-tests")
+  .describe("run-tests", "Run generated tests using `elm-test`.")
+  .default("run-tests", false)
   .describe("elm-test", "Path to elm-test.")
   .default("elm-test", path.join(__dirname, '../node_modules/.bin/elm-test'))
   .describe("elm-test-args", "Pass arguments to elm-test. f.e. `--elm-test-args=\"--report=junit\"`")
@@ -34,7 +34,7 @@ var model = runner.init(argv);
 
 runner.run(model, function(warnings) {
   warnings.map(runner.warnModule(model));
-  if (model.run) {
+  if (model["run-tests"]) {
     var status = runner.runElmTest(model);
     if (status === 0) runner.cleanup(model);
     runner.warnSummary(model, warnings);
