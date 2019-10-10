@@ -124,7 +124,7 @@ compileMarkdown : MarkdownSource -> Markdown.Parsed -> List Compiler.Result
 compileMarkdown { fileName } parsed =
     List.concatMap
         (Markdown.compile fileName)
-        parsed.testSuites
+        (List.indexedMap Tuple.pair parsed.testSuites)
 
 
 

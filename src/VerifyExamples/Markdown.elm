@@ -22,10 +22,10 @@ parse fileText =
         |> Parsed
 
 
-compile : String -> TestSuite -> List Compiler.Result
-compile filePath suite =
+compile : String -> ( Int, TestSuite ) -> List Compiler.Result
+compile filePath ( suiteIndex, suite ) =
     Compiler.compile
-        { testModuleName = testModuleName filePath
+        { testModuleName = testModuleName suiteIndex filePath
         , testName = \test -> "Documentation VerifyExamples"
         }
         suite
@@ -36,8 +36,8 @@ toTestSuite (Snippet snippet) =
     Parser.parse { snippet = snippet, functionName = Nothing }
 
 
-testModuleName : String -> Int -> Test -> ModuleName
-testModuleName filePath index _ =
+testModuleName : Int -> String -> Int -> Test -> ModuleName
+testModuleName suiteIndex filePath fileIndex _ =
     let
         filePathComponents =
             filePath
@@ -45,7 +45,7 @@ testModuleName filePath index _ =
                 |> String.split "/"
 
         addIndex components =
-            List.append components [ "Test" ++ String.fromInt index ]
+            List.append components [ "Test_" ++ String.fromInt fileIndex ++ "_" ++ String.fromInt suiteIndex ]
     in
     filePathComponents
         |> List.map capitalizeFirst
