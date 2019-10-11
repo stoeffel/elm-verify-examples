@@ -1,2 +1,5 @@
 /elm-stuff/
+# TODO: this is going to be a problem in the future with more tests for the
+# VerifyExamples code. The test harness should create a sample
+# `tests`directory elsewhere for CLI testing.
 VerifyExamples
