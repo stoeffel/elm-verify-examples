@@ -1,6 +1,6 @@
 {
   "name": "elm-verify-examples",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Verify examples in Elm doc-comments",
   "main": "index.js",
   "directories": {
