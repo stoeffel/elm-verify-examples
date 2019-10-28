@@ -1,4 +1,4 @@
-module VerifyExamples.Markdown.SnippetTest exposing (..)
+module Markdown.SnippetTest exposing (..)
 
 import Expect
 import Test exposing (..)

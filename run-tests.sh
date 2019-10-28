@@ -11,3 +11,4 @@ popd
 cat output.txt | grep "Passed" | grep "${PASSED_COUNT}"
 cat output.txt | grep "Failed" | grep "${FAILED_COUNT}"
 cat output.txt | grep "Todo" | grep "${TODO_COUNT}"
+npx elm-test
