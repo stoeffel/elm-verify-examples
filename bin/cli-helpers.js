@@ -42,7 +42,7 @@ function resolveTests(configPath, config) {
       process.exit(1);
     }
     if (elmJson.type == "package") {
-      config.tests = elmJson["exposed-modules"];
+      config.tests = elmJson["exposed-modules"].concat("./README.md");
     } else {
       console.error(
         "Config asks for 'exposed', but elm.json type is not 'package'"
