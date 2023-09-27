@@ -41,7 +41,7 @@ function resolveTests(configPath, config) {
       );
       process.exit(1);
     }
-    if (elmJson.type == "package" && config.tests === "exposed") {
+    if (elmJson.type == "package") {
       config.tests = elmJson["exposed-modules"];
     } else {
       console.error(
