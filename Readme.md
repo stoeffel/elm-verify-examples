@@ -31,6 +31,10 @@ $ touch tests/elm-verify-examples.json
 
 It's recommended to add `./tests/VerifyExamples` to your `.gitignore`.
 
+If you are building a _package_, you can pass the string `"exposed"` instead of an explicit list of modules,
+this will cause all the documented modules in your package to be verified. This makes it easier to keep these in
+sync.
+
 ## Writing Verified Examples
 
 Verified examples look like normal code examples in doc-comments. \
