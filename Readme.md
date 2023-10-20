@@ -222,9 +222,3 @@ $ # you can also pass arguments to elm-test with --elm-test-args
 ```
 
 It will use the elm-test installed with this package.
-
-## Examples
-
-You can run the examples using:
-
-`npm start`

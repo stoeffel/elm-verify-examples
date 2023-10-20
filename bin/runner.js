@@ -1,15 +1,15 @@
 // imports
 var path = require("path");
-var mkdirp = require("mkdirp");
+var { mkdirp } = require("mkdirp");
 var fs = require("fs");
 var Elm = require("./elm.js");
 var helpers = require("./cli-helpers.js");
-var rimraf = require("rimraf");
+var { rimrafSync } = require("rimraf");
 var childProcess = require("child_process");
 var chalk = require("chalk");
 
 // loaders are called by init
-var init = function(args) {
+var init = function (args) {
   var configJson = "elm-verify-examples.json";
   var configPath = path.join(process.cwd(), args.output, configJson);
   var verifyExamplesConfig = helpers.loadVerifyExamplesConfig(configPath);
@@ -17,7 +17,7 @@ var init = function(args) {
   var config = forFiles(verifyExamplesConfig, args._);
 
   return Object.assign(args, config, {
-    testsDocPath: path.join(args.output, "VerifyExamples")
+    testsDocPath: path.join(args.output, "VerifyExamples"),
   });
 };
 
@@ -36,17 +36,17 @@ function generate(model, allTestsGenerated) {
   }
 
   var app = Elm.Elm.VerifyExamples.init({ flags: model });
-  app.ports.reportError.subscribe(function(err) {
+  app.ports.reportError.subscribe(function (err) {
     console.error(err);
     process.exit(1);
   });
 
-  app.ports.readFile.subscribe(function(inputName) {
+  app.ports.readFile.subscribe(function (inputName) {
     if (path.extname(inputName) === ".md") {
-      readSource(inputName, function(fileText) {
+      readSource(inputName, function (fileText) {
         app.ports.generateMarkdownVerifyExamples.send({
           fileName: cleanMarkdownPath(inputName),
-          fileText: fileText
+          fileText: fileText,
         });
       });
     } else {
@@ -56,25 +56,25 @@ function generate(model, allTestsGenerated) {
         elmModuleToPath(inputName)
       );
 
-      readSource(pathToModule, function(fileText) {
+      readSource(pathToModule, function (fileText) {
         app.ports.generateModuleVerifyExamples.send({
           moduleName: inputName,
           fileText: fileText,
-          ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName)
+          ignoredWarnings: ignoredWarnings(model.ignoreWarnings, inputName),
         });
       });
     }
   });
 
   var warnings = [];
-  app.ports.warn.subscribe(function(args) {
+  app.ports.warn.subscribe(function (args) {
     if (args.warnings.length === 0) return;
     warnings.push(args);
   });
 
   var writtenTests = 0;
-  app.ports.writeFiles.subscribe(function(data) {
-    serial(data, writeFile(model.testsDocPath), function() {
+  app.ports.writeFiles.subscribe(function (data) {
+    serial(data, writeFile(model.testsDocPath), function () {
       writtenTests = writtenTests + 1;
       if (writtenTests === model.tests.length && allTestsGenerated) {
         allTestsGenerated(warnings);
@@ -106,16 +106,16 @@ function runElmTest(model) {
   model.elmTestArgs.unshift(model.testsDocPath);
   return childProcess.spawnSync(elmTest, model.elmTestArgs, {
     cwd: process.cwd(),
-    stdio: "inherit"
+    stdio: "inherit",
   }).status;
 }
 
 function cleanup(model) {
-  rimraf.sync(model.testsDocPath);
+  rimrafSync(model.testsDocPath);
 }
 
 function warnModule(model) {
-  return function(warnings) {
+  return function (warnings) {
     if (!model.warn || warnings.warnings.length === 0) return;
     warn(chalk.underline("Warnings in module " + warnings.moduleName));
     warn("\n");
@@ -126,7 +126,7 @@ function warnModule(model) {
 
 function warnSummary(model, warnings) {
   if (!model.warn) return;
-  var count = warnings.reduce(function(acc, warning) {
+  var count = warnings.reduce(function (acc, warning) {
     return warning.warnings.length + acc;
   }, 0);
   if (count > 0) {
@@ -151,7 +151,7 @@ function forFiles(model, files) {
   }
 
   model.tests = files
-    .filter(function(v) {
+    .filter(function (v) {
       return v.endsWith(".elm");
     })
     .map(elmPathToModule(model.root, model.testsPath));
@@ -160,8 +160,8 @@ function forFiles(model, files) {
 }
 
 function serial(xs, f, done) {
-  var run = function(x, rest) {
-    f(x, function() {
+  var run = function (x, rest) {
+    f(x, function () {
       if (rest.length > 0) {
         run(rest[0], rest.slice(1));
       } else {
@@ -173,7 +173,7 @@ function serial(xs, f, done) {
 }
 
 function writeFile(testsDocPath) {
-  return function(data, done) {
+  return function (data, done) {
     var test = data.content;
     var parts = data.moduleName.split(".");
     var modulePath = [];
@@ -188,32 +188,35 @@ function writeFile(testsDocPath) {
 
     var testsDocModulePath = path.join(testsDocPath, modulePath.join("/"));
 
-    mkdirp(testsDocModulePath, function(err) {
-      if (err) {
+    mkdirp(testsDocModulePath)
+      .then(function () {
+        fs.writeFile(
+          path.join(testsDocModulePath, moduleName + ".elm"),
+          test,
+          "utf8",
+          function (err) {
+            if (err) {
+              console.error(err);
+              process.exit(1);
+              return;
+            }
+
+            done();
+          }
+        );
+      })
+      .catch((err) => {
+        console.log(
+          chalk.red("Error creating directory: " + testsDocModulePath)
+        );
         console.error(err);
         process.exit(1);
-        return;
-      }
-      fs.writeFile(
-        path.join(testsDocModulePath, moduleName + ".elm"),
-        test,
-        "utf8",
-        function(err) {
-          if (err) {
-            console.error(err);
-            process.exit(1);
-            return;
-          }
-
-          done();
-        }
-      );
-    });
+      });
   };
 }
 
 function elmPathToModule(root, testsPath) {
-  return function(pathName) {
+  return function (pathName) {
     var relativePath = path.relative(
       path.resolve(path.join(testsPath, root)),
       pathName
@@ -230,7 +233,7 @@ function elmModuleToPath(moduleName) {
 }
 
 function readSource(filePath, onSuccess) {
-  fs.readFile(filePath, "utf8", function(err, fileText) {
+  fs.readFile(filePath, "utf8", function (err, fileText) {
     if (err) {
       console.error(err);
       process.exit(1);
@@ -254,5 +257,5 @@ module.exports = {
   cleanup: cleanup,
   warnModule: warnModule,
   warnSummary: warnSummary,
-  runElmTest: runElmTest
+  runElmTest: runElmTest,
 };

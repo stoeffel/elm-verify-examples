@@ -1,19 +1,18 @@
-module Failing
-    exposing
-        ( noExample
-        , nope
-        )
+module Failing exposing
+    ( noExample
+    , nope
+    )
 
 {-| -}
 
 
 {-|
 
-    nope --> 2
+    nope --> 3
 
 -}
 nope =
-    3
+    2
 
 
 noExample =
