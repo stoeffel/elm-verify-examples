@@ -1,3 +1,5 @@
+.PHONY: npm-install build test watch release-major release-minor release-patch
+
 npm-install:
 	npm install
 

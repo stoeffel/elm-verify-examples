@@ -34,7 +34,6 @@ var argv = require("yargs")
 var model = runner.init(argv);
 
 runner.run(model, function (warnings) {
-  console.log("warnings", warnings);
   warnings.map(runner.warnModule(model));
   if (model["run-tests"]) {
     var status = runner.runElmTest(model);
