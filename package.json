@@ -11,6 +11,9 @@
   "files": [
     "bin/"
   ],
+  "scripts": {
+    "test": "make test"
+  },
   "bin": {
     "elm-verify-examples": "bin/cli.js"
   },
