@@ -11,16 +11,6 @@
   "files": [
     "bin/"
   ],
-  "scripts": {
-    "prepublish": "npm run-script build",
-    "test": "./run-tests.sh && npm run-script verify-own-docs",
-    "verify-own-docs": "./bin/cli.js",
-    "build": "npx elm make src/VerifyExamples.elm --output bin/elm.js --optimize",
-    "start": "npm run-script build && cd example && ../bin/cli.js",
-    "release-major": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major",
-    "release-minor": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment minor",
-    "release-patch": "npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment patch"
-  },
   "bin": {
     "elm-verify-examples": "bin/cli.js"
   },
@@ -34,15 +24,15 @@
   "author": "schtoeffel",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.2",
     "elm-test": "^0.19.1-revision7",
-    "fs-extra": "^5.0.0",
-    "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.3",
-    "yargs": "^13.3.0"
+    "fs-extra": "^11.1.1",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^5.0.5",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "elm": "^0.19.1-5",
-    "xyz": "2.1.0"
+    "npm-check-updates": "^16.14.6",
+    "xyz": "^4.0.0"
   }
 }

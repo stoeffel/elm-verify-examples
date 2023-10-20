@@ -25,7 +25,7 @@ var argv = require("yargs")
     "elm-test-args",
     'Pass arguments to elm-test. f.e. `--elm-test-args="--report=junit"`'
   )
-  .coerce("elm-test-args", function(arg) {
+  .coerce("elm-test-args", function (arg) {
     if (typeof arg === "string") return arg.split(" ");
     return [];
   })
@@ -33,7 +33,7 @@ var argv = require("yargs")
 
 var model = runner.init(argv);
 
-runner.run(model, function(warnings) {
+runner.run(model, function (warnings) {
   warnings.map(runner.warnModule(model));
   if (model["run-tests"]) {
     var status = runner.runElmTest(model);
