@@ -7,9 +7,26 @@ function loadVerifyExamplesConfig(configPath) {
   */
 
   var verifyExamples = null;
+  var elmJson = null;
 
   try {
     verifyExamples = require(configPath);
+    if (verifyExamples["elm-root"] === undefined) {
+      throw new Error(
+        `elm-verify-examples.json at ${configPath} does not have an elm-root key`
+      );
+    }
+    if (verifyExamples["root"] !== undefined) {
+      throw new Error(
+        `elm-verify-examples.json at ${configPath} has a root key, but it should be elm-root and point to the location of elm.json`
+      );
+    }
+    var elmJsonPath = path.join(
+      path.dirname(configPath),
+      verifyExamples["elm-root"],
+      "elm.json"
+    );
+    elmJson = require(elmJsonPath);
   } catch (e) {
     console.log(`Copying initial elm-verify-examples.json to ${configPath}`);
     fsExtra.copySync(
@@ -23,7 +40,7 @@ function loadVerifyExamplesConfig(configPath) {
     ));
   }
 
-  return resolveTests(configPath, verifyExamples);
+  return resolveTests(configPath, Object.assign({}, verifyExamples, elmJson));
 }
 
 function resolveTests(configPath, config) {

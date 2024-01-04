@@ -1,4 +1,4 @@
 {
-  "root": "../src",
+  "elm-root": "..",
   "tests": []
 }

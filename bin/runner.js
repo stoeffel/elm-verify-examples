@@ -50,9 +50,9 @@ function generate(model, allTestsGenerated) {
         });
       });
     } else {
-      var pathToModule = path.join(
-        model.testsPath,
-        model.root,
+      var pathToModule = findModule(
+        path.join(model.testsPath, model["elm-root"]),
+        model["source-directories"],
         elmModuleToPath(inputName)
       );
 
@@ -154,7 +154,13 @@ function forFiles(model, files) {
     .filter(function (v) {
       return v.endsWith(".elm");
     })
-    .map(elmPathToModule(model.root, model.testsPath));
+    .map(
+      elmPathToModule(
+        model["elm-root"],
+        model["source-directories"],
+        model.testsPath
+      )
+    );
 
   return model;
 }
@@ -215,17 +221,28 @@ function writeFile(testsDocPath) {
   };
 }
 
-function elmPathToModule(root, testsPath) {
+function elmPathToModule(elmRoot, sourceDirs, testsPath) {
   return function (pathName) {
-    var relativePath = path.relative(
-      path.resolve(path.join(testsPath, root)),
-      pathName
-    );
+    var relativePath = findModule(elmRoot, sourceDirs, pathName);
     if (relativePath.startsWith("./")) {
       relativePath = relativePath.substr(2);
     }
     return relativePath.substr(0, relativePath.length - 4).replace(/\//g, ".");
   };
+}
+
+function findModule(elmRoot, sourceDirs, pathName) {
+  for (var i = 0; i < sourceDirs.length; i++) {
+    const dir = sourceDirs[i];
+    const module = path.join(elmRoot, dir, pathName);
+    if (fs.existsSync(module)) {
+      return module;
+    }
+  }
+  console.error(
+    `Could not find module ${pathName} in ${sourceDirs} with root ${elmRoot}`
+  );
+  process.exit(1);
 }
 
 function elmModuleToPath(moduleName) {

@@ -1,6 +1,4 @@
 {
-  "root": "../src",
-  "tests": [
-    "String.Util"
-  ]
+  "elm-root": "..",
+  "tests": ["String.Util"]
 }

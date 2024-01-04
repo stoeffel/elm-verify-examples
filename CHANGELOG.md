@@ -1,14 +1,18 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## 6.0.0
+
+- Change elm-verify-examples.json to contain elm root and not source root. In addition it will respect source-directories defined in elm.json [#109](https://github.com/stoeffel/elm-verify-examples/pull/109)
+
+## 5.3.0
 
 - Do not run tests by default, only generate [#65](https://github.com/stoeffel/elm-verify-examples/issues/65)
 - Add --run-tests (-r) option to run generated tests [#65](https://github.com/stoeffel/elm-verify-examples/issues/65)
-
 
 ## 2.0.0
 

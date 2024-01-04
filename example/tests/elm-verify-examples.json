@@ -1,5 +1,5 @@
 {
-  "root": "../src",
+  "elm-root": "..",
   "tests": [
     "Mock",
     "Mock.Foo.Bar.Moo",
@@ -7,20 +7,17 @@
     "Failing",
     "Todo",
     "FalseTodo",
-    "README.md"
+    "README.md",
+    "Other"
   ],
   "ignoreWarnings": {
     "Mock.Foo.Bar.Moo": [
       {
         "name": "dontCare",
-        "ignore": [
-          "NoExampleForExposedDefinition"
-        ]
+        "ignore": ["NoExampleForExposedDefinition"]
       },
       {
-        "ignore": [
-          "ExposingDotDot"
-        ]
+        "ignore": ["ExposingDotDot"]
       }
     ]
   }
