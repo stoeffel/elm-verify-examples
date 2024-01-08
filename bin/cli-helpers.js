@@ -12,9 +12,7 @@ function loadVerifyExamplesConfig(configPath) {
   try {
     verifyExamples = require(configPath);
     if (verifyExamples["elm-root"] === undefined) {
-      throw new Error(
-        `elm-verify-examples.json at ${configPath} does not have an elm-root key`
-      );
+      verifyExamples["elm-root"] = "..";
     }
     if (verifyExamples["root"] !== undefined) {
       throw new Error(
