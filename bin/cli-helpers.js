@@ -18,7 +18,7 @@ function loadVerifyExamplesConfig(configPath) {
     }
     if (verifyExamples["root"] !== undefined) {
       throw new Error(
-        `elm-verify-examples.json at ${configPath} has a root key, but it should be elm-root and point to the location of elm.json`
+        `elm-verify-examples.json at ${configPath} has a root key, but it should be elm-root and point to the root of the Elm project`
       );
     }
     var elmJsonPath = path.join(
