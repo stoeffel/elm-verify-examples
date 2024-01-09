@@ -16,7 +16,7 @@ function loadVerifyExamplesConfig(configPath) {
         "elm-verify-examples.json: 'root' is no longer a valid key. It defaults to point one directory up from `/tests`."
       );
     }
-    var elmJsonPath = path.join(path.dirname(configPath), "..", "elm.json");
+    var elmJsonPath = findParentElmJson(path.dirname(configPath));
     elmJson = require(elmJsonPath);
   } catch (e) {
     console.log(`Copying initial elm-verify-examples.json to ${configPath}`);
@@ -36,21 +36,8 @@ function loadVerifyExamplesConfig(configPath) {
 
 function resolveTests(configPath, config) {
   if (config.tests === "exposed") {
-    /* This is asserting that we want to run for all exposed modules in a package
-     */
-    var elmJson = null;
-    var elmJsonPath = findParentElmJson(path.dirname(configPath));
-    try {
-      elmJson = require(elmJsonPath);
-    } catch (e) {
-      console.error(
-        "Config asks for 'exposed', but could not find elm.json at " +
-          elmJsonPath
-      );
-      process.exit(1);
-    }
-    if (elmJson.type == "package") {
-      config.tests = elmJson["exposed-modules"].concat("./README.md");
+    if (config.type == "package") {
+      config.tests = config["exposed-modules"].concat("./README.md");
     } else {
       console.error(
         "Config asks for 'exposed', but elm.json type is not 'package'"
