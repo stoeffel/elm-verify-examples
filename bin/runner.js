@@ -51,7 +51,7 @@ function generate(model, allTestsGenerated) {
       });
     } else {
       var pathToModule = findModule(
-        path.join(model.testsPath, model["elm-root"]),
+        path.join(model.testsPath, ".."),
         model["source-directories"],
         elmModuleToPath(inputName)
       );
@@ -154,13 +154,7 @@ function forFiles(model, files) {
     .filter(function (v) {
       return v.endsWith(".elm");
     })
-    .map(
-      elmPathToModule(
-        model["elm-root"],
-        model["source-directories"],
-        model.testsPath
-      )
-    );
+    .map(elmPathToModule("..", model["source-directories"], model.testsPath));
 
   return model;
 }

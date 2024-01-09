@@ -7,14 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 6.0.0
 
-- Change elm-verify-examples.json to contain elm root and not source root. In addition it will respect source-directories defined in elm.json [#109](https://github.com/stoeffel/elm-verify-examples/pull/109)
+- Remove `root` from elm-verify-examples.json. In addition it will respect source-directories defined in elm.json [#109](https://github.com/stoeffel/elm-verify-examples/pull/109)
 
-    To migrate, replace the "root" key in your config file for a "elm-root" pointing to the folder containing your elm.json file. Typically this will look like this:
-    
-     ```diff
-     - "root": "../src",
-     + "elm-root": "..",
-     ```
+  To migrate, remove the "root" key in your config file and move it into `/tests`.
+
+  ```diff
+  - "root": "../src",
+  ```
 
 ## 5.3.0
 

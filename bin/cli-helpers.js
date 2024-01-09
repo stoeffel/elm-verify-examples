@@ -11,19 +11,12 @@ function loadVerifyExamplesConfig(configPath) {
 
   try {
     verifyExamples = require(configPath);
-    if (verifyExamples["elm-root"] === undefined) {
-      verifyExamples["elm-root"] = "..";
-    }
     if (verifyExamples["root"] !== undefined) {
       throw new Error(
-        `elm-verify-examples.json at ${configPath} has a root key, but it should be elm-root and point to the root of the Elm project`
+        "elm-verify-examples.json: 'root' is no longer a valid key. It defaults to point one directory up from `/tests`."
       );
     }
-    var elmJsonPath = path.join(
-      path.dirname(configPath),
-      verifyExamples["elm-root"],
-      "elm.json"
-    );
+    var elmJsonPath = path.join(path.dirname(configPath), "..", "elm.json");
     elmJson = require(elmJsonPath);
   } catch (e) {
     console.log(`Copying initial elm-verify-examples.json to ${configPath}`);

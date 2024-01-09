@@ -24,7 +24,6 @@ $ touch tests/elm-verify-examples.json
 
 ```json
 {
-  "elm-root": "..", -- directory of elm.json. default is `..`
   "tests": ["Mock", "Mock.Foo.Bar.Moo", "./README.md"]
 }
 ```
