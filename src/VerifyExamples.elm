@@ -89,7 +89,7 @@ generateTests : List Compiler.Result -> Cmd Msg
 generateTests tests =
     case tests of
         [] ->
-            Cmd.none
+            noExamples ()
 
         _ ->
             tests
@@ -135,6 +135,9 @@ port readFile : String -> Cmd msg
 
 
 port writeFiles : Value -> Cmd msg
+
+
+port noExamples : () -> Cmd msg
 
 
 port generateModuleVerifyExamples : (Value -> msg) -> Sub msg

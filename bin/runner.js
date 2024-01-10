@@ -73,10 +73,17 @@ function generate(model, allTestsGenerated) {
   });
 
   var writtenTests = 0;
+  var noExamples = 0;
+  app.ports.noExamples.subscribe(function () {
+    noExamples = noExamples + 1;
+  });
   app.ports.writeFiles.subscribe(function (data) {
     serial(data, writeFile(model.testsDocPath), function () {
       writtenTests = writtenTests + 1;
-      if (writtenTests === model.tests.length && allTestsGenerated) {
+      if (
+        writtenTests + noExamples === model.tests.length &&
+        allTestsGenerated
+      ) {
         allTestsGenerated(warnings);
       }
     });

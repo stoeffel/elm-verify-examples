@@ -16,6 +16,8 @@ $ elm-test init
 
 ## Setup
 
+There is no need for any configuration. elm-verify-examples will run on all elm files in the specified `source-directories` (`elm.json`). It's possible to create a config file if you want to run it on only a supset of files or on additional markdown files.
+
 ```bash
 $ touch tests/elm-verify-examples.json
 ```
@@ -25,6 +27,22 @@ $ touch tests/elm-verify-examples.json
 ```json
 {
   "tests": ["Mock", "Mock.Foo.Bar.Moo", "./README.md"]
+}
+```
+
+Alternatively you can run elm-verify-examples on all elm files in your source directories:
+
+```json
+{
+  "tests": "all"
+}
+```
+
+or
+
+```json
+{
+  "tests": ["all", "Some.md"]
 }
 ```
 
