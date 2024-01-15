@@ -27,7 +27,7 @@ watch:
 
 
 release-major: test
- npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major
+    npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment major
 
 release-minor: test
 	npx xyz --repo git@github.com:stoeffel/elm-verify-examples.git --increment minor
