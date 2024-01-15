@@ -1,5 +1,6 @@
 var path = require("path");
 var fsExtra = require("fs-extra");
+const { globSync } = require("glob");
 
 function loadVerifyExamplesConfig(configPath) {
   /* load the doc test config if we can find it
@@ -7,48 +8,47 @@ function loadVerifyExamplesConfig(configPath) {
   */
 
   var verifyExamples = null;
+  var elmJson = null;
 
   try {
     verifyExamples = require(configPath);
+    if (verifyExamples["root"] !== undefined) {
+      console.warn(
+        "elm-verify-examples.json: 'root' is no longer a valid key. It defaults to point one directory up from `/tests`."
+      );
+    }
+    var elmJsonPath = findParentElmJson(path.dirname(configPath));
+    elmJson = require(elmJsonPath);
   } catch (e) {
-    console.log(`Copying initial elm-verify-examples.json to ${configPath}`);
-    fsExtra.copySync(
-      path.resolve(__dirname, "./templates/elm-verify-examples.json"),
-      configPath
-    );
-
-    verifyExamples = require(path.resolve(
-      __dirname,
-      "templates/elm-verify-examples.json"
-    ));
+    var elmJsonPath = findParentElmJson(path.dirname(configPath));
+    elmJson = require(elmJsonPath);
+    verifyExamples = { tests: "all" };
   }
 
-  return resolveTests(configPath, verifyExamples);
+  return resolveTests(configPath, Object.assign({}, verifyExamples, elmJson));
 }
 
 function resolveTests(configPath, config) {
-  if (config.tests === "exposed") {
-    /* This is asserting that we want to run for all exposed modules in a package
-     */
-    var elmJson = null;
-    var elmJsonPath = findParentElmJson(path.dirname(configPath));
-    try {
-      elmJson = require(elmJsonPath);
-    } catch (e) {
-      console.error(
-        "Config asks for 'exposed', but could not find elm.json at " +
-          elmJsonPath
-      );
-      process.exit(1);
-    }
-    if (elmJson.type == "package") {
-      config.tests = elmJson["exposed-modules"].concat("./README.md");
+  if (config.tests === "exposed" || config.tests.includes("exposed")) {
+    if (config.type == "package") {
+      config.tests = config["exposed-modules"].concat("./README.md");
     } else {
       console.error(
         "Config asks for 'exposed', but elm.json type is not 'package'"
       );
       process.exit(1);
     }
+  }
+  if (config.tests === "all" || config.tests.includes("all")) {
+    var allElmFiles = config["source-directories"]
+      .map((d) =>
+        globSync("**/*.elm", {
+          cwd: path.join(path.dirname(configPath), "..", d),
+        })
+      )
+      .flat()
+      .map(elmPathToModuleName);
+    config.tests = allElmFiles.concat("./README.md");
   }
   return config;
 }
@@ -62,6 +62,10 @@ function findParentElmJson(p) {
   } else {
     return findParentElmJson(path.dirname(p));
   }
+}
+
+function elmPathToModuleName(pathName) {
+  return pathName.slice(0, -4).replace(/\//g, ".");
 }
 
 module.exports = {

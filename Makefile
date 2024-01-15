@@ -1,4 +1,4 @@
-.PHONY: npm-install build test watch release-major release-minor release-patch
+.PHONY: npm-install build test watch release-major release-minor release-patch run-examples verify-own-docs
 
 npm-install:
 	npm install
@@ -11,8 +11,9 @@ verify-own-docs: build
 
 test: verify-own-docs
 	./run-tests.sh
+
 run-examples: build
-	cd example && ../bin/cli.js
+	cd example && ../bin/cli.js --run-tests
 
 watch:
 	watchexec \

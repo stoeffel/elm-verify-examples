@@ -1,6 +1,3 @@
 {
-  "root": "../src",
-  "tests": [
-    "String.Util"
-  ]
+  "tests": ["String.Util"]
 }

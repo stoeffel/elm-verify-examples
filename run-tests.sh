@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-PASSED_COUNT=34
-FAILED_COUNT=2
+PASSED_COUNT=35
+FAILED_COUNT=5
 TODO_COUNT=1
 
 pushd example
