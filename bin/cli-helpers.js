@@ -13,7 +13,7 @@ function loadVerifyExamplesConfig(configPath) {
   try {
     verifyExamples = require(configPath);
     if (verifyExamples["root"] !== undefined) {
-      throw new Error(
+      console.warn(
         "elm-verify-examples.json: 'root' is no longer a valid key. It defaults to point one directory up from `/tests`."
       );
     }
