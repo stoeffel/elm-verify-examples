@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 6.0.1
+
+- Move elm-test to dev-dependencies.
+
 ## 6.0.0
 
 - Make `elm-verify-examples.json` optional [#110](https://github.com/stoeffel/elm-verify-examples/pull/110)
