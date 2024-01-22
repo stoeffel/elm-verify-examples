@@ -98,19 +98,12 @@ generateTests tests =
 
 
 compileElm : ElmSource -> Elm.Parsed -> ( List Warning, List Compiler.Result )
-compileElm { moduleName, fileText, ignoredWarnings } parsed =
-    case parsed.testSuites of
-        [] ->
-            ( []
-            , [ Compiler.todoSpec moduleName ]
-            )
-
-        _ ->
-            ( Warning.warnings ignoredWarnings parsed
-            , List.concatMap
-                (Elm.compile moduleName)
-                parsed.testSuites
-            )
+compileElm { moduleName, ignoredWarnings } parsed =
+    ( Warning.warnings ignoredWarnings parsed
+    , List.concatMap
+        (Elm.compile moduleName)
+        parsed.testSuites
+    )
 
 
 reportWarnings : ModuleName -> List Warning -> Cmd msg
