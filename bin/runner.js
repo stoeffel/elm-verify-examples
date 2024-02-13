@@ -232,7 +232,7 @@ function elmPathToModule(elmRoot, sourceDirs, testsPath) {
   };
 }
 
-function findModule(elmRoot, sourceDirs, pathName) {
+function findModule(elmRoot, sourceDirs = ["./src"], pathName) {
   for (var i = 0; i < sourceDirs.length; i++) {
     const dir = sourceDirs[i];
     const module = path.join(elmRoot, dir, pathName);
