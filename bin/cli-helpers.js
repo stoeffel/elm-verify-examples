@@ -65,7 +65,7 @@ function findParentElmJson(p) {
 }
 
 function elmPathToModuleName(pathName) {
-  return pathName.slice(0, -4).replace(/\//g, ".");
+  return pathName.slice(0, -4).split(path.sep).join(".");
 }
 
 module.exports = {
