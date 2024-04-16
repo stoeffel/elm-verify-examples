@@ -40,7 +40,7 @@ function resolveTests(configPath, config) {
     }
   }
   if (config.tests === "all" || config.tests.includes("all")) {
-    var allElmFiles = config["source-directories"]
+    var allElmFiles = (config["source-directories"] ?? ["./src"])
       .map((d) =>
         globSync("**/*.elm", {
           cwd: path.join(path.dirname(configPath), "..", d),
