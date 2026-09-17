@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -13,7 +13,7 @@
             buildInputs = [
               pkgs.elmPackages.elm
               pkgs.gnumake
-              pkgs.nodejs-19_x
+              pkgs.nodejs
               pkgs.watchexec
             ];
           };
