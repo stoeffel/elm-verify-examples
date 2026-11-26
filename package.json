@@ -29,9 +29,9 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "fs-extra": "^11.1.1",
-    "glob": "^10.3.10",
+    "glob": "^14.0.6",
     "mkdirp": "^3.0.1",
-    "rimraf": "^5.0.5",
+    "rimraf": "^6.1.4",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
